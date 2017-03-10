@@ -40,27 +40,23 @@ extern "C" {
 #define __func__ ""
 #endif
 
-/* DEBUG_TO_LOG -> print debug messages to log file
+/* DEBUG_TO_LOG -> print debug messages to log (file)
  else _DEBUG    -> print debug messages to stderr
  else           -> don't print anything */
 
 #ifdef DEBUG_TO_LOG
 
-#ifndef LOG_MESSAGE
-/* from log_queue.h */
 A_Printf_format_at(1,2)
-void log_message(A_Printf_format_string const char *format, ...);
-#define LOG_MESSAGE(...) log_message(__VA_ARGS__)
-#endif /* !LOG_MESSAGE */
+void DEBUG_TO_LOG(A_Printf_format_string const char *format, ...);
 
 #define ___DBGPRINT_1(f) \
-	LOG_MESSAGE("%p:%s:%d:%s(): " f, CURRENT_THREAD_ID(), __FILE__, __LINE__, __func__)
+	DEBUG_TO_LOG("%p:%s:%d:%s(): " f, CURRENT_THREAD_ID(), __FILE__, __LINE__, __func__)
 #define ___DBGPRINT_2(f,...) \
-	LOG_MESSAGE("%p:%s:%d:%s(): " f, CURRENT_THREAD_ID(), __FILE__, __LINE__, __func__, __VA_ARGS__)
+	DEBUG_TO_LOG("%p:%s:%d:%s(): " f, CURRENT_THREAD_ID(), __FILE__, __LINE__, __func__, __VA_ARGS__)
 #define ___DBGPRINTx1(__d_file,__d_line,__d_function,f) \
-	LOG_MESSAGE("%p:%s:%d:%s(): " f, CURRENT_THREAD_ID(), __d_file, __d_line, __d_function)
+	DEBUG_TO_LOG("%p:%s:%d:%s(): " f, CURRENT_THREAD_ID(), __d_file, __d_line, __d_function)
 #define ___DBGPRINTx2(__d_file,__d_line,__d_function,f,...) \
-	LOG_MESSAGE("%p:%s:%d:%s(): " f, CURRENT_THREAD_ID(), __d_file, __d_line, __d_function, __VA_ARGS__)
+	DEBUG_TO_LOG("%p:%s:%d:%s(): " f, CURRENT_THREAD_ID(), __d_file, __d_line, __d_function, __VA_ARGS__)
 
 #elif defined _DEBUG
 
