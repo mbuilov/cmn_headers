@@ -67,7 +67,7 @@ static inline void _x__assert_(int x, A_In_z const char *cond, A_In_z const char
 #ifdef _DEBUG
 #define DEBUG_CHECK(cond) ASSERT(cond)
 #else
-#define DEBUG_CHECK(cond) ((void)0) /* _must_ process an error */
+#define DEBUG_CHECK(cond) ((void)0) /* _must_ process an error on runtime if cond is false */
 #endif
 
 /* compile-time asserts:
