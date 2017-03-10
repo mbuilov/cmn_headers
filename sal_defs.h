@@ -8,7 +8,7 @@
 
 /* sal_defs.h */
 
-#if defined _MSC_VER && _MSC_VER >= 1600
+#if defined _MSC_VER && _MSC_VER >= 1600 && !defined NO_SAL_ANNOTATIONS
 /* SAL annotations, see http://www.codeproject.com/Reference/879527/SAL-Function-Parameters-Annotations */
 #include <sal.h>
 /* NOTE: post-annotations considered valid only if A_Success() condition is true or not specified */
@@ -461,6 +461,7 @@
 #pragma warning(push)
 #pragma warning(disable:6101) /* Returning uninitialized memory '*a' */
 #endif
+A_Nonnull_all_args
 static inline void A_Mark_ptr_valid(A_Pre_notnull A_Post_valid void *a)
 {
 	(void)a;
