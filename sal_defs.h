@@ -3,7 +3,7 @@
 
 /********************************************************************************
 * Static analysis definitions
-* Public domain
+* Public domain, see latest version at https://github.com/mbuilov/cmn_headers
 ********************************************************************************/
 
 /* sal_defs.h */
