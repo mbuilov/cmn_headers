@@ -1,10 +1,11 @@
 #ifndef DLIST_H_INCLUDED
 #define DLIST_H_INCLUDED
 
-/********************************************************************************
+/**********************************************************************************
 * Simple doubly-linked list
-* Public domain
-********************************************************************************/
+* Copyright (C) 2012-2017 Michael M. Builov, https://github.com/mbuilov/cmn_headers
+* Licensed under Apache License v2.0, see LICENSE.TXT
+**********************************************************************************/
 
 /* dlist.h */
 

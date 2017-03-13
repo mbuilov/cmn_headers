@@ -1,12 +1,15 @@
 #ifndef ASSERTS_H_INCLUDED
 #define ASSERTS_H_INCLUDED
 
-/********************************************************************************
+/**********************************************************************************
 * Assertions
-* Public domain
-********************************************************************************/
+* Copyright (C) 2012-2017 Michael M. Builov, https://github.com/mbuilov/cmn_headers
+* Licensed under Apache License v2.0, see LICENSE.TXT
+**********************************************************************************/
 
 /* asserts.h */
+
+/* defines: ASSERT, DEBUG_CHECK, EMBED_ASSERT, STATIC_ASSERT */
 
 #include <assert.h>
 #include "dprint.h"

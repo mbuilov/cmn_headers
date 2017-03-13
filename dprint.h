@@ -1,10 +1,11 @@
 #ifndef DPRINT_H_INCLUDED
 #define DPRINT_H_INCLUDED
 
-/********************************************************************************
+/**********************************************************************************
 * Debugg printing/tracing helpers
-* Public domain
-********************************************************************************/
+* Copyright (C) 2012-2017 Michael M. Builov, https://github.com/mbuilov/cmn_headers
+* Licensed under Apache License v2.0, see LICENSE.TXT
+**********************************************************************************/
 
 /* dprint.h */
 
@@ -24,6 +25,7 @@
 extern "C" {
 #endif
 
+/* NOTE: #include <windows.h> or <pthread.h> before this file */
 #ifdef WIN32
 #define CURRENT_THREAD_ID() ((const void*)((const char*)0 + GetCurrentThreadId()))
 #elif defined _POSIX_THREADS

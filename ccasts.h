@@ -1,12 +1,37 @@
 #ifndef CCASTS_H_INCLUDED
 #define CCASTS_H_INCLUDED
 
-/********************************************************************************
-* Different C-casts
-* Public domain
-********************************************************************************/
+/**********************************************************************************
+* C-casts
+* Copyright (C) 2012-2017 Michael M. Builov, https://github.com/mbuilov/cmn_headers
+* Licensed under Apache License v2.0, see LICENSE.TXT
+**********************************************************************************/
 
 /* ccasts.h */
+
+/* defines macros:
+
+  "pointer->pointer casts"
+
+  CAST          -       A* ->       B*
+  CAST_CONSTANT - const A* -> const B*
+  CONST_CAST    - const A* ->       A*
+
+  "member->container casts"
+
+  CONTAINER_OF:
+       NULL -> assert
+         M* ->       C*
+   const M* -> const C*
+
+  OPT_CONTAINER_OF:
+       NULL -> assert
+         M* ->       C*
+   const M* -> const C*
+
+  RAW_CONTAINER_OF:
+     any M* -> C*
+*/
 
 #include <stddef.h>
 #include "asserts.h"
