@@ -175,10 +175,10 @@
 #define A_Printf_format_at(f,v)
 #else /* !_MSC_VER */
 #if defined(__GNUC__) && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 2))
-#ifdef __cplusplus
-#define A_Restrict                               __restrict__
-#else
+#if defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
 #define A_Restrict                               restrict
+#else
+#define A_Restrict                               __restrict__
 #endif
 #define A_Noreturn_function                      __attribute__ ((noreturn))
 #define A_Const_function                         __attribute__ ((const))
