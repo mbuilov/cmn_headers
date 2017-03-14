@@ -169,7 +169,7 @@
 #define A_Field_z                                _Field_z_
 #define A_Field_range(min,max)                   _Field_range_(min,max)
 #define A_Ret_restrict                           __declspec(restrict)
-#define A_Ret_never_null                         _Ret_notnull_
+#define A_Ret_never_null                         _Always_(_Ret_notnull_)
 #define A_Nonnull_all_args
 #define A_Nonnull_arg(i)
 #define A_Printf_format_at(f,v)
