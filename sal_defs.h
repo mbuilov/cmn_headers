@@ -201,7 +201,7 @@
 #endif /* no GCC extensions */
 #define A_Ret_restrict                           /* returned pointer is the only alias to allocated memory - result of malloc()    */
 #if (defined(__GNUC__) && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 9))) || \
-  (defined(__clang__) && (__clang_major__ > 3 || (3 == __clang_major__  && __clang_minor__ >= 8)))
+  (defined(__clang__) && (__clang_major__ > 3 || (3 == __clang_major__  && __clang_minor__ >= 7)))
 #define A_Ret_never_null                         __attribute__ ((returns_nonnull))
 #define A_Nonnull_all_args                       __attribute__ ((nonnull))
 #define A_Nonnull_arg(i)                         __attribute__ ((nonnull(i,i)))
