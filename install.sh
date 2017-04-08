@@ -3,7 +3,11 @@
 # install/uninstall headers in specified directory
 
 if [ $# -ne 1 ] && [ $# -ne 2 ] || [ $# -eq 2 ] && [ "$1" != "-u" ]; then
-	echo "usage: $0 [-u] <include directory>"
+	echo "install/uninstall headers in specified directory"
+	echo "usage: $0 [-u] <incdir>"
+	echo "where:"
+	echo "    -u       - if specified, then uninstall headers"
+	echo "    <incdir> - directory where to copy/delete headers"
 	exit 1
 fi
 
