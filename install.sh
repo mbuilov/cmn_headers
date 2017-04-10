@@ -2,7 +2,10 @@
 
 # install/uninstall headers in specified directory
 
-if [ $# -ne 1 ] && [ $# -ne 2 ] || [ $# -eq 2 ] && [ "$1" != "-u" ]; then
+if { [ $# -ne 1 ] && [ $# -ne 2 ]; } ||
+   { [ $# -eq 1 ] && [ "$1" == "-u" ]; } ||
+   { [ $# -eq 2 ] && [ "$1" != "-u" ]; }
+then
 	echo "install/uninstall headers in specified directory"
 	echo "usage: $0 [-u] <incdir>"
 	echo "where:"
@@ -31,8 +34,8 @@ if [ ${uninstall} -eq 1 ]; then
 	# uninstall
 	for f in ${headers}; do
 		if [ -e "${incdir}/$f" ]; then
-			echo "delete ${incdir}/$f"
-			rm "${incdir}/$f"
+			echo "rm ${incdir}/$f"
+			rm "${incdir}/$f" || exit 3
 		fi
 	done
 
