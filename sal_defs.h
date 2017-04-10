@@ -427,7 +427,7 @@
 #elif defined __GNUC__ && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5))
 #define ASSUME(cond) ((void)(!(cond) ? __builtin_unreachable(), 0 : 1))
 #else
-#define ASSUME(cond) ((void)(cond)) /* assume condition is always true */
+#define ASSUME(cond) ((void)0) /* assume condition is always true */
 #endif
 #endif /* ASSUME */
 
