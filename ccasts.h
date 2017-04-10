@@ -13,20 +13,20 @@
 
   "pointer->pointer casts"
 
-  CAST          -       A* ->       B*
-  CAST_CONSTANT - const A* -> const B*
-  CONST_CAST    - const A* ->       A*
+  CAST          | A*       -> B*
+  CAST_CONSTANT | const A* -> const B*
+  CONST_CAST    | const A* -> A*
 
   "member->container casts"
 
   CONTAINER_OF:
-       NULL -> assert
-         M* ->       C*
+   NULL     -> assert
+   M*       -> C*
    const M* -> const C*
 
   OPT_CONTAINER_OF:
-       NULL -> assert
-         M* ->       C*
+   NULL     -> NULL
+   M*       -> C*
    const M* -> const C*
 
   RAW_CONTAINER_OF:
@@ -66,14 +66,14 @@ static inline void *_const_cast_void__(const void *p)
 	return u.v;
 }
 
-/* cast non-const pointer to one type to non-const pointer to another type:
+/* cast non-const pointer to one type to const/non-const pointer to another type:
 
   struct my_type1 *p;
   struct my_type2 *q = CAST(struct my_type2, p);
 */
 #define CAST(type, ptr) ((type*)_cast_void__(ptr))
 
-/* cast const pointer to one type to const pointer to another type:
+/* cast const/non-const pointer to one type to const pointer to another type:
 
   const struct my_type1 *p;
   const struct my_type2 *q = CAST_CONSTANT(struct my_type2, p);
