@@ -9,7 +9,7 @@
 
 /* asserts.h */
 
-/* defines: ASSERT, DEBUG_CHECK, EMBED_ASSERT, STATIC_ASSERT */
+/* defines: ASSERT, DEBUG_CHECK, EMBED_ASSERT, STATIC_ASSERT, COUNT_OF */
 
 #include <assert.h>
 #include "dprint.h"
@@ -88,6 +88,22 @@ static inline void _x__assert_(int x, A_In_z const char *cond, A_In_z const char
 #define ___STATIC_ASSERT(expr,line) struct _static_assert_at_line_##line{int _a[1-2*!(expr)];}
 #define __STATIC_ASSERT(expr,line) ___STATIC_ASSERT(expr,line)
 #define STATIC_ASSERT(expr) __STATIC_ASSERT(expr,__LINE__)
+
+/* number of elements in static array:
+
+  int arr[10];
+  size_t count = COUNT_OF(arr); // 10
+*/
+
+#ifdef __GNUC__
+#define _COUNT_OF(arr) (sizeof(arr)/sizeof((arr)[0]))
+#define COUNT_OF(arr) (_COUNT_OF(arr) + 0*sizeof(&(arr) - (__typeof__((arr)[0])(*)[_COUNT_OF(arr)])0))
+#elif defined __cplusplus
+template <typename T, size_t N> char (&_COUNT_OF(T (&array)[N]))[N];
+#define COUNT_OF(arr) (sizeof(_COUNT_OF(arr)))
+#else
+#define COUNT_OF(arr) (sizeof(arr)/sizeof((arr)[0]))
+#endif
 
 #ifdef __cplusplus
 }
