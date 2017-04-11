@@ -305,7 +305,7 @@ Parameters:
 - `...`    - formatting parameters
 
 _Note_:
-* if `DEBUG_TO_LOG` is defined, this must be a name of printing function:
+* if `DEBUG_TO_LOG` is defined, it must be a name of printing function:
   ```C
   void DEBUG_TO_LOG(const char *format, ...);
   ```
