@@ -30,7 +30,9 @@
    const M* -> const C*
 
   RAW_CONTAINER_OF:
-     any M* -> C*
+   NULL     -> invalid
+   M*       -> C*
+   const M* -> C*
 */
 
 #include <stddef.h>
@@ -76,11 +78,11 @@ static inline void *_const_cast_void__(const void *p)
 /* cast const/non-const pointer to one type to const pointer to another type:
 
   const struct my_type1 *p;
-  const struct my_type2 *q = CAST_CONSTANT(struct my_type2, p);
+  const struct my_type2 *q = CAST_CONSTANT(const struct my_type2, p);
 */
 #define CAST_CONSTANT(type, ptr) ((type*)_cast_constant_void__(ptr))
 
-/* cast const pointer to non-const one to the same type:
+/* cast const pointer to non-const one for the same type:
 
   const struct my_type *p;
   struct my_type *q = CONST_CAST(struct my_type, p);
