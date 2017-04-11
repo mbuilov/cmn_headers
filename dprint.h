@@ -25,14 +25,21 @@
 extern "C" {
 #endif
 
+/* format specifier for CURRENT_THREAD_ID() */
+#ifndef THREAD_ID_FORMAT
+#define THREAD_ID_FORMAT "%llx"
+#endif
+
+#ifdef CURRENT_THREAD_ID
 /* NOTE: #include <windows.h> or <pthread.h> before this file */
 #ifdef WIN32
-#define CURRENT_THREAD_ID() ((const void*)((const char*)0 + GetCurrentThreadId()))
+#define CURRENT_THREAD_ID ((long long)0 + GetCurrentThreadId())
 #elif defined _POSIX_THREADS
-#define CURRENT_THREAD_ID() ((const void*)((const char*)0 + pthread_self()))
+#define CURRENT_THREAD_ID ((long long)0 + pthread_self())
 #else
-#define CURRENT_THREAD_ID() ((const void*)0)
+#define CURRENT_THREAD_ID ((long long)0)
 #endif
+#endif /* CURRENT_THREAD_ID */
 
 #if defined _MSC_VER && !defined __func__
 #define __func__ __FUNCTION__
@@ -52,24 +59,24 @@ A_Printf_format_at(1,2)
 void DEBUG_TO_LOG(A_Printf_format_string const char *format, ...);
 
 #define ___DBGPRINT_1(f) \
-	DEBUG_TO_LOG("%p:%s:%d:%s(): " f, CURRENT_THREAD_ID(), __FILE__, __LINE__, __func__)
+	DEBUG_TO_LOG(THREAD_ID_FORMAT ":%s:%d:%s(): " f, CURRENT_THREAD_ID, __FILE__, __LINE__, __func__)
 #define ___DBGPRINT_2(f,...) \
-	DEBUG_TO_LOG("%p:%s:%d:%s(): " f, CURRENT_THREAD_ID(), __FILE__, __LINE__, __func__, __VA_ARGS__)
+	DEBUG_TO_LOG(THREAD_ID_FORMAT ":%s:%d:%s(): " f, CURRENT_THREAD_ID, __FILE__, __LINE__, __func__, __VA_ARGS__)
 #define ___DBGPRINTx1(__d_file,__d_line,__d_function,f) \
-	DEBUG_TO_LOG("%p:%s:%d:%s(): " f, CURRENT_THREAD_ID(), __d_file, __d_line, __d_function)
+	DEBUG_TO_LOG(THREAD_ID_FORMAT ":%s:%d:%s(): " f, CURRENT_THREAD_ID, __d_file, __d_line, __d_function)
 #define ___DBGPRINTx2(__d_file,__d_line,__d_function,f,...) \
-	DEBUG_TO_LOG("%p:%s:%d:%s(): " f, CURRENT_THREAD_ID(), __d_file, __d_line, __d_function, __VA_ARGS__)
+	DEBUG_TO_LOG(THREAD_ID_FORMAT ":%s:%d:%s(): " f, CURRENT_THREAD_ID, __d_file, __d_line, __d_function, __VA_ARGS__)
 
 #elif defined _DEBUG
 
 #define ___DBGPRINT_1(f) \
-	fprintf(stderr, "%p:%s:%d:%s(): " f "\n", CURRENT_THREAD_ID(), __FILE__, __LINE__, __func__)
+	fprintf(stderr, THREAD_ID_FORMAT ":%s:%d:%s(): " f "\n", CURRENT_THREAD_ID, __FILE__, __LINE__, __func__)
 #define ___DBGPRINT_2(f,...) \
-	fprintf(stderr, "%p:%s:%d:%s(): " f "\n", CURRENT_THREAD_ID(), __FILE__, __LINE__, __func__, __VA_ARGS__)
+	fprintf(stderr, THREAD_ID_FORMAT ":%s:%d:%s(): " f "\n", CURRENT_THREAD_ID, __FILE__, __LINE__, __func__, __VA_ARGS__)
 #define ___DBGPRINTx1(__d_file,__d_line,__d_function,f) \
-	fprintf(stderr, "%p:%s:%d:%s(): " f "\n", CURRENT_THREAD_ID(), __d_file, __d_line, __d_function)
+	fprintf(stderr, THREAD_ID_FORMAT ":%s:%d:%s(): " f "\n", CURRENT_THREAD_ID, __d_file, __d_line, __d_function)
 #define ___DBGPRINTx2(__d_file,__d_line,__d_function,f,...) \
-	fprintf(stderr, "%p:%s:%d:%s(): " f "\n", CURRENT_THREAD_ID(), __d_file, __d_line, __d_function, __VA_ARGS__)
+	fprintf(stderr, THREAD_ID_FORMAT ":%s:%d:%s(): " f "\n", CURRENT_THREAD_ID, __d_file, __d_line, __d_function, __VA_ARGS__)
 
 #endif /* _DEBUG */
 
