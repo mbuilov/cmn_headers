@@ -21,6 +21,10 @@ Container of member field:
 - [CONTAINER_OF](#get-non-null-pointer-to-container-from-non-null-pointer-to-member)
 - [OPT_CONTAINER_OF](#get-pointer-to-container-from-pointer-to-member)
 
+Debug printing:
+- [DBGPRINT](#print-line-of-debugging-text)
+- [DBGPRINTX](#print-line-of-debugging-text-at-position)
+
 ----------------------------------------
 
 #### Ensure that condition is non-zero at runtime
@@ -32,9 +36,9 @@ Parameters:
 
 If `condition` is zero on runtime, then:
 * in debug builds (when `_DEBUG` is defined), program terminates
-* in release builds (when `_DEBUG` is not defined), program behaviour is undefined
+* in release builds (when `_DEBUG` is not defined), program behaviour is **undefined**
 
-_Note_: in some configurations `condition` may not be evaluated, so its evaluation must have no side-effects
+_Note_: in some configurations `condition` may not be evaluated, so its evaluation must have **no side-effects**.
 
 *Example:*
 ```C
@@ -56,9 +60,9 @@ Parameters:
 
 If `condition` is zero on runtime, then:
 * in debug builds (when `_DEBUG` is defined), program terminates
-* in release builds (when `_DEBUG` is not defined), not `condition` is not evaluated
+* in release builds (when `_DEBUG` is not defined), `condition` is **not evaluated**
 
-_Note_: in some configurations `condition` may not be evaluated, so its evaluation must have no side-effects
+_Note_: in some configurations `condition` may not be evaluated, so its evaluation must have **no side-effects**.
 
 *Example:*
 ```C
@@ -83,7 +87,7 @@ STATIC_ASSERT(expression)
 Parameters:
 - `expression` - expression to verify, must give non-zero result
 
-_Note_: `expression` is evaluated on compile-time, any side-effects of its evaluation are discarded
+_Note_: `expression` is evaluated on compile-time, any side-effects of its evaluation are **discarded**.
 
 *Example:*
 ```C
@@ -107,7 +111,7 @@ Parameters:
 
 **Returns:** zero
 
-_Note_: `expression` is evaluated on compile-time, any side-effects of its evaluation are discarded
+_Note_: `expression` is evaluated on compile-time, any side-effects of its evaluation are **discarded**.
 
 *Example:*
 ```C
@@ -134,7 +138,7 @@ In C/C++ arrays are passed to functions as pointers, without any information abo
 
 `COUNT_OF(array)` should trigger compilation error if number of elements in `array` is not known to compiler.
 
-_Note_: Some compilers may not trigger compilation errors on invalid usage of `COUNT_OF()` macro
+_Note_: Some compilers may not trigger compilation errors on invalid usage of `COUNT_OF()` macro.
 
 *Example:*
 ```C
@@ -157,13 +161,13 @@ CAST(type, ptr)
 ```
 Parameters:
 - `type` - type to cast pointer to
-- `ptr`  - non-const pointer to cast
+- `ptr`  - **non-const** pointer to cast
 
 **Returns:** pointer to given type
 
 `CAST()` protects from casting const pointer to non-const one, this macro should trigger compilation error/warning if `ptr` is const
 
-_Note_: Some compilers may not trigger compilation errors or warnings on invalid usage of `CAST()` macro
+_Note_: Some compilers may not trigger compilation errors or warnings on invalid usage of `CAST()` macro.
 
 _Note_: To cast constant pointers - use [`CAST_CONSTANT()`](#cast-pointer-to-constant) or [`CONST_CAST()`](#remove-pointer-constness)
 
@@ -187,16 +191,16 @@ void foo(struct P *p)
 CAST_CONSTANT(type, ptr)
 ```
 Parameters:
-- `type` - const type to cast pointer to
+- `type` - **const** type to cast pointer to
 - `ptr`  - pointer to cast
 
 **Returns:** const pointer to given type
 
 `CAST_CONSTANT()` protects from casting const pointer to non-const one, this macro should trigger compilation error/warning if `type` is not const
 
-_Note_: Some compilers may not trigger compilation errors or warnings on invalid usage of `CAST_CONSTANT()` macro
+_Note_: Some compilers may not trigger compilation errors or warnings on invalid usage of `CAST_CONSTANT()` macro.
 
-_Note_: To cast constant pointers to non-const ones - use [`CONST_CAST()`](#remove-pointer-constness)
+_Note_: To cast constant pointers to non-const ones - use [`CONST_CAST()`](#remove-pointer-constness).
 
 *Example:*
 ```C
@@ -223,9 +227,9 @@ Parameters:
 
 **Returns:** non-const pointer to the same type
 
-`CONST_CAST()` removes pointer _constness_ without changing pointer type, this macro should trigger compilation error/warning if `type` is not the type of the pointer
+`CONST_CAST()` removes pointer _constness_ without changing pointer type, this macro should trigger compilation error/warning if `type` is not the type of the pointer.
 
-_Note_: Some compilers may not trigger compilation errors or warnings on invalid usage of `CONST_CAST()` macro
+_Note_: Some compilers may not trigger compilation errors or warnings on invalid usage of `CONST_CAST()` macro.
 
 *Example:*
 ```C
@@ -253,7 +257,7 @@ Parameters:
 
 **Returns:** non-`NULL` pointer to container
 
-_Note_: returned pointer generally points some bytes before `ptr`
+_Note_: returned pointer generally points some bytes before `ptr`.
 
 *Example:*
 ```C
@@ -284,3 +288,43 @@ Parameters:
 *Example:* see [CONTAINER_OF](#get-non-null-pointer-to-container-from-non-null-pointer-to-member)
 
 *Declared in:* [`ccasts.h`](/ccasts.h)
+
+----------------------------------------
+
+#### Print line of debugging text
+```C
+DBGPRINT(format, ...)
+```
+Parameters:
+- `format` - `printf`-like format string (without `'\n'` at end)
+- `...`    - formatting parameters
+
+_Note_:
+* if `DEBUG_TO_LOG` is defined, this must be a name of printing function: `void DEBUG_TO_LOG(const char *format, ...);`
+* if `DEBUG_TO_LOG` is not defined, in release builds (when `_DEBUG` is not defined), parameters of `DBGPRINT` are not evaluated, so their evaluation must have **no side-effects**
+* if `CURRENT_THREAD_ID` is defined, this must be a macro returning current thread identifier number, which is formatted according to `THREAD_ID_FORMAT` value
+
+*Example:*
+```C
+void foo()
+{
+	DPRINT("debug message %d: %s", 1, "some message");
+}
+```
+
+*Declared in:* [`dprint.h`](/dprint.h)
+
+#### Print line of debugging text at position
+```C
+DBGPRINTX(file, line, function, format, ...)
+```
+Parameters:
+- `file`     - position file name
+- `line`     - position line number
+- `function` - position function name
+- `format`   - `printf`-like format string (without `'\n'` at end)
+- `...`      - formatting parameters
+
+_Note_: this macro is implicitly called from [`DBGPRINT`](#print-line-of-debugging-text)
+
+*Declared in:* [`dprint.h`](/dprint.h)
