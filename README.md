@@ -1,8 +1,6 @@
 # cmn_headers
 Common C/C++ definitions in header files
 
-## **Macros**
-
 Asserts:
 - [ASSERT](#ensure-that-condition-is-non-zero-at-runtime)
 - [DEBUG_CHECK](#check-that-condition-is-non-zero-at-runtime)
@@ -24,6 +22,17 @@ Container of member field:
 Debug printing:
 - [DBGPRINT](#print-line-of-debugging-text)
 - [DBGPRINTX](#print-line-of-debugging-text-at-position)
+
+Swap byte order:
+- [bswap2](#swap-byte-order-of-16--32-or-64-bit-unsigned-integer)
+- [bswap4](#swap-byte-order-of-16--32-or-64-bit-unsigned-integer)
+- [bswap8](#swap-byte-order-of-16--32-or-64-bit-unsigned-integer)
+- [hswap2](#swap-halves-of-16--32-or-64-bit-unsigned-integer)
+- [hswap4](#swap-halves-of-16--32-or-64-bit-unsigned-integer)
+- [hswap8](#swap-halves-of-16--32-or-64-bit-unsigned-integer)
+
+Parse command line options:
+- [get_opts](#parse-command-line-options)
 
 ----------------------------------------
 
@@ -328,3 +337,88 @@ Parameters:
 _Note_: this macro is implicitly called from [`DBGPRINT`](#print-line-of-debugging-text)
 
 *Declared in:* [`dprint.h`](/dprint.h)
+
+----------------------------------------
+
+#### Swap byte order of 16, 32 or 64-bit unsigned integer
+```C
+UINT16_TYPE bswap2(UINT16_TYPE x);
+UINT32_TYPE bswap4(UINT32_TYPE x);
+UINT64_TYPE bswap8(UINT64_TYPE x);
+```
+Parameters:
+- `x` - unsigned 16, 32 or 64-bit integer to swap bytes of
+
+**Returns:** unsigned 16, 32 or 64-bit integer with reverse byte order
+
+_Note_: UINT16_TYPE, UINT32_TYPE and UINT64_TYPE integer types are defined in place if they are not defined already
+
+*Declared in:* [`bswaps.h`](/bswaps.h)
+
+#### Swap halves of 16, 32 or 64-bit unsigned integer
+```C
+UINT16_TYPE hswap2(UINT16_TYPE x);
+UINT32_TYPE hswap4(UINT32_TYPE x);
+UINT64_TYPE hswap8(UINT64_TYPE x);
+```
+Parameters:
+- `x` - unsigned 16, 32 or 64-bit integer to swap haves of
+
+**Returns:** unsigned 16, 32 or 64-bit integer with swapped high and low halves
+
+_Note_: UINT16_TYPE, UINT32_TYPE and UINT64_TYPE integer types are defined in place if they are not defined already
+
+*Declared in:* [`bswaps.h`](/bswaps.h)
+
+----------------------------------------
+
+#### Parse command line options
+```C
+int get_opts(
+	int argc,
+	char *argv[/*argc*/],
+	const char *opts/*'\0'-terminated*/,
+	char *values[/*strlen(opts)*/]
+);
+```
+Parameters:
+- `argc`   - number of program arguments, as passed to `int main(int argc, char *argv[])`
+- `argv`   - program arguments array, as passed to `int main(int argc, char *argv[])`
+- `opts`   - options string in format: one letter for one option, for example: `"abc"`
+- `values` - to be filled array of pointers to values of the options, must be big enough
+
+**Returns:**
+* `0`  - no errors, `values` array is filled
+* `>0` - number of first non-option program argument (not started with `'-'`)
+* `<0` - number of first unknown option argument
+
+_Notes_:
+* options may be specified in any order
+* options may be optional, corresponding value in `values` array will be `NULL`
+* an option may be specified many times - only the last value is used
+
+*Example:*
+```C
+int main(int argc, char *argv[])
+{
+	#define opts "abc"
+	#define A values[0]
+	#define B values[1]
+	#define C values[2]
+	char *values[sizeof(opts) - 1];
+	{
+		int i = get_opts(argc, argv, opts, values);
+		if (i > 0) {
+			fprintf(stderr, "%s: expecting an option argument started with '-': %s\n", argv[0], argv[i]);
+			return 1;
+		}
+		if (i < 0) {
+			fprintf(stderr, "%s: unknown option: %s\n", argv[0], argv[-i]);
+			return 2;
+		}
+	}
+	....
+}
+```
+
+*Declared in:* [`get_opts.inl`](/get_opts.inl)
