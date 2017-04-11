@@ -305,9 +305,12 @@ Parameters:
 - `...`    - formatting parameters
 
 _Note_:
-* if `DEBUG_TO_LOG` is defined, this must be a name of printing function: `void DEBUG_TO_LOG(const char *format, ...);`
+* if `DEBUG_TO_LOG` is defined, this must be a name of printing function:
+  ```C
+  void DEBUG_TO_LOG(const char *format, ...);
+  ```
 * if `DEBUG_TO_LOG` is not defined, in release builds (when `_DEBUG` is not defined), parameters of `DBGPRINT` are not evaluated, so their evaluation must have **no side-effects**
-* if `CURRENT_THREAD_ID` is defined, this must be a macro returning current thread identifier number, which is formatted according to `THREAD_ID_FORMAT` value
+* if `CURRENT_THREAD_ID` is defined, it must be a macro returning current thread identifier number, which is formatted according to `THREAD_ID_FORMAT` value
 
 *Example:*
 ```C
@@ -347,7 +350,7 @@ Parameters:
 
 **Returns:** unsigned 16, 32 or 64-bit integer with reverse byte order
 
-_Note_: UINT16_TYPE, UINT32_TYPE and UINT64_TYPE integer types are defined in place if they are not defined already
+_Note_: `UINT16_TYPE`, `UINT32_TYPE` and `UINT64_TYPE` integer types are defined in place if they are not defined already
 
 *Declared in:* [`bswaps.h`](/bswaps.h)
 
@@ -362,7 +365,7 @@ Parameters:
 
 **Returns:** unsigned 16, 32 or 64-bit integer with swapped high and low halves
 
-_Note_: UINT16_TYPE, UINT32_TYPE and UINT64_TYPE integer types are defined in place if they are not defined already
+_Note_: `UINT16_TYPE`, `UINT32_TYPE` and `UINT64_TYPE` integer types are defined in place if they are not defined already
 
 *Declared in:* [`bswaps.h`](/bswaps.h)
 
