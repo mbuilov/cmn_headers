@@ -24,8 +24,8 @@ Debug printing:
 - [DBGPRINTX](#print-line-of-debugging-text-at-position)
 
 Swap byte order:
-- [bswap2/bswap4/bswap8](#swap-byte-order-of-16--32-or-64-bit-unsigned-integer)
-- [hswap2/hswap4/hswap8](#swap-halves-of-16--32-or-64-bit-unsigned-integer)
+- [bswap2/bswap4/bswap8](#swap-byte-order-of-16-32-or-64-bit-unsigned-integer)
+- [hswap2/hswap4/hswap8](#swap-halves-of-16-32-or-64-bit-unsigned-integer)
 
 Parse command line options:
 - [get_opts](#parse-command-line-options)
