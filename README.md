@@ -17,19 +17,15 @@ Casting pointers:
 
 Container of member field:
 - [CONTAINER_OF](#get-non-null-pointer-to-container-from-non-null-pointer-to-member)
-- [OPT_CONTAINER_OF](#get-pointer-to-container-from-pointer-to-member)
+- [OPT_CONTAINER_OF](#get-pointer-to-container-from-possibly-null-pointer-to-member)
 
 Debug printing:
 - [DBGPRINT](#print-line-of-debugging-text)
 - [DBGPRINTX](#print-line-of-debugging-text-at-position)
 
 Swap byte order:
-- [bswap2](#swap-byte-order-of-16--32-or-64-bit-unsigned-integer)
-- [bswap4](#swap-byte-order-of-16--32-or-64-bit-unsigned-integer)
-- [bswap8](#swap-byte-order-of-16--32-or-64-bit-unsigned-integer)
-- [hswap2](#swap-halves-of-16--32-or-64-bit-unsigned-integer)
-- [hswap4](#swap-halves-of-16--32-or-64-bit-unsigned-integer)
-- [hswap8](#swap-halves-of-16--32-or-64-bit-unsigned-integer)
+- [bswap2/bswap4/bswap8](#swap-byte-order-of-16--32-or-64-bit-unsigned-integer)
+- [hswap2/hswap4/hswap8](#swap-halves-of-16--32-or-64-bit-unsigned-integer)
 
 Parse command line options:
 - [get_opts](#parse-command-line-options)
@@ -43,8 +39,8 @@ ASSERT(condition)
 Parameters:
 - `condition` - condition to check: if evaluated, must give non-zero result
 
-If `condition` is zero on runtime, then:
-* in debug builds (when `_DEBUG` is defined), program terminates
+If `condition` is zero at runtime, then:
+* in debug builds (when `_DEBUG` is defined), program terminates with some error message
 * in release builds (when `_DEBUG` is not defined), program behaviour is **undefined**
 
 _Note_: in some configurations `condition` may not be evaluated, so its evaluation must have **no side-effects**.
@@ -67,8 +63,8 @@ DEBUG_CHECK(condition)
 Parameters:
 - `condition` - condition to check: if evaluated, should give non-zero result
 
-If `condition` is zero on runtime, then:
-* in debug builds (when `_DEBUG` is defined), program terminates
+If `condition` is zero at runtime, then:
+* in debug builds (when `_DEBUG` is defined), program terminates with some error message
 * in release builds (when `_DEBUG` is not defined), `condition` is **not evaluated**
 
 _Note_: in some configurations `condition` may not be evaluated, so its evaluation must have **no side-effects**.
@@ -96,7 +92,7 @@ STATIC_ASSERT(expression)
 Parameters:
 - `expression` - expression to verify, must give non-zero result
 
-_Note_: `expression` is evaluated on compile-time, any side-effects of its evaluation are **discarded**.
+_Note_: `expression` is evaluated at compile-time, any side-effects of its evaluation are **discarded**.
 
 *Example:*
 ```C
@@ -120,7 +116,7 @@ Parameters:
 
 **Returns:** zero
 
-_Note_: `expression` is evaluated on compile-time, any side-effects of its evaluation are **discarded**.
+_Note_: `expression` is evaluated at compile-time, any side-effects of its evaluation are **discarded**.
 
 *Example:*
 ```C
@@ -147,7 +143,7 @@ In C/C++ arrays are passed to functions as pointers, without any information abo
 
 `COUNT_OF(array)` should trigger compilation error if number of elements in `array` is not known to compiler.
 
-_Note_: Some compilers may not trigger compilation errors on invalid usage of `COUNT_OF()` macro.
+_Note_: Some compilers may not trigger compilation error on invalid usage of `COUNT_OF()` macro.
 
 *Example:*
 ```C
@@ -176,7 +172,7 @@ Parameters:
 
 `CAST()` protects from casting const pointer to non-const one, this macro should trigger compilation error/warning if `ptr` is const
 
-_Note_: Some compilers may not trigger compilation errors or warnings on invalid usage of `CAST()` macro.
+_Note_: Some compilers may not trigger compilation error or warning on invalid usage of `CAST()` macro.
 
 _Note_: To cast constant pointers - use [`CAST_CONSTANT()`](#cast-pointer-to-constant) or [`CONST_CAST()`](#remove-pointer-constness)
 
@@ -207,9 +203,9 @@ Parameters:
 
 `CAST_CONSTANT()` protects from casting const pointer to non-const one, this macro should trigger compilation error/warning if `type` is not const
 
-_Note_: Some compilers may not trigger compilation errors or warnings on invalid usage of `CAST_CONSTANT()` macro.
+_Note_: Some compilers may not trigger compilation error or warning on invalid usage of `CAST_CONSTANT()` macro.
 
-_Note_: To cast constant pointers to non-const ones - use [`CONST_CAST()`](#remove-pointer-constness).
+_Note_: To cast const pointer to non-const one - use [`CONST_CAST()`](#remove-pointer-constness).
 
 *Example:*
 ```C
@@ -238,7 +234,7 @@ Parameters:
 
 `CONST_CAST()` removes pointer _constness_ without changing pointer type, this macro should trigger compilation error/warning if `type` is not the type of the pointer.
 
-_Note_: Some compilers may not trigger compilation errors or warnings on invalid usage of `CONST_CAST()` macro.
+_Note_: Some compilers may not trigger compilation error or warning on invalid usage of `CONST_CAST()` macro.
 
 *Example:*
 ```C
@@ -260,13 +256,13 @@ void foo(const struct P *cp)
 CONTAINER_OF(ptr, type, member)
 ```
 Parameters:
-- `ptr`    - non-`NULL` pointer to member field of container
+- `ptr`    - non-`NULL` pointer to member field of container structure
 - `type`   - type of container
 - `member` - name of member field
 
 **Returns:** non-`NULL` pointer to container
 
-_Note_: returned pointer generally points some bytes before `ptr`.
+_Note_: returned pointer generally points to memory at some offset before `ptr`.
 
 *Example:*
 ```C
@@ -283,12 +279,12 @@ struct Container *foo(float *m)
 
 *Declared in:* [`ccasts.h`](/ccasts.h)
 
-#### Get pointer to container from pointer to member
+#### Get pointer to container from possibly NULL pointer to member
 ```C
 OPT_CONTAINER_OF(ptr, type, member)
 ```
 Parameters:
-- `ptr`    - pointer to member field of container, may be `NULL`
+- `ptr`    - pointer to member field of container structure, may be `NULL`
 - `type`   - type of container
 - `member` - name of member field
 
@@ -334,7 +330,7 @@ Parameters:
 - `format`   - `printf`-like format string (without `'\n'` at end)
 - `...`      - formatting parameters
 
-_Note_: this macro is implicitly called from [`DBGPRINT`](#print-line-of-debugging-text)
+_Note_: this macro is implicitly called by [`DBGPRINT`](#print-line-of-debugging-text)
 
 *Declared in:* [`dprint.h`](/dprint.h)
 
