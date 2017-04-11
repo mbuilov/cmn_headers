@@ -15,7 +15,7 @@ Casting pointers:
 - [CAST_CONSTANT](#cast-pointer-to-constant)
 - [CONST_CAST](#remove-pointer-constness)
 
-Container of member field:
+Container from pointer to member:
 - [CONTAINER_OF](#get-non-null-pointer-to-container-from-non-null-pointer-to-member)
 - [OPT_CONTAINER_OF](#get-pointer-to-container-from-possibly-null-pointer-to-member)
 
@@ -205,7 +205,7 @@ Parameters:
 
 _Note_: Some compilers may not trigger compilation error or warning on invalid usage of `CAST_CONSTANT()` macro.
 
-_Note_: To cast const pointer to non-const one - use [`CONST_CAST()`](#remove-pointer-constness).
+_Note_: To cast const pointer to non-const one - use [`CONST_CAST()`](#remove-pointer-constness)
 
 *Example:*
 ```C
