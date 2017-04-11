@@ -348,7 +348,7 @@ UINT64_TYPE bswap8(UINT64_TYPE x);
 Parameters:
 - `x` - unsigned 16, 32 or 64-bit integer to swap bytes of
 
-**Returns:** unsigned 16, 32 or 64-bit integer with reverse byte order
+**Returns:** `x` with reverse byte order
 
 _Note_: `UINT16_TYPE`, `UINT32_TYPE` and `UINT64_TYPE` integer types are defined in place if they are not defined already
 
@@ -363,7 +363,7 @@ UINT64_TYPE hswap8(UINT64_TYPE x);
 Parameters:
 - `x` - unsigned 16, 32 or 64-bit integer to swap haves of
 
-**Returns:** unsigned 16, 32 or 64-bit integer with swapped high and low halves
+**Returns:** `x` with swapped high and low halves
 
 _Note_: `UINT16_TYPE`, `UINT32_TYPE` and `UINT64_TYPE` integer types are defined in place if they are not defined already
 
