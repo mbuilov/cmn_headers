@@ -40,7 +40,7 @@ if not exist "%~1\*" (
 )
 
 set incdir=%~1
-set headers=bswaps.h ccasts.h dlist.h dprint.h get_opts.inl sal_defs.h
+set headers=asserts.h bswaps.h ccasts.h dprint.h get_opts.inl sal_defs.h
 
 if %uninstall%==1 (
 
