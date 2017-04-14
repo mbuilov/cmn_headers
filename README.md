@@ -1,6 +1,17 @@
 # cmn_headers
 Common C/C++ definitions in header files
 
+* Copyright (C) 2012-2017 Michael M. Builov, https://github.com/mbuilov/cmn_headers
+* All files, except sal_defs.h are licensed under Apache License v2.0, see LICENSE.TXT
+* sal_defs.h licensed under Public domain
+
+## Installing
+
+- for UNIX-like OS, run install.sh
+- for WINDOWS, use install.bat
+
+## Api documentation
+
 Asserts:
 - [ASSERT](#ensure-that-condition-is-non-zero-at-runtime)
 - [DEBUG_CHECK](#check-that-condition-is-non-zero-at-runtime)
