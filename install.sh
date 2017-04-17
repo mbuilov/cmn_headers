@@ -46,7 +46,7 @@ else
 		INSTALL=install
 	fi
 
-	echo "install ${headers} -> ${incdir}"
+	echo "install: ${headers} -> ${incdir}"
 	${INSTALL} -m 644 ${headers} "${incdir}"
 
 fi
