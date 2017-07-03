@@ -9,6 +9,10 @@
 
 /* get_opt.inl */
 
+/* defines two functions:
+  get_opt()             - get next option value specified in command line,
+  is_long_opt_matched() - check if long option is matched, may be used while processing get_opt() result. */
+
 /* structure that describes state of options parsing */
 struct opt_info {
 
@@ -47,14 +51,14 @@ struct opt_info {
 
 /* get_opt() normally returns value >= 0 - parsed option number, but also may return next values: */
 #define OPT_UNKNOWN     -1 /* i->arg points to an unknown option */
-#define OPT_PARAMETER   -2 /* i->value points to parameter value */
+#define OPT_PARAMETER   -2 /* i->value points to non-NULL parameter value */
 #define OPT_REST_PARAMS -3 /* all arguments starting with i->arg and until i->args_end - are parameters */
 
 /* Notes:
   1) get_opt(i) expects that i->arg < i->args_end,
-  2) a non-NULL value may be parsed for an option that do not expects one - if a value was provided:
-     for short option:  -ovalue
-     for long option:   -option=value
+  2) a non-NULL value may be parsed for an option that do not expects one - if a value was provided, for example:
+     for short option: -ovalue
+     for long option:  -option=value
 */
 
 #if 0
@@ -81,11 +85,11 @@ int main(int argc, char *argv[])
 					fprintf(stderr, "no value provided for 'file'\n");
 				break;
 			case 2: { /* short option '-' or long option "beta" */
-				int long_opt = ('-' == i.arg[-1 - ('-' == i.arg[-1][0])][1]);
+				const char *opt_name = is_long_opt_matched(i.arg) ? "beta" : "-";
 				if (i.value)
-					fprintf(stderr, "not expecting a value for option '%s': %s\n", long_opt ? "beta" : "-", i.value);
+					fprintf(stderr, "not expecting a value for option '%s': %s\n", opt_name, i.value);
 				else
-					fprintf(stderr, "option '%s'\n", long_opt ? "beta" : "-");
+					fprintf(stderr, "option '%s'\n", opt_name);
 				break;
 			}
 			case OPT_UNKNOWN:
@@ -116,7 +120,7 @@ A_Ret_range(>=,OPT_REST_PARAMS)
 #ifdef A_Pre_satisfies
 A_Pre_satisfies(i->arg < i->args_end)
 #endif
-int get_opt(
+static int get_opt(
 #ifdef A_Inout
 	A_Inout
 #endif
@@ -135,12 +139,12 @@ int get_opt(
 			return OPT_REST_PARAMS; /* all arguments starting with i->arg are parameters */
 		}
 		a += 2; /* skip "--" */
-		if (long_opts) {
+		if (i->long_opts) {
 			char *v = strchr(a, '=');
 			if (v)
 				*v = '\0'; /* temporary terminate option name */
 			{
-				const char *const *lo = long_opts;
+				const char *const *lo = i->long_opts;
 				for (; *lo; lo++) {
 					const char *beg = *lo;
 					if (*beg) {
@@ -155,7 +159,7 @@ int get_opt(
 									a = *i->arg;
 									if ('-' != *a) {
 										i->arg++;
-										i->value = a;
+										i->value = a; /* option value */
 									}
 									else
 										i->value = NULL; /* no value provided: next is an another option */
@@ -168,7 +172,7 @@ int get_opt(
 								*v = '='; /* restore */
 								i->value = v + 1; /* skip '=' */
 							}
-							return (int)(lo - long_opts);
+							return (int)(lo - i->long_opts);
 						}
 					}
 				}
@@ -177,9 +181,9 @@ int get_opt(
 				*v = '='; /* restore */
 		}
 	}
-	else if (opts) {
+	else if (i->opts) {
 		/* short option, like "-h" or "-ffile" or "-" */
-		const char *o = strchr(opts, a[1] ? a[1] : '-');
+		const char *o = strchr(i->opts, a[1] ? a[1] : '-');
 		if (o) {
 			if (!a[1] || !a[2]) {
 				/* no value passed, like "-h" or "-" */
@@ -188,7 +192,7 @@ int get_opt(
 					a = *i->arg;
 					if ('-' != *a) {
 						i->arg++;
-						i->value = a;
+						i->value = a; /* option value */
 					}
 					else
 						i->value = NULL; /* no value provided: next is an another option */
@@ -200,11 +204,27 @@ int get_opt(
 				/* "-ffile": set (non-empty) option value, even if not expecting one */
 				i->value = a + 2; /* skip "-f" */
 			}
-			return (int)(o - opts)/2;
+			return (int)(o - i->opts)/2;
 		}
 	}
 	i->arg--;
 	return OPT_UNKNOWN; /* i->arg points to unknown (may be long) option */
+}
+
+#ifdef A_Nonnull_all_args
+A_Nonnull_all_args
+#endif
+#ifdef A_Ret_range
+A_Ret_range(0,1)
+#endif
+static inline int is_long_opt_matched(
+#ifdef A_In
+	A_In
+#endif
+	char **arg
+) {
+	int has_value = ('-' != arg[-1][0]);
+	return ('-' == arg[-1 - has_value][1]);
 }
 
 #endif /* GET_OPT_INL_INCLUDED */
