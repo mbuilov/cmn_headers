@@ -11,6 +11,7 @@ include $(MTOP)/exts/ctest.mk
 EXE := get_opt_test S
 SRC := get_opt_test.c
 
-$(DO_TEST_EXE)
+$(call DO_TEST_EXE,1 --help 3 --file 2 -b3 --level=4 -c 5 -d6 --debug 7 -e 8 -er\
+  --output=9 -fg -f g --verbose 1 --verbose=4 -g 3 -g1 -9 - --trace --trace q --trace=v -h 6 -- 4 -b --y 9)
 
 $(DEFINE_TARGETS)

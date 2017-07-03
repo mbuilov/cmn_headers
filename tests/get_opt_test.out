@@ -1,0 +1,34 @@
+parameter: 1
+unknown option: --help
+parameter: 3
+file:2
+b:3
+level:4
+c:5
+d:6
+debug:7
+e:<null>
+parameter: 8
+e:r
+output:9
+f:g
+f:<null>
+parameter: g
+verbose:<null>
+parameter: 1
+verbose:4
+g:<null>
+parameter: 3
+g:1
+unknown option: -9
+-:<null>
+trace:<null>
+trace:<null>
+parameter: q
+trace:v
+h:<null>
+parameter: 6
+parameter: 4
+parameter: -b
+parameter: --y
+parameter: 9
