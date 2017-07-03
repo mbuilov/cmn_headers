@@ -65,49 +65,52 @@ struct opt_info {
 /* example */
 int main(int argc, char *argv[])
 {
+	static const char short_opts[] = "a:  - ";
+	static const char *const long_opts[] = {"","=file","beta",NULL};
 	struct opt_info i;
 	i.arg       = &argv[1];
 	i.args_end  = &argv[argc];
-	i.opts      = "a:  - ";
-	i.long_opts = {"","=file","beta",NULL};
+	i.opts      = short_opts;
+	i.long_opts = long_opts;
 	while (i.arg < i.args_end) {
 		switch (get_opt(&i)) {
 			case 0: /* short option 'a' */
 				if (i.value)
-					fprintf(stderr, "'a' has value: %s\n", i.value);
+					printf("'a' has value: %s\n", i.value);
 				else
-					fprintf(stderr, "no value provided for 'a'\n");
+					printf("no value provided for 'a'\n");
 				break;
 			case 1: /* long option "file" */
 				if (i.value)
-					fprintf(stderr, "'file' has value: %s\n", i.value);
+					printf("'file' has value: %s\n", i.value);
 				else
-					fprintf(stderr, "no value provided for 'file'\n");
+					printf("no value provided for 'file'\n");
 				break;
 			case 2: { /* short option '-' or long option "beta" */
 				const char *opt_name = is_long_opt_matched(i.arg) ? "beta" : "-";
 				if (i.value)
-					fprintf(stderr, "not expecting a value for option '%s': %s\n", opt_name, i.value);
+					printf("not expecting a value for option '%s': %s\n", opt_name, i.value);
 				else
-					fprintf(stderr, "option '%s'\n", opt_name);
+					printf("option '%s'\n", opt_name);
 				break;
 			}
 			case OPT_UNKNOWN:
-				fprintf(stderr, "unknown option: '%s'\n", *i.arg);
-				error();
+				printf("unknown option: '%s'\n", *i.arg++);
+				break;
 			case OPT_PARAMETER:
-				fprintf(stderr, "parameter: '%s'\n", i.value);
+				printf("parameter: '%s'\n", i.value);
 				break;
 			case OPT_REST_PARAMS:
-				fprintf(stderr, "all parameters starting with: '%s'\n", *i.arg);
-				process_params(i);
-				i.arg = i.args_end;
+				do {
+					printf("parameter: %s\n", *i.arg++);
+				} while (i.arg != i.args_end);
 				break;
 			default:
-				assert(false);
+				fprintf(stderr, "assert!\n");
+				return 1;
 		}
 	}
-	...
+	return 0;
 }
 #endif
 
