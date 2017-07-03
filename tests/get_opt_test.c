@@ -13,11 +13,13 @@
 
 int main(int argc, char *argv[])
 {
+	static const char *const short_opts  = "a:  b:c:  d:e f g - h ";
+	static const char *const long_opts[] = {"","","=file","=level","","=debug","=output","verbose","","trace",NULL};
 	struct opt_info i;
 	i.arg       = &argv[1];
 	i.args_end  = &argv[argc];
-	i.opts      = "a:  b:c:  d:e f g - h ";
-	i.long_opts = {"","","=file","=level","","=debug","=output","verbose","","trace",NULL};
+	i.opts      = short_opts;
+	i.long_opts = long_opts;
 	while (i.arg < i.args_end) {
 		switch (get_opt(&i)) {
 			case 0:
@@ -27,28 +29,28 @@ int main(int argc, char *argv[])
 				printf("unexpected option number 1\n");
 				return 1;
 			case 2:
-				printf("b or file:%s\n", i.value ? i.value : "<null>");
+				printf("%s:%s\n", is_long_opt_matched(i.arg) ? "file" : "b", i.value ? i.value : "<null>");
 				break;
 			case 3:
-				printf("c or level:%s\n", i.value ? i.value : "<null>");
+				printf("%s:%s\n", is_long_opt_matched(i.arg) ? "level" : "c", i.value ? i.value : "<null>");
 				break;
 			case 4:
 				printf("unexpected option number 4\n");
 				return 1;
 			case 5:
-				printf("d or debug:%s\n", i.value ? i.value : "<null>");
+				printf("%s:%s\n", is_long_opt_matched(i.arg) ? "debug" : "d", i.value ? i.value : "<null>");
 				break;
 			case 6:
-				printf("e or output:%s\n", i.value ? i.value : "<null>");
+				printf("%s:%s\n", is_long_opt_matched(i.arg) ? "output" : "e", i.value ? i.value : "<null>");
 				break;
 			case 7:
-				printf("f or verbose:%s\n", i.value ? i.value : "<null>");
+				printf("%s:%s\n", is_long_opt_matched(i.arg) ? "verbose" : "f", i.value ? i.value : "<null>");
 				break;
 			case 8:
 				printf("g:%s\n", i.value ? i.value : "<null>");
 				break;
 			case 9:
-				printf("- or trace:%s\n", i.value ? i.value : "<null>");
+				printf("%s:%s\n", is_long_opt_matched(i.arg) ? "trace" : "-", i.value ? i.value : "<null>");
 				break;
 			case 10:
 				printf("h:%s\n", i.value ? i.value : "<null>");
