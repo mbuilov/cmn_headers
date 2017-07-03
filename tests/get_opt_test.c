@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 				printf("a:%s\n", i.value ? i.value : "<null>");
 				break;
 			case 1:
-				printf("unexpected option number 1\n");
+				fprintf(stderr, "unexpected option number 1\n");
 				return 1;
 			case 2:
 				printf("%s:%s\n", is_long_opt_matched(i.arg) ? "file" : "b", i.value ? i.value : "<null>");
@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 				printf("%s:%s\n", is_long_opt_matched(i.arg) ? "level" : "c", i.value ? i.value : "<null>");
 				break;
 			case 4:
-				printf("unexpected option number 4\n");
+				fprintf(stderr, "unexpected option number 4\n");
 				return 1;
 			case 5:
 				printf("%s:%s\n", is_long_opt_matched(i.arg) ? "debug" : "d", i.value ? i.value : "<null>");
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 				} while (i.arg != i.args_end);
 				break;
 			default:
-				printf("assert!\n");
+				fprintf(stderr, "assert!\n");
 				return 1;
 		}
 	}
