@@ -13,7 +13,7 @@
 
 int main(int argc, char *argv[])
 {
-	static const char *const short_opts  = "a:  b:c:  d:e f g - h ";
+	static const char short_opts[] = "a:  b:c:  d:e f g - h ";
 	static const char *const long_opts[] = {"","","=file","=level","","=debug","=output","verbose","","trace",NULL};
 	struct opt_info i;
 	i.arg       = &argv[1];
