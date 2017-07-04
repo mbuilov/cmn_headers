@@ -7,6 +7,7 @@
 include $(dir $(lastword $(MAKEFILE_LIST)))project.mk
 include $(MTOP)/c.mk
 include $(MTOP)/exts/ctest.mk
+include $(MTOP)/exts/cmp.mk
 
 EXE := get_opt_test S
 SRC := get_opt_test.c
@@ -14,6 +15,6 @@ SRC := get_opt_test.c
 $(call DO_TEST_EXE,1 --help 3 --file 2 -b3 --level=4 -c 5 -d6 --debug 7 -e 8 -er\
   --output=9 -fg -f g --verbose 1 --verbose=4 -g 3 -g1 -9 - --trace --trace q --trace=v -h 6 -- 4 -b --y 9)
 
-$(call DO_DIFF_EXE,get_opt_test.out)
+$(call DO_CMP_OUT,$(addsuffix .out,$(call ALL_TRG,EXE)),get_opt_test.out)
 
 $(DEFINE_TARGETS)
