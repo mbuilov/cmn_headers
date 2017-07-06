@@ -1,4 +1,4 @@
-bundled #ifndef GET_OPT_INL_INCLUDED
+#ifndef GET_OPT_INL_INCLUDED
 #define GET_OPT_INL_INCLUDED
 
 /**********************************************************************************
