@@ -9,9 +9,7 @@
 
 /* get_opt.inl */
 
-/* get_opt() - get next option value or parameter specified in a command line */
-
-/* note #include <string.h> before this file */
+/* note: #include <string.h> before this file */
 
 #ifndef GET_OPT_STRCHR
 #define GET_OPT_STRCHR(s,c) strchr(s,c)
@@ -20,6 +18,24 @@
 #ifndef GET_OPT_STRCMP
 #define GET_OPT_STRCMP(s1,s2) strcmp(s1,s2)
 #endif
+
+/*
+
+1) init opt_info structure:
+
+void opt_info_init(
+	struct opt_info *i,
+	int argc,
+	char *const argv[]);
+
+2) get next option value or parameter specified in a command line:
+
+int get_opt(
+	struct opt_info *i,
+	const char short_opts[],
+	const char *const long_opts[]);
+
+*/
 
 /* structure that describes state of options parsing */
 struct opt_info {
@@ -81,6 +97,70 @@ struct opt_info {
       empty short option "-" is a dash option, usually used to denote stdin/stdout, get_opt() returns OPT_DASH,
       empty long option "--" denotes end of options, all arguments after it - are parameters, get_opt() returns OPT_REST_PARAMS.
 */
+
+#if 0
+/* example */
+int main(int argc, char *argv[])
+{
+	static const char short_opts[] = "aacb-";
+	static const char *const long_opts[] = {"=file","beta",NULL};
+	struct opt_info i;
+	opt_info_init(&i, argc, argv);
+	while (i.arg < i.args_end) {
+		switch (get_opt(&i, short_opts, long_opts)) {
+			case SHORT_OPT(0): /* short option 'a' */
+				if (i.value)
+					printf("'a' has value: %s\n", i.value);
+				else
+					printf("no value provided for 'a'\n");
+				break;
+			case SHORT_OPT(2): /* short option 'c' */
+				printf("option 'c'\n");
+				break;
+			case LONG_OPT(0): /* long option "file" */
+				if (i.value)
+					printf("'file' has value: %s\n", i.value);
+				else
+					printf("no value provided for 'file'\n");
+				break;
+			case LONG_OPT(1): /* long option "beta" */
+				if (i.value)
+					printf("not expecting a value for option 'beta': %s\n", i.value);
+				else
+					printf("option 'beta'\n");
+				break;
+			case OPT_UNKNOWN:
+				if (i.sopt)
+					printf("unknown short option '%c' in the bundle: '%s'\n", *i.sopt, *i.arg);
+				else
+					printf("unknown option: '%s'\n", *i.arg);
+				i.arg++; /* skip unknown option */
+				i.sopt = NULL; /* reset current bundle */
+				break;
+			case OPT_BAD_BUNDLE:
+				printf("short option '%c' cannot be bundled: '%s'\n", *i.sopt, *i.arg);
+				i.arg++; /* skip bad bundle */
+				i.sopt = NULL; /* reset current bundle */
+				break;
+			case OPT_PARAMETER:
+				printf("parameter: %s\n", i.value);
+				break;
+			case OPT_DASH:
+				printf("dash option: '-'\n");
+				break;
+			case OPT_REST_PARAMS:
+				do {
+					printf("parameter: %s\n", *i.arg++);
+				} while (i.arg != i.args_end);
+				break;
+			default:
+				fprintf(stderr, "assert!\n");
+				return 1;
+		}
+	}
+	return 0;
+}
+#endif
 
 #ifdef A_Nonnull_all_args
 A_Nonnull_all_args
@@ -253,69 +333,5 @@ parse_long_option:
 	i->arg--;
 	return OPT_UNKNOWN; /* i->arg points to unknown option */
 }
-
-#if 1
-/* example */
-int main1(int argc, char *argv[])
-{
-	static const char short_opts[] = "aacb-";
-	static const char *const long_opts[] = {"=file","beta",NULL};
-	struct opt_info i;
-	opt_info_init(&i, argc, argv);
-	while (i.arg < i.args_end) {
-		switch (get_opt(&i, short_opts, long_opts)) {
-			case SHORT_OPT(0): /* short option 'a' */
-				if (i.value)
-					printf("'a' has value: %s\n", i.value);
-				else
-					printf("no value provided for 'a'\n");
-				break;
-			case SHORT_OPT(2): /* short option 'c' */
-				printf("option 'c'\n");
-				break;
-			case LONG_OPT(0): /* long option "file" */
-				if (i.value)
-					printf("'file' has value: %s\n", i.value);
-				else
-					printf("no value provided for 'file'\n");
-				break;
-			case LONG_OPT(1): /* long option "beta" */
-				if (i.value)
-					printf("not expecting a value for option 'beta': %s\n", i.value);
-				else
-					printf("option 'beta'\n");
-				break;
-			case OPT_UNKNOWN:
-				if (i.sopt)
-					printf("unknown short option '%c' in the bundle: '%s'\n", *i.sopt, *i.arg);
-				else
-					printf("unknown option: '%s'\n", *i.arg);
-				i.arg++; /* skip unknown option */
-				i.sopt = NULL; /* reset current bundle */
-				break;
-			case OPT_BAD_BUNDLE:
-				printf("short option '%c' cannot be bundled: '%s'\n", *i.sopt, *i.arg);
-				i.arg++; /* skip bad bundle */
-				i.sopt = NULL; /* reset current bundle */
-				break;
-			case OPT_PARAMETER:
-				printf("parameter: %s\n", i.value);
-				break;
-			case OPT_DASH:
-				printf("dash option: '-'\n");
-				break;
-			case OPT_REST_PARAMS:
-				do {
-					printf("parameter: %s\n", *i.arg++);
-				} while (i.arg != i.args_end);
-				break;
-			default:
-				fprintf(stderr, "assert!\n");
-				return 1;
-		}
-	}
-	return 0;
-}
-#endif
 
 #endif /* GET_OPT_INL_INCLUDED */
