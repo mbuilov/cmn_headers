@@ -2,7 +2,7 @@
 #define GET_OPT_INL_INCLUDED
 
 /**********************************************************************************
-* Program options parsing
+* Program options and parameters parsing
 * Copyright (C) 2012-2017 Michael M. Builov, https://github.com/mbuilov/cmn_headers
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
@@ -57,18 +57,18 @@ struct opt_info {
 	char *sopt;
 };
 
-/* get_opt() normally returns a value >= 0 - parsed option position encoded as follows: */
-#define SHORT_OPT(p)   ((p)<<1)     /* matched short option position in short options format string  */
-#define LONG_OPT(p)    (((p)<<1)+1) /* matched long option index in long options format array */
-#define DECODE_OPT(c)  ((c)>>1)     /* decode short/long option position */
-#define IS_LONG_OPT(c) ((c)&1)      /* check if long option matched */
+/* get_opt() normally returns a value >= 0 - matched option position, encoded as follows: */
+#define SHORT_OPT(p)   ((p)<<1)     /* encode short option position in short options format string  */
+#define LONG_OPT(p)    (((p)<<1)+1) /* encode long option index in long options format array */
+#define DECODE_OPT(c)  ((c)>>1)     /* decode short or long option position */
+#define IS_LONG_OPT(c) ((c)&1)      /* check if long option was matched */
 
 /* get_opt() also may return next error codes: */
 #define OPT_UNKNOWN     -1 /* i->arg points to unknown option argument, check i->sopt - it may point to unknown short option character */
-#define OPT_BAD_BUNDLE  -2 /* i->sopt denotes short option that cannot be bundled, i->arg points to whole bundled options argument */
+#define OPT_BAD_BUNDLE  -2 /* i->sopt denotes short option that cannot be bundled, i->arg points to whole short options bundle argument */
 #define OPT_PARAMETER   -3 /* i->value points to non-NULL parameter value */
 #define OPT_DASH        -4 /* '-' (dash) option was parsed (this option usually used to specify stdin/stdout) */
-#define OPT_REST_PARAMS -5 /* all arguments starting with i->arg and until i->args_end - are parameters */
+#define OPT_REST_PARAMS -5 /* after '--' option, all rest arguments starting with i->arg and until i->args_end - are parameters */
 
 /* Notes:
 
@@ -83,8 +83,8 @@ struct opt_info {
   4) get_opt() accepts short options as '\0'-terminated C-string, formatted as follows:
       first symbol - option name, usually a letter or decimal digit, except '-' (dash),
       second symbol - option type (optional):
-       copy of first symbol denotes that option expects a value (like "-oval" or "-o val", but value may be not provided),
-       '-' (dash) denotes that option is a first letter of long option (like "-myopt" or "-myopt=val"),
+       copy of the first symbol denotes that option expects a value (like "-oval" or "-o val", but value may be not provided),
+       '-' (dash) denotes that option is a first letter of long option started with a dash (like "-myopt" or "-myopt=val"),
        other character means that option has no type, this character is a name of another option,
      example of short options string: "aabbccde-f"
 
@@ -100,7 +100,7 @@ struct opt_info {
 
 #if 0
 /* example */
-int main(int argc, char *argv[])
+int main1(int argc, char *argv[])
 {
 	static const char short_opts[] = "aacb-";
 	static const char *const long_opts[] = {"=file","beta",NULL};
@@ -108,33 +108,24 @@ int main(int argc, char *argv[])
 	opt_info_init(&i, argc, argv);
 	while (i.arg < i.args_end) {
 		switch (get_opt(&i, short_opts, long_opts)) {
-			case SHORT_OPT(0): /* short option 'a' */
-				if (i.value)
-					printf("'a' has value: %s\n", i.value);
-				else
-					printf("no value provided for 'a'\n");
+			case SHORT_OPT(0): /* short option 'a', may be specified with a value */
+				printf("'a' has value: %s\n", i.value ? i.value : "<null>");
 				break;
 			case SHORT_OPT(2): /* short option 'c' */
 				printf("option 'c'\n");
 				break;
-			case LONG_OPT(0): /* long option "file" */
-				if (i.value)
-					printf("'file' has value: %s\n", i.value);
-				else
-					printf("no value provided for 'file'\n");
+			case LONG_OPT(0): /* long option "file", may be specified with a value */
+				printf("'file' has value: %s\n", i.value ? i.value : "<null>");
 				break;
-			case LONG_OPT(1): /* long option "beta" */
-				if (i.value)
-					printf("not expecting a value for option 'beta': %s\n", i.value);
-				else
-					printf("option 'beta'\n");
+			case LONG_OPT(1): /* long option "beta", not expecting a value, but one may be specified */
+				printf("option 'beta' has value: '%s'\n", i.value ? i.value : "<null>");
 				break;
 			case OPT_UNKNOWN:
 				if (i.sopt)
 					printf("unknown short option '%c' in the bundle: '%s'\n", *i.sopt, *i.arg);
 				else
 					printf("unknown option: '%s'\n", *i.arg);
-				i.arg++; /* skip unknown option */
+				i.arg++; /* skip unknown option (whole bundle) */
 				i.sopt = NULL; /* reset current bundle */
 				break;
 			case OPT_BAD_BUNDLE:
