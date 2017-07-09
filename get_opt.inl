@@ -100,7 +100,7 @@ struct opt_info {
 
 #if 0
 /* example */
-int main1(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 	static const char short_opts[] = "aacb-";
 	static const char *const long_opts[] = {"=file","beta",NULL};
