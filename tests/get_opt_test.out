@@ -1,33 +1,43 @@
 parameter: 1
-unknown option: --help
+g:<null>
+short option 'a' cannot be bundled: '-gaf'
+unknown option: '--help'
 parameter: 3
 file:2
-b:3
+unknown option: '-b3'
 level:4
-c:5
+l:5
 d:6
 debug:7
-e:<null>
+o:<null>
 parameter: 8
-e:r
+v:<null>
+unknown short option 'r' in the bundle: '-vr'
 output:9
 f:g
-f:<null>
-parameter: g
+f:g
 verbose:<null>
 parameter: 1
 verbose:4
 g:<null>
 parameter: 3
-g:1
-unknown option: -9
--:<null>
+g:<null>
+unknown short option '1' in the bundle: '-g1'
+unknown option: '-9'
+dash option: '-'
 trace:<null>
 trace:<null>
 parameter: q
 trace:v
-h:<null>
+unknown option: '-t'
+unknown option: '-tra'
+trace:<null>
+unknown option: '-h'
 parameter: 6
+o:<null>
+g:<null>
+v:<null>
+short option '-' cannot be bundled: '-ogv-'
 parameter: 4
 parameter: -b
 parameter: --y

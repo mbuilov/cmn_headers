@@ -13,53 +13,99 @@
 
 int main(int argc, char *argv[])
 {
-	static const char short_opts[] = "a:  b:c:  d:e f g - h ";
-	static const char *const long_opts[] = {"","","=file","=level","","=debug","=output","verbose","","trace",NULL};
+	static const char short_opts[] =
+#define SHORT_OPT_A SHORT_OPT(0)
+		"aa"
+#define SHORT_OPT_F SHORT_OPT(2)
+		"ff"
+#define SHORT_OPT_L SHORT_OPT(4)
+		"ll"
+#define SHORT_OPT_D SHORT_OPT(6)
+		"dd"
+#define SHORT_OPT_O SHORT_OPT(8)
+		"o"
+#define SHORT_OPT_V SHORT_OPT(9)
+		"v"
+#define SHORT_OPT_G SHORT_OPT(10)
+		"g"
+		"t-"
+	;
+	static const char *const long_opts[]= {
+#define LONG_OPT_FILE    LONG_OPT(0)
+		"=file",
+#define LONG_OPT_LEVEL   LONG_OPT(1)
+		"=level",
+#define LONG_OPT_DEBUG   LONG_OPT(2)
+		"=debug",
+#define LONG_OPT_OUTPUT  LONG_OPT(3)
+		"=output",
+#define LONG_OPT_VERBOSE LONG_OPT(4)
+		"verbose",
+#define LONG_OPT_TRACE   LONG_OPT(5)
+		"trace",
+		NULL
+	};
 	struct opt_info i;
-	i.arg       = &argv[1];
-	i.args_end  = &argv[argc];
-	i.opts      = short_opts;
-	i.long_opts = long_opts;
+	opt_info_init(&i, argc, argv);
 	while (i.arg < i.args_end) {
-		switch (get_opt(&i)) {
-			case 0:
+		switch (get_opt(&i, short_opts, long_opts)) {
+			case SHORT_OPT_A:
 				printf("a:%s\n", i.value ? i.value : "<null>");
 				break;
-			case 1:
-				fprintf(stderr, "unexpected option number 1\n");
-				return 1;
-			case 2:
-				printf("%s:%s\n", is_long_opt_matched(i.arg) ? "file" : "b", i.value ? i.value : "<null>");
+			case SHORT_OPT_F:
+				printf("f:%s\n", i.value ? i.value : "<null>");
 				break;
-			case 3:
-				printf("%s:%s\n", is_long_opt_matched(i.arg) ? "level" : "c", i.value ? i.value : "<null>");
+			case SHORT_OPT_L:
+				printf("l:%s\n", i.value ? i.value : "<null>");
 				break;
-			case 4:
-				fprintf(stderr, "unexpected option number 4\n");
-				return 1;
-			case 5:
-				printf("%s:%s\n", is_long_opt_matched(i.arg) ? "debug" : "d", i.value ? i.value : "<null>");
+			case SHORT_OPT_D:
+				printf("d:%s\n", i.value ? i.value : "<null>");
 				break;
-			case 6:
-				printf("%s:%s\n", is_long_opt_matched(i.arg) ? "output" : "e", i.value ? i.value : "<null>");
+			case SHORT_OPT_O:
+				printf("o:%s\n", i.value ? i.value : "<null>");
 				break;
-			case 7:
-				printf("%s:%s\n", is_long_opt_matched(i.arg) ? "verbose" : "f", i.value ? i.value : "<null>");
+			case SHORT_OPT_V:
+				printf("v:%s\n", i.value ? i.value : "<null>");
 				break;
-			case 8:
+			case SHORT_OPT_G:
 				printf("g:%s\n", i.value ? i.value : "<null>");
 				break;
-			case 9:
-				printf("%s:%s\n", is_long_opt_matched(i.arg) ? "trace" : "-", i.value ? i.value : "<null>");
+			case LONG_OPT_FILE:
+				printf("file:%s\n", i.value ? i.value : "<null>");
 				break;
-			case 10:
-				printf("h:%s\n", i.value ? i.value : "<null>");
+			case LONG_OPT_LEVEL:
+				printf("level:%s\n", i.value ? i.value : "<null>");
+				break;
+			case LONG_OPT_DEBUG:
+				printf("debug:%s\n", i.value ? i.value : "<null>");
+				break;
+			case LONG_OPT_OUTPUT:
+				printf("output:%s\n", i.value ? i.value : "<null>");
+				break;
+			case LONG_OPT_VERBOSE:
+				printf("verbose:%s\n", i.value ? i.value : "<null>");
+				break;
+			case LONG_OPT_TRACE:
+				printf("trace:%s\n", i.value ? i.value : "<null>");
 				break;
 			case OPT_UNKNOWN:
-				printf("unknown option: %s\n", *i.arg++);
+				if (i.sopt)
+					printf("unknown short option '%c' in the bundle: '%s'\n", *i.sopt, *i.arg);
+				else
+					printf("unknown option: '%s'\n", *i.arg);
+				i.arg++; /* skip unknown option */
+				i.sopt = NULL;
+				break;
+			case OPT_BAD_BUNDLE:
+				printf("short option '%c' cannot be bundled: '%s'\n", *i.sopt, *i.arg);
+				i.arg++; /* skip bad option */
+				i.sopt = NULL;
 				break;
 			case OPT_PARAMETER:
 				printf("parameter: %s\n", i.value);
+				break;
+			case OPT_DASH:
+				printf("dash option: '-'\n");
 				break;
 			case OPT_REST_PARAMS:
 				do {
