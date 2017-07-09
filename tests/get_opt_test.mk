@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------------
-# Makefile of program options parsing test
+# Makefile of program options and parameters parsing test
 # Copyright (C) 2012-2017 Michael M. Builov, https://github.com/mbuilov/cmn_headers
 # Licensed under Apache License v2.0, see LICENSE.TXT
 #----------------------------------------------------------------------------------
