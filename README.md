@@ -40,6 +40,7 @@ Swap byte order:
 
 Parse command line options:
 - [get_opts](#parse-command-line-options)
+- [get_opt](#parse-command-line-options-and-parameters)
 
 ----------------------------------------
 
@@ -432,3 +433,144 @@ int main(int argc, char *argv[])
 ```
 
 *Declared in:* [`get_opts.inl`](/get_opts.inl)
+
+#### Parse command line options and parameters
+`get_opt()` function recognizes 4 types of options:
+1. short options with or without value (like `-h` for help or `-f file` or `-ffile` to specify a file)
+2. long options with or without value (like `--help` or `--file file` or `--file=file`)
+3. long options started with one dash (like `-help` or `-file file` or `-file=file`)
+4. dash or double-dash options (`-` or `--` alone)
+
+Multiple short options that do not require a value may be bundled together: `-abc` is equivalent to `-a -b -c`.
+Dash option `-` usually used to specify `stdin` or `stdout` streams.
+Double-dash option `--` denotes end of options, all arguments after it - are parameters.
+
+`get_opt()` uses next structure to hold state of options parsing:
+```C
+struct opt_info {
+	char *const *arg;      /* in/out: current argument               */
+	char *const *args_end; /* in:     end of program arguments array */
+	char *value;           /* out:    option value or parameter      */
+	char *sopt;            /* in/out: next short option in a bundle  */
+};
+```
+
+`struct opt_info` must be initialized via next function prior passing it into `get_opt()`:
+```C
+void opt_info_init(
+	struct opt_info *i,
+	int argc,
+	char *const argv[]
+);
+```
+Parameters:
+- `i`    - structure to initialize
+- `argc` - number of program arguments, as passed to `int main(int argc, char *argv[])`
+- `argv` - program arguments array, as passed to `int main(int argc, char *argv[])`
+
+Function for parsing command-line options and parameters:
+```C
+int get_opt(
+	struct opt_info *i,
+	const char short_opts[],
+	const char *const long_opts[]
+);
+```
+Parameters:
+- `i`          - structure that describes state of options parsing, must be initialized via `opt_info_init()`
+- `short_opts` - `'\0'`-terminated short options format string, may be `NULL`
+- `long_opts`  - `NULL`-terminated array of long options names, may be `NULL`
+
+_Note_: `get_opt()` expects that `i->arg < i->arg_end`, caller must check this prior the call.
+
+_Format of `short_opts` string:_
+* first symbol - option name, any character, usually a letter or decimal digit, except `'-'` (dash)
+* second symbol - option type or another short option name, depending on the value:
+  - copy of the first symbol denotes that option expects a value (like `-f file` or `-ffile`),
+  - `'-'` (dash) denotes that option is a first letter of long option started with one dash (like `-myopt` or `-myopt=val`),
+  - other character means that option has no type, this character is a name of another option.
+
+Example of short options string: `"aabbccde-f"`.
+
+_Format of `long_opts` array:_
+* each name is a (non-empty) `'\0'`-terminated C-string,
+* name must not contain a `'='` character, except at the beginning, where it denotes that the option expects a value,
+
+Example of long options array: `{"=file","=level","=debug","=output","verbose","trace",NULL}`
+
+Macros for encoding and decoding parsed options positions, returned by `get_opt()`:
+```C
+SHORT_OPT(pos)    /* encode short option position in short options format string  */
+LONG_OPT(idx)     /* encode long option index in long options format array */
+DECODE_OPT(code)  /* decode short or long option position */
+IS_LONG_OPT(code) /* check if long option was matched */
+```
+
+**Returns:**
+* `>=0`             - matched option position in `short_opts` string or `long_opts` array, encoded correspondingly via `SHORT_OPT` or `LONG_OPT` macros
+* `OPT_UNKNOWN`     - `i->arg` points to unknown option argument (may be bundle), `i->sopt`, if not `NULL`, points to unknown short option character in short options bundle
+* `OPT_BAD_BUNDLE`  - `i->sopt` denotes short option that cannot be bundled, `i->arg` points to whole short options bundle argument
+* `OPT_PARAMETER`   - `i->value` points to non-`NULL` parameter value
+* `OPT_DASH`        - `-` (dash) option was parsed (this option usually used to specify `stdin`/`stdout`)
+* `OPT_REST_PARAMS` - after `--`, all rest arguments starting with `i->arg` and until `i->args_end` - are parameters
+
+_Notes_:
+* a non-`NULL` value may be parsed for a long option that do not expects a value, if a value was provided together with the option, for example: `--option=value`
+* a `NULL` value may be parsed for an option that expects some value - if no value was provided for the option in the command line
+
+*Example:*
+```C
+int main(int argc, char *argv[])
+{
+	static const char short_opts[] = "aacb-";
+	static const char *const long_opts[] = {"=file","beta",NULL};
+	struct opt_info i;
+	opt_info_init(&i, argc, argv);
+	while (i.arg < i.args_end) {
+		switch (get_opt(&i, short_opts, long_opts)) {
+			case SHORT_OPT(0): /* short option 'a', may be specified with a value */
+				printf("'a' has value: %s\n", i.value ? i.value : "<null>");
+				break;
+			case SHORT_OPT(2): /* short option 'c' */
+				printf("option 'c'\n");
+				break;
+			case LONG_OPT(0): /* long option "file", may be specified with a value */
+				printf("'file' has value: %s\n", i.value ? i.value : "<null>");
+				break;
+			case LONG_OPT(1): /* long option "beta", not expecting a value, but one may be specified */
+				printf("option 'beta' has value: '%s'\n", i.value ? i.value : "<null>");
+				break;
+			case OPT_UNKNOWN:
+				if (i.sopt)
+					printf("unknown short option '%c' in the bundle: '%s'\n", *i.sopt, *i.arg);
+				else
+					printf("unknown option: '%s'\n", *i.arg);
+				i.arg++; /* skip unknown option (whole bundle) */
+				i.sopt = NULL; /* reset current bundle */
+				break;
+			case OPT_BAD_BUNDLE:
+				printf("short option '%c' cannot be bundled: '%s'\n", *i.sopt, *i.arg);
+				i.arg++; /* skip bad bundle */
+				i.sopt = NULL; /* reset current bundle */
+				break;
+			case OPT_PARAMETER:
+				printf("parameter: %s\n", i.value);
+				break;
+			case OPT_DASH:
+				printf("dash option: '-'\n");
+				break;
+			case OPT_REST_PARAMS:
+				do {
+					printf("parameter: %s\n", *i.arg++);
+				} while (i.arg != i.args_end);
+				break;
+			default:
+				fprintf(stderr, "assert!\n");
+				return 1;
+		}
+	}
+	return 0;
+}
+```
+
+*Declared in:* [`get_opt.inl`](/get_opt.inl)
