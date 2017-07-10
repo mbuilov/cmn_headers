@@ -7,8 +7,8 @@ Common C/C++ definitions in header files
 
 ## Installing
 
-- for UNIX-like OS, run install.sh
-- for WINDOWS, use install.bat
+- for UNIX-like OS, run [install.sh](/install.sh)
+- for WINDOWS, use [install.bat](/install.bat)
 
 ## Api documentation
 
@@ -182,11 +182,11 @@ Parameters:
 
 **Returns:** pointer to given type
 
-`CAST()` protects from casting const pointer to non-const one, this macro should trigger compilation error/warning if `ptr` is const
+`CAST()` allows casting only non-const pointers, for a const pointer this macro should trigger compilation error or warning.
 
 _Note_: Some compilers may not trigger compilation error or warning on invalid usage of `CAST()` macro.
 
-_Note_: To cast constant pointers - use [`CAST_CONSTANT()`](#cast-pointer-to-constant) or [`CONST_CAST()`](#remove-pointer-constness)
+_Note_: To cast **const** pointers use [`CAST_CONSTANT()`](#cast-pointer-to-constant) or [`CONST_CAST()`](#remove-pointer-constness)
 
 *Example:*
 ```C
@@ -213,11 +213,11 @@ Parameters:
 
 **Returns:** const pointer to given type
 
-`CAST_CONSTANT()` protects from casting const pointer to non-const one, this macro should trigger compilation error/warning if `type` is not const
+`CAST_CONSTANT()` allows casting only to const type, assuming that `ptr` points to some constant. For a non-const type this macro should trigger compilation error or warning.
 
 _Note_: Some compilers may not trigger compilation error or warning on invalid usage of `CAST_CONSTANT()` macro.
 
-_Note_: To cast const pointer to non-const one - use [`CONST_CAST()`](#remove-pointer-constness)
+_Note_: To cast **const** pointer to **non-const** one without changing pointer type (remove _constness_) use [`CONST_CAST()`](#remove-pointer-constness)
 
 *Example:*
 ```C
@@ -239,12 +239,12 @@ void foo(struct P *p)
 CONST_CAST(type, ptr)
 ```
 Parameters:
-- `type` - non-const type of the pointer
-- `ptr`  - const pointer to cast
+- `type` - **non-const** type of the pointer
+- `ptr`  - **const** pointer to cast
 
 **Returns:** non-const pointer to the same type
 
-`CONST_CAST()` removes pointer _constness_ without changing pointer type, this macro should trigger compilation error/warning if `type` is not the type of the pointer.
+`CONST_CAST()` removes pointer _constness_ without changing pointer type, this macro should trigger compilation error or warning if `type` is not the type of the pointer.
 
 _Note_: Some compilers may not trigger compilation error or warning on invalid usage of `CONST_CAST()` macro.
 
@@ -274,7 +274,7 @@ Parameters:
 
 **Returns:** non-`NULL` pointer to container
 
-_Note_: returned pointer generally points to memory at some offset before `ptr`.
+_Note_: returned pointer points to memory at some, possible zero, offset above `ptr`.
 
 *Example:*
 ```C
@@ -435,32 +435,34 @@ int main(int argc, char *argv[])
 *Declared in:* [`get_opts.inl`](/get_opts.inl)
 
 #### Parse command line options and parameters
-`get_opt()` function recognizes 4 types of options:
+Parsing is done by `get_opt()` function, which recognizes 4 types of options:
 1. short options with or without value (like `-h` for help or `-f file` or `-ffile` to specify a file)
 2. long options with or without value (like `--help` or `--file file` or `--file=file`)
 3. long options started with one dash (like `-help` or `-file file` or `-file=file`)
 4. dash or double-dash options (`-` or `--` alone)
 
 Multiple short options that do not require a value may be bundled together: `-abc` is equivalent to `-a -b -c`.
+
 Dash option `-` usually used to specify `stdin` or `stdout` streams.
+
 Double-dash option `--` denotes end of options, all arguments after it - are parameters.
 
-`get_opt()` uses next structure to hold state of options parsing:
+`get_opt()` function uses next structure to hold state of options parsing:
 ```C
 struct opt_info {
-	char *const *arg;      /* in/out: current argument               */
-	char *const *args_end; /* in:     end of program arguments array */
-	char *value;           /* out:    option value or parameter      */
-	char *sopt;            /* in/out: next short option in a bundle  */
+	char *const *arg;       /* in/out: current argument               */
+	char *const *args_end;  /* in:     end of program arguments array */
+	char *value;            /* out:    option value or parameter      */
+	char *sopt;             /* in/out: next short option in a bundle  */
 };
 ```
 
-`struct opt_info` must be initialized via next function prior passing it into `get_opt()`:
+`struct opt_info` must be initialized by next function prior passing it into `get_opt()`:
 ```C
 void opt_info_init(
-	struct opt_info *i,
-	int argc,
-	char *const argv[]
+	struct opt_info *i,  /* out, != NULL */
+	int argc,            /* in,  > 0     */
+	char *const argv[]   /* in,  != NULL */
 );
 ```
 Parameters:
@@ -468,54 +470,58 @@ Parameters:
 - `argc` - number of program arguments, as passed to `int main(int argc, char *argv[])`
 - `argv` - program arguments array, as passed to `int main(int argc, char *argv[])`
 
-Function for parsing command-line options and parameters:
+Main function for parsing command-line options and parameters:
 ```C
 int get_opt(
-	struct opt_info *i,
-	const char short_opts[],
-	const char *const long_opts[]
+	struct opt_info *i,            /* in/out, != NULL  */
+	const char short_opts[],       /* in,     == NULL? */
+	const char *const long_opts[]  /* in,     == NULL? */
 );
 ```
 Parameters:
-- `i`          - structure that describes state of options parsing, must be initialized via `opt_info_init()`
-- `short_opts` - `'\0'`-terminated short options format string, may be `NULL`
-- `long_opts`  - `NULL`-terminated array of long options names, may be `NULL`
+- `i`          - structure that describes state of options parsing, must be initialized by `opt_info_init()`
+- `short_opts` - `'\0'`-terminated short options format string
+- `long_opts`  - `NULL`-terminated array of long options names
 
-_Note_: `get_opt()` expects that `i->arg < i->arg_end`, caller must check this prior the call.
+_Note_: `get_opt()` expects that `i->arg < i->args_end`, caller must check this prior the call.
 
-_Format of `short_opts` string:_
-* first symbol - option name, any character, usually a letter or decimal digit, except `'-'` (dash)
+__Format of `short_opts` string:__
+* first symbol - option name: any character, usually a letter or decimal digit, except `'-'` (dash)
 * second symbol - option type or another short option name, depending on the value:
-  - copy of the first symbol denotes that option expects a value (like `-f file` or `-ffile`),
-  - `'-'` (dash) denotes that option is a first letter of long option started with one dash (like `-myopt` or `-myopt=val`),
-  - other character means that option has no type, this character is a name of another option.
+  - copy of the first symbol denotes that option expects a value (like `-f file` or `-ffile`)
+  - `'-'` (dash) denotes that option is a first letter of long option started with one dash (like `-myopt` or `-myopt=val`)
+  - other character means that option has no type, this character is a name of another option
 
-Example of short options string: `"aabbccde-f"`.
+Example of short options format string: `"aabbccde-f"`
 
-_Format of `long_opts` array:_
-* each name is a (non-empty) `'\0'`-terminated C-string,
-* name must not contain a `'='` character, except at the beginning, where it denotes that the option expects a value,
+(options `a`,`b`,`c` should be passed with a value, option `d` do not expects a value, option `e` is the first letter of long option, `f` - also do not expects a value)
 
-Example of long options array: `{"=file","=level","=debug","=output","verbose","trace",NULL}`
+__Format of `long_opts` array:__
+* each name is a (non-empty) `'\0'`-terminated C-string
+* name must not contain a `'='` character, except at the beginning, where it denotes that the option expects a value
+
+Example of long options names array: `{"=file","=output","verbose","trace",NULL}`
+
+(options `file` and `output` should be passed with a value, options `verbose` and `trace` do not expect a value)
 
 Macros for encoding and decoding parsed options positions, returned by `get_opt()`:
 ```C
 SHORT_OPT(pos)    /* encode short option position in short options format string  */
-LONG_OPT(idx)     /* encode long option index in long options format array */
+LONG_OPT(idx)     /* encode long option index in long options names array */
 DECODE_OPT(code)  /* decode short or long option position */
-IS_LONG_OPT(code) /* check if long option was matched */
+IS_LONG_OPT(code) /* check if long option has been matched */
 ```
 
 **Returns:**
 * `>=0`             - matched option position in `short_opts` string or `long_opts` array, encoded correspondingly via `SHORT_OPT` or `LONG_OPT` macros
 * `OPT_UNKNOWN`     - `i->arg` points to unknown option argument (may be bundle), `i->sopt`, if not `NULL`, points to unknown short option character in short options bundle
 * `OPT_BAD_BUNDLE`  - `i->sopt` denotes short option that cannot be bundled, `i->arg` points to whole short options bundle argument
-* `OPT_PARAMETER`   - `i->value` points to non-`NULL` parameter value
+* `OPT_PARAMETER`   - `i->value` points to non-`NULL` parameter
 * `OPT_DASH`        - `-` (dash) option was parsed (this option usually used to specify `stdin`/`stdout`)
 * `OPT_REST_PARAMS` - after `--`, all rest arguments starting with `i->arg` and until `i->args_end` - are parameters
 
 _Notes_:
-* a non-`NULL` value may be parsed for a long option that do not expects a value, if a value was provided together with the option, for example: `--option=value`
+* a non-`NULL` value may be parsed for a long option that do not expects one, if a value was provided together with the option (i.g. `--option=value`)
 * a `NULL` value may be parsed for an option that expects some value - if no value was provided for the option in the command line
 
 *Example:*
