@@ -67,18 +67,18 @@ struct opt_info {
   3) a NULL value may be parsed for an option that expects some value
      - if no value was provided for the option in the command line,
 
-  4) get_opt() accepts short options as '\0'-terminated C-string, formatted as follows:
-     . first symbol - option name, usually a letter or decimal digit, except '-' (dash),
+  4) get_opt() accepts *short* options as '\0'-terminated C-string in the following format:
+     . first symbol  - option name, usually a letter or decimal digit, except '-' (dash),
      . second symbol - option type (optional):
-        1. copy of the first symbol denotes that option expects a value, like "-oval" or "-o val" (but value may be not provided);
-        2. '-' (dash) denotes that option is a first letter of long option started with a dash, like "-myopt" or "-myopt=val",
-           appropriate long option is then looked up in long options array;
-        3. other character means that option has no type, this character is a name of another short option.
+       a) copy of the first symbol denotes that option expects a value, like "-oval" or "-o val" (but value may be not provided);
+       b) '-' (dash) denotes that option is the first letter of a long option started with one dash, like "-myopt" or "-myopt=val",
+          appropriate long option is then looked up in long options array;
+       c) any other character means that option has no type, this character is the name of another short option.
      example of short options string: "aabbccde-f"
 
-  5) get_opt() accepts long options as NULL-terminated array of options names, in the following format:
+  5) get_opt() accepts *long* options as NULL-terminated array of options names, in the following format:
      . each name is a (non-empty) '\0'-terminated C-string,
-     . name must not contain a '=' character, except at the beginning, where it denotes that the option expects a value,
+     . a name must not contain a '=' character, except at the beginning, where it denotes that the option expects a value,
      example of long options array: {"=file","=level","=debug","=output","verbose","trace",NULL}
 
   6) get_opt() recognizes next special options:
@@ -86,13 +86,13 @@ struct opt_info {
      - empty long option "--" denotes end of options, all arguments after it - parameters, get_opt() returns OPT_REST_PARAMS.
 */
 
-/* get_opt() returns next error codes (all negative): */
+/* get_opt() returns next error codes (negative values): */
 
 #define OPT_UNKNOWN     -1 /* i->arg points to unknown option argument,
                               if i->sopt != NULL, then it points to unknown short option character in short options bundle */
 
-#define OPT_BAD_BUNDLE  -2 /* i->sopt denotes short option that cannot be bundled,
-                              i->arg points to whole short options bundle argument */
+#define OPT_BAD_BUNDLE  -2 /* i->arg points to whole short options bundle argument,
+                              i->sopt denotes short option that cannot be bundled */
 
 #define OPT_PARAMETER   -3 /* i->value points to non-NULL parameter value */
 
