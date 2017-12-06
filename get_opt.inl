@@ -2,7 +2,7 @@
 #define GET_OPT_INL_INCLUDED
 
 /**********************************************************************************
-* Program options parsing
+* Program options and parameters parsing
 * Copyright (C) 2012-2017 Michael M. Builov, https://github.com/mbuilov/cmn_headers
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
@@ -19,28 +19,19 @@
 #define GET_OPT_STRCMP(s1,s2) strcmp(s1,s2)
 #endif
 
-/*
+/* this file defines two inline functions:
 
-1) before calling get_opt(), first initialize opt_info structure (declared below):
+   1) void opt_info_init(struct opt_info *i, int argc, char *const argv[]);
+      - used to initialize options parsing state structure 'opt_info' (declared below)
 
-void opt_info_init(
-	struct opt_info *i,
-	int argc,
-	char *const argv[]);
-
-2) then may use get_opt() to get next option value or parameter specified in a command line:
-
-int get_opt(
-	struct opt_info *i,
-	const char short_opts[],
-	const char *const long_opts[]);
-
+   2) int get_opt(struct opt_info *i, const char short_opts[], const char *const long_opts[]);
+      - get next option value or parameter specified in the command line
 */
 
 /* structure that describes state of options parsing */
 struct opt_info {
 
-	/* in/out: current argument,
+	/* in/out: next argument to check,
 	   initially should be set to &argv[1] (argv[0] is a program name, so skip it) */
 	char *const *arg;
 
@@ -49,50 +40,55 @@ struct opt_info {
 	char *const *args_end;
 
 	/* out: option value or parameter,
-	  as option value may be NULL - if no value was provided for an option */
+	  as option value may be NULL - if no value was provided for the option */
 	char *value;
 
-	/* in/out: next short option in a bundle,
+	/* in/out: next short option in the bundle,
 	  used when multiple short options are bundled together, e.g.: -abc */
 	char *sopt;
 };
 
-/* Notes:
+/*=========================== Notes: ============================================================================================
+|
+| 1) get_opt(i) expects that i->arg < i->args_end
+|
+| 2) a non-NULL value may be parsed for a long option that do not expects a value,
+|    if a value was provided together with the option, for example: --option=value
+|
+| 3) a NULL value may be parsed for an option that expects some value
+|    - if no value was provided for the option in the command line, e.g.: --option --other
+|
+| 4) get_opt() accepts *short* options as '\0'-terminated C-string in the following format:
+|    . first symbol  - option name, usually a letter or decimal digit, except '-' (dash),
+|    . second symbol - option type (optional):
+|      a) copy of the first symbol denotes that the option expects a value, like "-oval" or "-o val";
+|      b) '-' (dash) denotes that the option is the first letter of a long option started with one dash,
+|        for example,  "-myopt" or "-myopt=val", appropriate long option is then looked up in the long options array;
+|      c) any other character means that option has no type, this character is the name of another short option.
+|
+|    Example of short options string: "aabbccde-f"
+|
+| 5) get_opt() accepts *long* options as NULL-terminated array of options names, in the following format:
+|    . each name is a non-empty '\0'-terminated C-string,
+|    . the name must not contain a '=' character, except at the beginning, where it denotes that the option expects a value.
+|
+|    Example of long options array: {"=file","=level","=debug","=output","verbose","trace",NULL}
+|
+| 6) get_opt() recognizes next special options:
+|    - empty short option "-" is a dash option, usually used to denote stdin/stdout, get_opt() returns OPT_DASH,
+|    - empty long option "--" denotes end of options, all arguments after it - parameters, get_opt() returns OPT_REST_PARAMS.
+|
+===============================================================================================================================*/
 
-  1) get_opt(i) expects that i->arg < i->args_end,
 
-  2) a non-NULL value may be parsed for a long option that do not expects a value,
-     if a value was provided together with the option, for example: --option=value
-
-  3) a NULL value may be parsed for an option that expects some value
-     - if no value was provided for the option in the command line,
-
-  4) get_opt() accepts *short* options as '\0'-terminated C-string in the following format:
-     . first symbol  - option name, usually a letter or decimal digit, except '-' (dash),
-     . second symbol - option type (optional):
-       a) copy of the first symbol denotes that option expects a value, like "-oval" or "-o val" (but value may be not provided);
-       b) '-' (dash) denotes that option is the first letter of a long option started with one dash, like "-myopt" or "-myopt=val",
-          appropriate long option is then looked up in long options array;
-       c) any other character means that option has no type, this character is the name of another short option.
-     example of short options string: "aabbccde-f"
-
-  5) get_opt() accepts *long* options as NULL-terminated array of options names, in the following format:
-     . each name is a (non-empty) '\0'-terminated C-string,
-     . a name must not contain a '=' character, except at the beginning, where it denotes that the option expects a value,
-     example of long options array: {"=file","=level","=debug","=output","verbose","trace",NULL}
-
-  6) get_opt() recognizes next special options:
-     - empty short option "-" is a dash option, usually used to denote stdin/stdout, get_opt() returns OPT_DASH,
-     - empty long option "--" denotes end of options, all arguments after it - parameters, get_opt() returns OPT_REST_PARAMS.
-*/
-
-/* get_opt() returns next error codes (negative values): */
+/* get_opt(i) returns next error codes (negative values): */
 
 #define OPT_UNKNOWN     -1 /* i->arg points to unknown option argument,
-                              if i->sopt != NULL, then it points to unknown short option character in short options bundle */
+                              if i->sopt != NULL, then it points to unknown short option character in the short options bundle */
 
-#define OPT_BAD_BUNDLE  -2 /* i->arg points to whole short options bundle argument,
-                              i->sopt denotes short option that cannot be bundled */
+#define OPT_BAD_BUNDLE  -2 /* i->arg points to the whole short options bundle argument,
+                              i->sopt denotes short option that cannot be bundled:
+                              either option expects a value or option is the first letter of a long option started with one dash */
 
 #define OPT_PARAMETER   -3 /* i->value points to non-NULL parameter value */
 
@@ -100,74 +96,161 @@ struct opt_info {
 
 #define OPT_REST_PARAMS -5 /* '--' option was parsed, all rest arguments starting with i->arg and until i->args_end - parameters */
 
-/* normally, get_opt() returns matched option position, encoded as follows: */
+
+/* else, get_opt() returns matched option position (non-negative), encoded as follows: */
 #define SHORT_OPT(p)   ((p)<<1)     /* encode short option position in short options format string  */
-#define LONG_OPT(p)    (((p)<<1)+1) /* encode long option index in long options format array */
+#define LONG_OPT(p)    (((p)<<1)+1) /* encode long option index in long options names array */
+
+/* helper macros for processing encoded value returned by the get_opt() */
 #define DECODE_OPT(c)  ((c)>>1)     /* decode short or long option position */
 #define IS_LONG_OPT(c) ((c)&1)      /* check if long option was matched */
 
-#if 1
+
+/*--------------------------------------------------------------------------------------------------------
+  note: short options may be defined by the following method:
+
+#define SHORT_OPTION_a      SHORT_OPT_MODIFIER(SHORT_OPT_NULL, "aa")
+#define SHORT_OPTION_b      SHORT_OPT_MODIFIER(SHORT_OPTION_a, "b")
+#define DASH_LONG_OPTION_c  SHORT_OPT_MODIFIER(SHORT_OPTION_b, "c-")
+
+#define SHORT_OPT_NULL
+#define SHORT_OPT_MODIFIER  SHORT_OPT_DEFINER
+
+const char short_opts[] = DASH_LONG_OPTION_c;
+*/
+
+/* where SHORT_OPT_DEFINER - helper macro used to define short options format string: */
+#define SHORT_OPT_DEFINER(a,b) a b
+
+/* to make option define to return short option position in short options format string, use this:
+
+#undef  SHORT_OPT_NULL
+#undef  SHORT_OPT_MODIFIER
+
+#define SHORT_OPT_NULL      0
+#define SHORT_OPT_MODIFIER  SHORT_OPT_INDEXER
+*/
+
+/* where SHORT_OPT_INDEXER - helper macro used to obtain position of short option: */
+#define SHORT_OPT_INDEXER(a,b) (a+sizeof(b)-1)
+
+/*--------------------------------------------------------------------------------------------------------
+  note: long options may be defined by the following method:
+
+#define LONG_OPTION_alpha   LONG_OPT_MODIFIER(LONG_OPT_NULL,     "alpha")
+#define LONG_OPTION_beta    LONG_OPT_MODIFIER(LONG_OPTION_alpha, "=beta")
+
+#define LONG_OPT_NULL       NULL
+#define LONG_OPT_MODIFIER   LONG_OPT_DEFINER
+
+const char *const long_opts[] = {LONG_OPTION_beta};
+*/
+
+/* where LONG_OPT_DEFINER - helper macro used to define long options names array: */
+#define LONG_OPT_DEFINER(a,b) b,a
+
+/* to make option define to return long option index in long options names array, use this:
+
+#undef  LONG_OPT_NULL
+#undef  LONG_OPT_MODIFIER
+
+#define LONG_OPT_NULL       LONG_OPT_END_IDX(long_opts)
+#define LONG_OPT_MODIFIER   LONG_OPT_INDEXER
+*/
+
+/* where LONG_OPT_END_IDX - defines index of last NULL entry in long options names array: */
+#define LONG_OPT_END_IDX(arr) (sizeof(arr)/sizeof(const char*)-1)
+
+/* and LONG_OPT_INDEXER - helper macro used to obtain index of long option: */
+#define LONG_OPT_INDEXER(a,b) (a-1)
+
+/*********************************************************************************************************/
+
+
+#if 0
 /* example */
 int main(int argc, char *argv[])
 {
-#define SHORT_OPT_NUM(opt) SHORT_OPT(sizeof(opt))
+	/* short options */
 
-#define SHORT_OPT_a "aa"
-#define SHORT_OPT_c SHORT_OPT_a "c"
-#define DASH_OPT_b  SHORT_OPT_c "b-"
+#define SHORT_OPTION_a      SHORT_OPT_MODIFIER(SHORT_OPT_NULL, "aa")
+#define SHORT_OPTION_b      SHORT_OPT_MODIFIER(SHORT_OPTION_a, "b")
+#define DASH_LONG_OPTION_c  SHORT_OPT_MODIFIER(SHORT_OPTION_b, "c-")
 
-#define LONG_OPT_NUM(opt) LONG_OPT(sizeof(opt))
+	static const char short_opts[] = DASH_LONG_OPTION_c;
 
-#define LONG_OPT_FILE "=file\0"
-#define LONG_OPT_BETA LONG_OPT_FILE "beta\0"
+#undef  SHORT_OPT_NULL
+#undef  SHORT_OPT_MODIFIER
 
-	static const char short_opts[] = SHORT_OPT_FINISH(DASH_OPT_b);
-	static const char *const long_opts[] = {LONG_OPT_BETA"\0"};
+#define SHORT_OPT_NULL      0
+#define SHORT_OPT_MODIFIER  SHORT_OPT_INDEXER
 
-	SHORT_OPT_NUM(SHORT_OPT_a):
-	SHORT_OPT_NUM(SHORT_OPT_c):
-	SHORT_OPT_NUM(DASH_OPT_b):
+	/* long options */
 
-	LONG_OPT_NUM(LONG_OPT_FILE):
-	LONG_OPT_NUM(LONG_OPT_BETA):
+#define LONG_OPTION_alpha   LONG_OPT_MODIFIER(LONG_OPT_NULL,     "alpha")
+#define LONG_OPTION_cetera  LONG_OPT_MODIFIER(LONG_OPTION_alpha, "=cetera")
 
+#define LONG_OPT_NULL       NULL
+#define LONG_OPT_MODIFIER   LONG_OPT_DEFINER
 
+	static const char *const long_opts[] = {LONG_OPTION_cetera};
 
+#undef  LONG_OPT_NULL
+#undef  LONG_OPT_MODIFIER
 
-	static const char short_opts[] = "aacb-";
-	static const char *const long_opts[] = {"=file","beta",NULL};
+#define LONG_OPT_NULL       LONG_OPT_END_IDX(long_opts)
+#define LONG_OPT_MODIFIER   LONG_OPT_INDEXER
+
 	struct opt_info i;
 	opt_info_init(&i, argc, argv);
+
 	while (i.arg < i.args_end) {
 		switch (get_opt(&i, short_opts, long_opts)) {
-			case 0: /* short option 'a' */
+			case SHORT_OPT(SHORT_OPTION_a):
+				/* short option 'a', may be with value: '-aval' or '-a val' */
 				if (i.value)
 					printf("'a' has value: %s\n", i.value);
 				else
 					printf("no value provided for 'a'\n");
 				break;
-			case 3: /* long option "file" */
-				if (i.value)
-					printf("'file' has value: %s\n", i.value);
-				else
-					printf("no value provided for 'file'\n");
+			case SHORT_OPT(SHORT_OPTION_b):
+				/* short option 'b', without a value, may be bundled: '-b' or '-bcdefg' */
+				if (i.value) {
+					fprintf(stderr, "assert: a value was parsed for short option 'b'!\n");
+					return 1;
+				}
+				printf("option 'b'\n");
 				break;
-			case 5: /* long option "beta" */
+			case SHORT_OPT(DASH_LONG_OPTION_c):
+				/* short option 'c' is the first letter of a long option started with one dash, cannot be returned */
+				fprintf(stderr, "assert: short option 'c' was parsed!\n");
+				return 1;
+			case LONG_OPT(LONG_OPTION_alpha):
+				/* long option "alpha", not expecting a value for it, but the value may be provided, e.g.: --alpha=value */
 				if (i.value)
-					printf("not expecting a value for option 'beta': %s\n", i.value);
+					printf("warning: not expecting a value for option 'alpha': %s\n", i.value);
 				else
-					printf("option 'beta'\n");
+					printf("option 'alpha'\n");
+				break;
+			case LONG_OPT(LONG_OPTION_cetera):
+				/* long option "cetera", expecting a value for it, but the value may not be provided, e.g.: --cetera --alpha */
+				if (i.value)
+					printf("'cetera' has value: %s\n", i.value);
+				else
+					printf("no value provided for 'cetera'\n");
 				break;
 			case OPT_UNKNOWN:
 				if (i.sopt)
 					printf("unknown short option '%c' in the bundle: '%s'\n", *i.sopt, *i.arg);
 				else
 					printf("unknown option: '%s'\n", *i.arg);
-				i.arg++; /* skip unknown option */
+				i.arg++;       /* skip unknown option */
+				i.sopt = NULL; /* and the rest of the bundle */
 				break;
 			case OPT_BAD_BUNDLE:
 				printf("short option '%c' cannot be bundled: '%s'\n", *i.sopt, *i.arg);
-				i.arg++; /* skip bad option */
+				i.arg++;       /* skip bad option */
+				i.sopt = NULL; /* and the rest of the bundle */
 				break;
 			case OPT_PARAMETER:
 				printf("parameter: %s\n", i.value);
@@ -181,7 +264,7 @@ int main(int argc, char *argv[])
 				} while (i.arg != i.args_end);
 				break;
 			default:
-				fprintf(stderr, "assert!\n");
+				fprintf(stderr, "assert: unexpected get_opt() return value!\n");
 				return 1;
 		}
 	}
@@ -206,7 +289,7 @@ static void opt_info_init(
 #endif
 	char *const argv[]
 ) {
-	i->arg = &argv[1];         /* skip program name */
+	i->arg = &argv[1];         /* skip program name at argv[0] */
 	i->args_end = &argv[argc];
 	i->sopt = NULL;
 	/*i->value = NULL;*/       /* should be accessed only after an option was successfully parsed */
@@ -227,7 +310,7 @@ static int get_opt(
 #endif
 	struct opt_info *i,
 #ifdef A_In_opt
-	A_In_opt
+	A_In_opt_z
 #endif
 	const char short_opts[]/*NULL?*/,
 #ifdef A_In_opt
@@ -237,7 +320,7 @@ static int get_opt(
 ) {
 	char *a = i->sopt;
 	if (a) {
-		/* next short option in a bundle, like "bc" in "-abc" */
+		/* next short option in the bundle, like "bc" in "-abc" */
 		if ('-' != *a) {
 			if (short_opts) {
 				const char *o = GET_OPT_STRCHR(short_opts, *a);
@@ -253,8 +336,12 @@ static int get_opt(
 					i->arg--;
 					return OPT_BAD_BUNDLE;
 				}
-				return (int)(o - short_opts);
 			}
+		}
+		else {
+			/* not expecting a '-' (dash) in short options bundle */
+			i->arg--;
+			return OPT_BAD_BUNDLE;
 		}
 	}
 	else {
@@ -275,7 +362,7 @@ static int get_opt(
 			a += 2; /* skip "--" */
 parse_long_option:
 			if (long_opts) {
-				char *v = strchr(a, '=');
+				char *v = GET_OPT_STRCHR(a, '=');
 				if (v)
 					*v = '\0'; /* temporary terminate option name */
 				{
@@ -293,17 +380,19 @@ parse_long_option:
 							else {
 								/* no value is passed, like "--help" */
 								if (n != *lo && i->arg != i->args_end) {
-									/* option expects a value */
+									/* option expects a value, try to get one */
 									a = *i->arg;
 									if ('-' != *a) {
 										i->arg++;
 										i->value = a; /* option value */
 									}
 									else
-										i->value = NULL; /* not expecting a value for the option or end of args */
+										i->value = NULL; /* no value provided: next argument is an another option */
 								}
-								return (int)(lo - long_opts)*2 + 1;
+								else
+									i->value = NULL; /* not expecting a value for the option or end of args */
 							}
+							return LONG_OPT((int)(lo - long_opts));
 						}
 					}
 				}
@@ -313,41 +402,38 @@ parse_long_option:
 		}
 		else if (short_opts) {
 			/* short option, like "-h" or "-ffile" */
-			const char *o = strchr(short_opts, a[1]);
+			const char *o = GET_OPT_STRCHR(short_opts, a[1]);
 			if (o) {
 				if ('-' == *++o) {
 					/* long option: "-myopt" */
 					a++; /* skip "-" */
 					goto parse_long_option;
 				}
-				if (a[2]) {
-					/* may be short option with a value or multiple short options bundled together: -abc */
-					a += 2; /* skip "-a" */
-					if ('\t' == o[1]) {
+				if (a[1] == *o) {
+					/* option expects a value, try to get one */
+					if (a[2]) {
 						/* "-ffile": set (non-empty) option value */
-						i->value = a;
+						i->value = a + 2; /* skip "-a" */
 					}
-					else {
-						i->sopt = a; /* next short option in a bundle: "bc" in "-abc" */
-						i->value = NULL; /* option do not expects a value */
-					}
-				}
-				else {
-					/* no value was passed, like "-h" */
-					if ('\t' == o[1] && i->arg != i->args_end) {
-						/* option wants a value */
+					else if (i->arg != i->args_end) {
 						a = *i->arg;
 						if ('-' != *a) {
 							i->arg++;
 							i->value = a; /* option value */
 						}
 						else
-							i->value = NULL; /* no value provided: next is an another option */
+							i->value = NULL; /* no value provided: next argument is an another option */
 					}
 					else
-						i->value = NULL; /* not expecting a value for the option or end of args */
+						i->value = NULL; /* end of args */
+					return SHORT_OPT((int)(o + 1 - short_opts));
 				}
-				return (int)(o - short_opts);
+				if (a[2]) {
+					/* multiple short options bundled together: -abc */
+					i->sopt = a + 2; /* next short option in the bundle: "bc" in "-abc" */
+				}
+				i->value = NULL; /* option do not expects a value */
+				return SHORT_OPT((int)(o - short_opts));
 			}
 		}
 	}
