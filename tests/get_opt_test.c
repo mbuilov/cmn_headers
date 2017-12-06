@@ -13,79 +13,86 @@
 
 int main(int argc, char *argv[])
 {
-	static const char short_opts[] =
-#define SHORT_OPT_A SHORT_OPT(0)
-		"aa"
-#define SHORT_OPT_F SHORT_OPT(2)
-		"ff"
-#define SHORT_OPT_L SHORT_OPT(4)
-		"ll"
-#define SHORT_OPT_D SHORT_OPT(6)
-		"dd"
-#define SHORT_OPT_O SHORT_OPT(8)
-		"o"
-#define SHORT_OPT_V SHORT_OPT(9)
-		"v"
-#define SHORT_OPT_G SHORT_OPT(10)
-		"g"
-		"t-"
-	;
-	static const char *const long_opts[]= {
-#define LONG_OPT_FILE    LONG_OPT(0)
-		"=file",
-#define LONG_OPT_LEVEL   LONG_OPT(1)
-		"=level",
-#define LONG_OPT_DEBUG   LONG_OPT(2)
-		"=debug",
-#define LONG_OPT_OUTPUT  LONG_OPT(3)
-		"=output",
-#define LONG_OPT_VERBOSE LONG_OPT(4)
-		"verbose",
-#define LONG_OPT_TRACE   LONG_OPT(5)
-		"trace",
-		NULL
-	};
+#define SHORT_OPTION_a      SHORT_OPT_MODIFIER(SHORT_OPT_NULL, "aa")
+#define SHORT_OPTION_f      SHORT_OPT_MODIFIER(SHORT_OPTION_a, "ff")
+#define SHORT_OPTION_l      SHORT_OPT_MODIFIER(SHORT_OPTION_f, "ll")
+#define SHORT_OPTION_d      SHORT_OPT_MODIFIER(SHORT_OPTION_l, "dd")
+#define SHORT_OPTION_o      SHORT_OPT_MODIFIER(SHORT_OPTION_d, "o")
+#define SHORT_OPTION_v      SHORT_OPT_MODIFIER(SHORT_OPTION_o, "v")
+#define SHORT_OPTION_g      SHORT_OPT_MODIFIER(SHORT_OPTION_v, "g")
+#define DASH_SHORT_OPTION_t SHORT_OPT_MODIFIER(SHORT_OPTION_g, "t-")
+
+#define SHORT_OPT_NULL
+#define SHORT_OPT_MODIFIER  SHORT_OPT_DEFINER
+
+	static const char short_opts[] = DASH_SHORT_OPTION_t;
+
+#define LONG_OPTION_file    LONG_OPT_MODIFIER(LONG_OPT_NULL,       "=file")
+#define LONG_OPTION_level   LONG_OPT_MODIFIER(LONG_OPTION_file,    "=level")
+#define LONG_OPTION_debug   LONG_OPT_MODIFIER(LONG_OPTION_level,   "=debug")
+#define LONG_OPTION_output  LONG_OPT_MODIFIER(LONG_OPTION_debug,   "=output")
+#define LONG_OPTION_verbose LONG_OPT_MODIFIER(LONG_OPTION_output,  "verbose")
+#define LONG_OPTION_trace   LONG_OPT_MODIFIER(LONG_OPTION_verbose, "trace")
+
+#define LONG_OPT_NULL       NULL
+#define LONG_OPT_MODIFIER   LONG_OPT_DEFINER
+
+	static const char *const long_opts[] = {LONG_OPTION_trace};
+
+#undef  SHORT_OPT_NULL
+#undef  SHORT_OPT_MODIFIER
+
+#define SHORT_OPT_NULL      0
+#define SHORT_OPT_MODIFIER  SHORT_OPT_INDEXER
+
+#undef  LONG_OPT_NULL
+#undef  LONG_OPT_MODIFIER
+
+#define LONG_OPT_NULL       LONG_OPT_END_IDX(long_opts)
+#define LONG_OPT_MODIFIER   LONG_OPT_INDEXER
+
 	struct opt_info i;
 	opt_info_init(&i, argc, argv);
+
 	while (i.arg < i.args_end) {
 		switch (get_opt(&i, short_opts, long_opts)) {
-			case SHORT_OPT_A:
+			case SHORT_OPT(SHORT_OPTION_a):
 				printf("a:%s\n", i.value ? i.value : "<null>");
 				break;
-			case SHORT_OPT_F:
+			case SHORT_OPT(SHORT_OPTION_f):
 				printf("f:%s\n", i.value ? i.value : "<null>");
 				break;
-			case SHORT_OPT_L:
+			case SHORT_OPT(SHORT_OPTION_l):
 				printf("l:%s\n", i.value ? i.value : "<null>");
 				break;
-			case SHORT_OPT_D:
+			case SHORT_OPT(SHORT_OPTION_d):
 				printf("d:%s\n", i.value ? i.value : "<null>");
 				break;
-			case SHORT_OPT_O:
+			case SHORT_OPT(SHORT_OPTION_o):
 				printf("o:%s\n", i.value ? i.value : "<null>");
 				break;
-			case SHORT_OPT_V:
+			case SHORT_OPT(SHORT_OPTION_v):
 				printf("v:%s\n", i.value ? i.value : "<null>");
 				break;
-			case SHORT_OPT_G:
+			case SHORT_OPT(SHORT_OPTION_g):
 				printf("g:%s\n", i.value ? i.value : "<null>");
 				break;
-			case LONG_OPT_FILE:
+			case LONG_OPT(LONG_OPTION_file):
 				printf("file:%s\n", i.value ? i.value : "<null>");
 				break;
-			case LONG_OPT_LEVEL:
+			case LONG_OPT(LONG_OPTION_level):
 				printf("level:%s\n", i.value ? i.value : "<null>");
 				break;
-			case LONG_OPT_DEBUG:
+			case LONG_OPT(LONG_OPTION_debug):
 				printf("debug:%s\n", i.value ? i.value : "<null>");
 				break;
-			case LONG_OPT_OUTPUT:
+			case LONG_OPT(LONG_OPTION_output):
 				printf("output:%s\n", i.value ? i.value : "<null>");
 				break;
-			case LONG_OPT_VERBOSE:
+			case LONG_OPT(LONG_OPTION_verbose):
 				printf("verbose:%s\n", i.value ? i.value : "<null>");
 				break;
-			case LONG_OPT_TRACE:
+			case LONG_OPT(LONG_OPTION_trace):
 				printf("trace:%s\n", i.value ? i.value : "<null>");
 				break;
 			case OPT_UNKNOWN:
