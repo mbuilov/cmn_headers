@@ -493,7 +493,7 @@ __Format of `short_opts` string:__
 * first symbol - option name: any character, usually a letter or decimal digit, except `'-'` (dash)
 * second symbol - option type or another short option name, depending on the value:
   - copy of the first symbol denotes that the option expects a value (like `-f file` or `-ffile`)
-  - `'-'` (dash) denotes that the option is a first letter of long option started with one dash (e.g. `-myopt` or `-myopt=val`), appropriate long option is then looked up in the long options array
+  - `'-'` (dash) denotes that the option is a first letter of long option started with one dash (e.g. `-myopt` or `-myopt=val`), appropriate long option is then looked up in the long options names array
   - any other character means that option has no type, this character is the name of another short option
 
 Example of short options format string: `"aabbccde-f"`
