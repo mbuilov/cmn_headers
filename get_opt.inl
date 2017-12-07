@@ -177,7 +177,7 @@ const char *const long_opts[] = {LONG_OPTION_alpha};
 /* where LONG_OPT_DEFINER - helper macro used to define long options names array: */
 #define LONG_OPT_DEFINER(a,b) a,b
 
-/* to make option define to return long option index in long options names array, use this:
+/* to make option define to return encoded long option index in long options names array, use this:
 
 #undef  LONG_OPT_NULL
 #undef  LONG_OPT_MODIFIER
