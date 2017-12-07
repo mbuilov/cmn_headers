@@ -51,7 +51,7 @@ struct opt_info {
 
 /*=========================== Notes: ============================================================================================
 |
-| 1) get_opt(i) assumes that i->arg < i->args_end, caller must check this
+| 1) get_opt(i) assumes that i->arg < i->args_end, caller must check this prior the call
 |
 | 2) a non-NULL value may be parsed for a long option that do not expects a value,
 |    if a value was provided together with the option, for example: --option=value
