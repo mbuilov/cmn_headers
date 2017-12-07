@@ -13,86 +13,86 @@
 
 int main(int argc, char *argv[])
 {
-#define SHORT_OPTION_a      SHORT_OPT_MODIFIER(SHORT_OPT_NULL, "aa")
-#define SHORT_OPTION_f      SHORT_OPT_MODIFIER(SHORT_OPTION_a, "ff")
-#define SHORT_OPTION_l      SHORT_OPT_MODIFIER(SHORT_OPTION_f, "ll")
-#define SHORT_OPTION_d      SHORT_OPT_MODIFIER(SHORT_OPTION_l, "dd")
-#define SHORT_OPTION_o      SHORT_OPT_MODIFIER(SHORT_OPTION_d, "o")
-#define SHORT_OPTION_v      SHORT_OPT_MODIFIER(SHORT_OPTION_o, "v")
-#define SHORT_OPTION_g      SHORT_OPT_MODIFIER(SHORT_OPTION_v, "g")
-#define DASH_SHORT_OPTION_t SHORT_OPT_MODIFIER(SHORT_OPTION_g, "t-")
+#define SHORT_OPTION_a      SHORT_OPT_MODIFIER("aa", SHORT_OPTION_f)
+#define SHORT_OPTION_f      SHORT_OPT_MODIFIER("ff", SHORT_OPTION_l)
+#define SHORT_OPTION_l      SHORT_OPT_MODIFIER("ll", SHORT_OPTION_d)
+#define SHORT_OPTION_d      SHORT_OPT_MODIFIER("dd", SHORT_OPTION_o)
+#define SHORT_OPTION_o      SHORT_OPT_MODIFIER("o",  SHORT_OPTION_v)
+#define SHORT_OPTION_v      SHORT_OPT_MODIFIER("v",  SHORT_OPTION_g)
+#define SHORT_OPTION_g      SHORT_OPT_MODIFIER("g",  DASH_SHORT_OPTION_t)
+#define DASH_SHORT_OPTION_t SHORT_OPT_MODIFIER("t-", SHORT_OPT_NULL)
 
-#define SHORT_OPT_NULL
+#define SHORT_OPT_NULL      ""
 #define SHORT_OPT_MODIFIER  SHORT_OPT_DEFINER
 
-	static const char short_opts[] = DASH_SHORT_OPTION_t;
+	static const char short_opts[] = SHORT_OPTION_a;
 
-#define LONG_OPTION_file    LONG_OPT_MODIFIER(LONG_OPT_NULL,       "=file")
-#define LONG_OPTION_level   LONG_OPT_MODIFIER(LONG_OPTION_file,    "=level")
-#define LONG_OPTION_debug   LONG_OPT_MODIFIER(LONG_OPTION_level,   "=debug")
-#define LONG_OPTION_output  LONG_OPT_MODIFIER(LONG_OPTION_debug,   "=output")
-#define LONG_OPTION_verbose LONG_OPT_MODIFIER(LONG_OPTION_output,  "verbose")
-#define LONG_OPTION_trace   LONG_OPT_MODIFIER(LONG_OPTION_verbose, "trace")
+#define LONG_OPTION_file    LONG_OPT_MODIFIER("=file",   LONG_OPTION_level)
+#define LONG_OPTION_level   LONG_OPT_MODIFIER("=level",  LONG_OPTION_debug)
+#define LONG_OPTION_debug   LONG_OPT_MODIFIER("=debug",  LONG_OPTION_output)
+#define LONG_OPTION_output  LONG_OPT_MODIFIER("=output", LONG_OPTION_verbose)
+#define LONG_OPTION_verbose LONG_OPT_MODIFIER("verbose", LONG_OPTION_trace)
+#define LONG_OPTION_trace   LONG_OPT_MODIFIER("trace",   LONG_OPT_NULL)
 
 #define LONG_OPT_NULL       NULL
 #define LONG_OPT_MODIFIER   LONG_OPT_DEFINER
 
-	static const char *const long_opts[] = {LONG_OPTION_trace};
+	static const char *const long_opts[] = {LONG_OPTION_file};
 
 #undef  SHORT_OPT_NULL
 #undef  SHORT_OPT_MODIFIER
 
-#define SHORT_OPT_NULL      0
-#define SHORT_OPT_MODIFIER  SHORT_OPT_INDEXER
+#define SHORT_OPT_NULL      SHORT_OPT_END_POS(short_opts)
+#define SHORT_OPT_MODIFIER  SHORT_OPT_ENCODER
 
 #undef  LONG_OPT_NULL
 #undef  LONG_OPT_MODIFIER
 
 #define LONG_OPT_NULL       LONG_OPT_END_IDX(long_opts)
-#define LONG_OPT_MODIFIER   LONG_OPT_INDEXER
+#define LONG_OPT_MODIFIER   LONG_OPT_ENCODER
 
 	struct opt_info i;
 	opt_info_init(&i, argc, argv);
 
 	while (i.arg < i.args_end) {
 		switch (get_opt(&i, short_opts, long_opts)) {
-			case SHORT_OPT(SHORT_OPTION_a):
+			case SHORT_OPTION_a:
 				printf("a:%s\n", i.value ? i.value : "<null>");
 				break;
-			case SHORT_OPT(SHORT_OPTION_f):
+			case SHORT_OPTION_f:
 				printf("f:%s\n", i.value ? i.value : "<null>");
 				break;
-			case SHORT_OPT(SHORT_OPTION_l):
+			case SHORT_OPTION_l:
 				printf("l:%s\n", i.value ? i.value : "<null>");
 				break;
-			case SHORT_OPT(SHORT_OPTION_d):
+			case SHORT_OPTION_d:
 				printf("d:%s\n", i.value ? i.value : "<null>");
 				break;
-			case SHORT_OPT(SHORT_OPTION_o):
+			case SHORT_OPTION_o:
 				printf("o:%s\n", i.value ? i.value : "<null>");
 				break;
-			case SHORT_OPT(SHORT_OPTION_v):
+			case SHORT_OPTION_v:
 				printf("v:%s\n", i.value ? i.value : "<null>");
 				break;
-			case SHORT_OPT(SHORT_OPTION_g):
+			case SHORT_OPTION_g:
 				printf("g:%s\n", i.value ? i.value : "<null>");
 				break;
-			case LONG_OPT(LONG_OPTION_file):
+			case LONG_OPTION_file:
 				printf("file:%s\n", i.value ? i.value : "<null>");
 				break;
-			case LONG_OPT(LONG_OPTION_level):
+			case LONG_OPTION_level:
 				printf("level:%s\n", i.value ? i.value : "<null>");
 				break;
-			case LONG_OPT(LONG_OPTION_debug):
+			case LONG_OPTION_debug:
 				printf("debug:%s\n", i.value ? i.value : "<null>");
 				break;
-			case LONG_OPT(LONG_OPTION_output):
+			case LONG_OPTION_output:
 				printf("output:%s\n", i.value ? i.value : "<null>");
 				break;
-			case LONG_OPT(LONG_OPTION_verbose):
+			case LONG_OPTION_verbose:
 				printf("verbose:%s\n", i.value ? i.value : "<null>");
 				break;
-			case LONG_OPT(LONG_OPTION_trace):
+			case LONG_OPTION_trace:
 				printf("trace:%s\n", i.value ? i.value : "<null>");
 				break;
 			case OPT_UNKNOWN:
