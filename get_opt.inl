@@ -44,13 +44,14 @@ struct opt_info {
 	char *value;
 
 	/* in/out: next short option in the bundle,
-	  used when multiple short options are bundled together, e.g.: -abc */
+	  used when multiple short options are bundled together,
+      e.g.: "-abc", which is equivalent of "-a -b -c" */
 	char *sopt;
 };
 
 /*=========================== Notes: ============================================================================================
 |
-| 1) get_opt(i) expects that i->arg < i->args_end
+| 1) get_opt(i) assumes that i->arg < i->args_end, caller must check this
 |
 | 2) a non-NULL value may be parsed for a long option that do not expects a value,
 |    if a value was provided together with the option, for example: --option=value
@@ -101,7 +102,7 @@ struct opt_info {
 #define SHORT_OPT(p)   ((p)<<1)     /* encode short option position in short options format string  */
 #define LONG_OPT(p)    (((p)<<1)+1) /* encode long option index in long options names array */
 
-/* helper macros for processing encoded value returned by the get_opt() */
+/* helper macros for decoding a value returned by the get_opt() */
 #define DECODE_OPT(c)  ((c)>>1)     /* decode short or long option position */
 #define IS_LONG_OPT(c) ((c)&1)      /* check if long option was matched */
 
@@ -146,10 +147,10 @@ const char short_opts[] = SHORT_OPTION_a;
 */
 
 /* where SHORT_OPT_END_POS - defines encoded position of last '\0' entry in short options format string: */
-#define SHORT_OPT_END_POS(short_opts) SHORT_OPT(sizeof(short_opts)-1)
+#define SHORT_OPT_END_POS(short_opts)   SHORT_OPT(sizeof(short_opts)-1)
 
 /* and SHORT_OPT_ENCODER - helper macro used to obtain encoded position of short option: */
-#define SHORT_OPT_ENCODER(a,b) SHORT_OPT(DECODE_OPT(b)-(sizeof("" a)-1))
+#define SHORT_OPT_ENCODER(a,b)          SHORT_OPT(DECODE_OPT(b)-(sizeof("" a)-1))
 
 
 /*--------------------------------------------------------------------------------------------------------
@@ -186,10 +187,10 @@ const char *const long_opts[] = {LONG_OPTION_alpha};
 */
 
 /* where LONG_OPT_END_IDX - defines encoded index of last NULL entry in long options names array: */
-#define LONG_OPT_END_IDX(long_opts) LONG_OPT(sizeof(long_opts)/sizeof(const char*)-1)
+#define LONG_OPT_END_IDX(long_opts)   LONG_OPT(sizeof(long_opts)/sizeof(const char*)-1)
 
 /* and LONG_OPT_ENCODER - helper macro used to obtain encoded index of long option: */
-#define LONG_OPT_ENCODER(a,b) LONG_OPT(DECODE_OPT(b)-1)
+#define LONG_OPT_ENCODER(a,b)         LONG_OPT(DECODE_OPT(b)-1)
 
 /*********************************************************************************************************/
 
