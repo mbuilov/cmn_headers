@@ -16,7 +16,12 @@ int main(int argc, char *argv[])
 #define SHORT_OPTION_a      SHORT_OPT_MODIFIER("aa", SHORT_OPTION_f)
 #define SHORT_OPTION_f      SHORT_OPT_MODIFIER("ff", SHORT_OPTION_l)
 #define SHORT_OPTION_l      SHORT_OPT_MODIFIER("ll", SHORT_OPTION_d)
-#define SHORT_OPTION_d      SHORT_OPT_MODIFIER("dd", SHORT_OPTION_o)
+#define SHORT_OPTION_d      SHORT_OPT_MODIFIER("dd", SHORT_OPTION_q)
+#if 0
+#define SHORT_OPTION_q      SHORT_OPT_MODIFIER("q",  SHORT_OPTION_o)
+#else
+#define SHORT_OPTION_q      SHORT_OPTION_o
+#endif
 #define SHORT_OPTION_o      SHORT_OPT_MODIFIER("o",  SHORT_OPTION_v)
 #define SHORT_OPTION_v      SHORT_OPT_MODIFIER("v",  SHORT_OPTION_g)
 #define SHORT_OPTION_g      SHORT_OPT_MODIFIER("g",  DASH_SHORT_OPTION_t)
@@ -29,7 +34,12 @@ int main(int argc, char *argv[])
 
 #define LONG_OPTION_file    LONG_OPT_MODIFIER("=file",   LONG_OPTION_level)
 #define LONG_OPTION_level   LONG_OPT_MODIFIER("=level",  LONG_OPTION_debug)
-#define LONG_OPTION_debug   LONG_OPT_MODIFIER("=debug",  LONG_OPTION_output)
+#define LONG_OPTION_debug   LONG_OPT_MODIFIER("=debug",  LONG_OPTION_quiet)
+#if 0
+#define LONG_OPTION_quiet   LONG_OPT_MODIFIER("quiet",   LONG_OPTION_output)
+#else
+#define LONG_OPTION_quiet   LONG_OPTION_output
+#endif
 #define LONG_OPTION_output  LONG_OPT_MODIFIER("=output", LONG_OPTION_verbose)
 #define LONG_OPTION_verbose LONG_OPT_MODIFIER("verbose", LONG_OPTION_trace)
 #define LONG_OPTION_trace   LONG_OPT_MODIFIER("trace",   LONG_OPT_NULL)
