@@ -27,7 +27,7 @@ if [ ! -d "$1" ]; then
 fi
 
 incdir="$1"
-headers="asserts.h bswaps.h ccasts.h dprint.h get_opts.inl sal_defs.h"
+headers="asserts.h bswaps.h ccasts.h dprint.h get_opts.inl get_opt.inl sal_defs.h"
 
 if [ ${uninstall} -eq 1 ]; then
 

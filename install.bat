@@ -40,15 +40,13 @@ if not exist "%~1\*" (
 )
 
 set incdir=%~1
-set headers=asserts.h bswaps.h ccasts.h dprint.h get_opts.inl sal_defs.h
+set headers=asserts.h bswaps.h ccasts.h dprint.h get_opts.inl get_opt.inl sal_defs.h
 
 if %uninstall%==1 (
 
 	for %%x in (%headers%) do (
 		if exist "%incdir%\%%x" (
 			echo del "%incdir%\%%x"
-
-			set error=0
 			for /f %%i in ('del /F /Q "%incdir%\%%x" 2^>^&1') do (
 				echo command failed: del /F /Q "%incdir%\%%x"
 				exit /b 3

@@ -1,5 +1,5 @@
 /**********************************************************************************
-* Program options parsing test
+* Program options and parameters parsing test
 * Copyright (C) 2012-2017 Michael M. Builov, https://github.com/mbuilov/cmn_headers
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
@@ -13,60 +13,116 @@
 
 int main(int argc, char *argv[])
 {
-	static const char        short_opts[] =  "a\t""  ""f\t"   "l\t"    "  ""d\t"    "o "      "v "      "g ""  ""t-";
-	static const char *const long_opts[]  = {"",  "", "=file","=level","", "=debug","=output","verbose","", "trace",NULL};
+#define SHORT_OPTION_a      SHORT_OPT_MODIFIER("aa", SHORT_OPTION_f)
+#define SHORT_OPTION_f      SHORT_OPT_MODIFIER("ff", SHORT_OPTION_l)
+#define SHORT_OPTION_l      SHORT_OPT_MODIFIER("ll", SHORT_OPTION_d)
+#define SHORT_OPTION_d      SHORT_OPT_MODIFIER("dd", SHORT_OPTION_q)
+#if 0
+#define SHORT_OPTION_q      SHORT_OPT_MODIFIER("q",  SHORT_OPTION_o)
+#else
+#define SHORT_OPTION_q      SHORT_OPTION_o
+#endif
+#define SHORT_OPTION_o      SHORT_OPT_MODIFIER("o",  SHORT_OPTION_v)
+#define SHORT_OPTION_v      SHORT_OPT_MODIFIER("v",  SHORT_OPTION_g)
+#define SHORT_OPTION_g      SHORT_OPT_MODIFIER("g",  DASH_SHORT_OPTION_t)
+#define DASH_SHORT_OPTION_t SHORT_OPT_MODIFIER("t-", SHORT_OPT_NULL)
+
+#define SHORT_OPT_NULL      ""
+#define SHORT_OPT_MODIFIER  SHORT_OPT_DEFINER
+
+	static const char short_opts[] = SHORT_OPTION_a;
+
+#define LONG_OPTION_file    LONG_OPT_MODIFIER("=file",   LONG_OPTION_level)
+#define LONG_OPTION_level   LONG_OPT_MODIFIER("=level",  LONG_OPTION_debug)
+#define LONG_OPTION_debug   LONG_OPT_MODIFIER("=debug",  LONG_OPTION_quiet)
+#if 0
+#define LONG_OPTION_quiet   LONG_OPT_MODIFIER("quiet",   LONG_OPTION_output)
+#else
+#define LONG_OPTION_quiet   LONG_OPTION_output
+#endif
+#define LONG_OPTION_output  LONG_OPT_MODIFIER("=output", LONG_OPTION_verbose)
+#define LONG_OPTION_verbose LONG_OPT_MODIFIER("verbose", LONG_OPTION_trace)
+#define LONG_OPTION_trace   LONG_OPT_MODIFIER("trace",   LONG_OPT_NULL)
+
+#define LONG_OPT_NULL       NULL
+#define LONG_OPT_MODIFIER   LONG_OPT_DEFINER
+
+	static const char *const long_opts[] = {LONG_OPTION_file};
+
+#undef  SHORT_OPT_NULL
+#undef  SHORT_OPT_MODIFIER
+
+#define SHORT_OPT_NULL      SHORT_OPT_END_POS(short_opts)
+#define SHORT_OPT_MODIFIER  SHORT_OPT_ENCODER
+
+#undef  LONG_OPT_NULL
+#undef  LONG_OPT_MODIFIER
+
+#define LONG_OPT_NULL       LONG_OPT_END_IDX(long_opts)
+#define LONG_OPT_MODIFIER   LONG_OPT_ENCODER
+
 	struct opt_info i;
 	opt_info_init(&i, argc, argv);
+
 	while (i.arg < i.args_end) {
 		switch (get_opt(&i, short_opts, long_opts)) {
-			case 0:
+			case SHORT_OPTION_a:
 				printf("a:%s\n", i.value ? i.value : "<null>");
 				break;
-			case 1:
-			case 2:
-			case 3:
-				fprintf(stderr, "unexpected option number 1,2 or 3\n");
-				return 1;
-			case 4:
+			case SHORT_OPTION_f:
 				printf("f:%s\n", i.value ? i.value : "<null>");
 				break;
-			case 5:
-				printf("file:%s\n", i.value ? i.value : "<null>");
-				break;
-			case 6:
+			case SHORT_OPTION_l:
 				printf("l:%s\n", i.value ? i.value : "<null>");
 				break;
-			case 7:
-				printf("level:%s\n", i.value ? i.value : "<null>");
+			case SHORT_OPTION_d:
+				printf("d:%s\n", i.value ? i.value : "<null>");
 				break;
-			case 8:
-			case 9:
-				fprintf(stderr, "unexpected option number 8,9\n");
-				return 1;
-			case 10:
-				printf("%s:%s\n", is_long_opt_matched(i.arg) ? "debug" : "d", i.value ? i.value : "<null>");
-				printf("%s:%s\n", is_long_opt_matched(i.arg) ? "debug" : "d", i.value ? i.value : "<null>");
+			case SHORT_OPTION_o:
+				printf("o:%s\n", i.value ? i.value : "<null>");
 				break;
-			case 6:
-				printf("%s:%s\n", is_long_opt_matched(i.arg) ? "output" : "e", i.value ? i.value : "<null>");
+			case SHORT_OPTION_v:
+				printf("v:%s\n", i.value ? i.value : "<null>");
 				break;
-			case 7:
-				printf("%s:%s\n", is_long_opt_matched(i.arg) ? "verbose" : "f", i.value ? i.value : "<null>");
-				break;
-			case 8:
+			case SHORT_OPTION_g:
 				printf("g:%s\n", i.value ? i.value : "<null>");
 				break;
-			case 9:
-				printf("%s:%s\n", is_long_opt_matched(i.arg) ? "trace" : "-", i.value ? i.value : "<null>");
+			case LONG_OPTION_file:
+				printf("file:%s\n", i.value ? i.value : "<null>");
 				break;
-			case 10:
-				printf("h:%s\n", i.value ? i.value : "<null>");
+			case LONG_OPTION_level:
+				printf("level:%s\n", i.value ? i.value : "<null>");
+				break;
+			case LONG_OPTION_debug:
+				printf("debug:%s\n", i.value ? i.value : "<null>");
+				break;
+			case LONG_OPTION_output:
+				printf("output:%s\n", i.value ? i.value : "<null>");
+				break;
+			case LONG_OPTION_verbose:
+				printf("verbose:%s\n", i.value ? i.value : "<null>");
+				break;
+			case LONG_OPTION_trace:
+				printf("trace:%s\n", i.value ? i.value : "<null>");
 				break;
 			case OPT_UNKNOWN:
-				printf("unknown option: %s\n", *i.arg++);
+				if (i.sopt)
+					printf("unknown short option '%c' in the bundle: '%s'\n", *i.sopt, *i.arg);
+				else
+					printf("unknown option: '%s'\n", *i.arg);
+				i.arg++; /* skip unknown option */
+				i.sopt = NULL;
+				break;
+			case OPT_BAD_BUNDLE:
+				printf("short option '%c' cannot be bundled: '%s'\n", *i.sopt, *i.arg);
+				i.arg++; /* skip bad option */
+				i.sopt = NULL;
 				break;
 			case OPT_PARAMETER:
 				printf("parameter: %s\n", i.value);
+				break;
+			case OPT_DASH:
+				printf("dash option: '-'\n");
 				break;
 			case OPT_REST_PARAMS:
 				do {
