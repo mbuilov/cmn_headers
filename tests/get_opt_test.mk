@@ -22,7 +22,7 @@ SRC := get_opt_test.c
 OUT := $(call DO_TEST_EXE_RET,1 -gaf --help 3 --file 2 -b3 --level=4 -l 5 -d6 --debug 7 -o 8 -vr --output=9\
   -fg -f g --verbose 1 --verbose=4 -g 3 -g1 -9 - --trace --trace q --trace=v -t -tra -trace -h 6 -ogv- -- 4 -b --y 9)
 
-# generate the rule for comparing $(OUT) and get_opt_test.out
+# generate a rule for comparing $(OUT) and get_opt_test.out
 $(call DO_CMP_TEXT,$(OUT),get_opt_test.out)
 
 $(DEFINE_TARGETS)
