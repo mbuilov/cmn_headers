@@ -1,4 +1,4 @@
-parameter: 1
+parameter: ! $ ^ ' " % ^ 1 2 #
 g:<null>
 short option 'a' cannot be bundled: '-gaf'
 unknown option: '--help'
