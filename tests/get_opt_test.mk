@@ -7,10 +7,10 @@
 # add rules for building C/C++ sources
 include $(dir $(lastword $(MAKEFILE_LIST)))make/c.mk
 
-# define rules for testing built executables - for the 'check' goal
+# define DO_TEST_EXE_RET macro - generator of rule for testing built executables
 include $(MTOP)/extensions/ctest.mk
 
-# add rule for comparing outputs of tested executables with given file, for the 'check' goal
+# define DO_CMP_TEXT macro - generator of rule for comparing output of tested executable
 include $(MTOP)/extensions/cmp.mk
 
 # build S-variant of 'get_opt_test' executable - one with statically linked C runtime
