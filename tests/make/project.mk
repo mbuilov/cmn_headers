@@ -18,7 +18,7 @@
 #   +- make/
 #   |  |- project.mk    (modified copy of this file)
 #   |  |- overrides.mk  (support for 'config' goal and OVERRIDES variable)
-#   |  |- parallel.mk   (support for sub-makefiles)
+#   |  |- submakes.mk   (support for sub-makefiles)
 #   |  |- c.mk          (support for building C/C++ sources)
 #   |  ...
 #   +-- src/
