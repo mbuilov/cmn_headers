@@ -1,13 +1,11 @@
-#------------------- delete this header --------------------------------------------------
-#
-# stub of a project configuration makefile
-#
-# Note: This file should be copied to the directory of the project build system
-#         and modified appropriately for the custom project
-#
-# Note: this file is under public domain, it may be freely modified by the project authors
-#
-#-----------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------
+# cmn_headers tests
+# Copyright (C) 2012-2017 Michael M. Builov, https://github.com/mbuilov/cmn_headers
+# Licensed under Apache License v2.0, see LICENSE.TXT
+#----------------------------------------------------------------------------------
+
+# original file: $(CLEAN_BUILD_DIR)/stub/project.mk
+# description:   project configuration makefile
 
 # NOTE *********************************************************************************
 # according to the clean-build principles, it is acceptable to use environment variables
@@ -51,9 +49,9 @@ CLEAN_BUILD_REQUIRED_VERSION := 0.9.0
 # - header file with version info (see $(MTOP)/extensions/version/version.mk)
 # - under Windows, resource files with version info (see $(MTOP)/compilers/msvc/stdres.mk)
 PRODUCT_NAMES_H  := product_names.h
-VENDOR_NAME      := Unkown Company/Author
-PRODUCT_NAME     := Sample app
-VENDOR_COPYRIGHT := Copyright (C) 2015-2017 Unkown Company/Author
+VENDOR_NAME      := Michael M. Builov
+PRODUCT_NAME     := cmn_headers tests
+VENDOR_COPYRIGHT := Copyright (C) 2015-2017 Michael M. Builov, https://github.com/mbuilov/cmn_headers
 
 # global product version
 # Note: this is default value of MODVER - per-module version number
