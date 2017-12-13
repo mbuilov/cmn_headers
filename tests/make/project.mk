@@ -7,11 +7,6 @@
 # original file: $(CLEAN_BUILD_DIR)/stub/project.mk
 # description:   project configuration makefile
 
-# NOTE *********************************************************************************
-# according to the clean-build principles, it is acceptable to use environment variables
-# only while autoconfiguration: in this file and the files included by this one
-# **************************************************************************************
-
 # Assume custom project has the following directory structure:
 # 
 # +- my_project/
