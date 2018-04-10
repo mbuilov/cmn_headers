@@ -89,7 +89,7 @@ struct opt_info {
 
 /* get_opt(i) returns next error codes (negative values): */
 
-#define OPT_UNKNOWN     -1 /* i->arg points to unknown option argument,
+#define OPT_UNKNOWN     -1 /* i->arg points to unknown option argument (may be bundle),
                               if i->sopt != NULL, then it points to unknown short option character in the short options bundle */
 
 #define OPT_BAD_BUNDLE  -2 /* i->arg points to the whole short options bundle argument,
