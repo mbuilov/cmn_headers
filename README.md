@@ -457,7 +457,7 @@ struct opt_info {
 	char *const *arg;       /* in/out: next program argument to parse  */
 	char *const *args_end;  /* in:     end of program arguments array  */
 	char *value;            /* out:    option value or parameter       */
-	char *sopt;             /* in/out: next short option in the bundle */
+	char *sopt;             /* in/out: next short option in the bundle pointed by arg */
 };
 ```
 
@@ -693,7 +693,7 @@ int main(int argc, char *argv[])
 				else
 					printf("unknown option: '%s'\n", *i.arg);
 				i.arg++;       /* skip unknown option */
-				i.sopt = NULL; /* and the rest of the bundle */
+				i.sopt = NULL; /* and the rest of the bundle, if any */
 				break;
 			case OPT_BAD_BUNDLE:
 				printf("short option '%c' cannot be bundled: '%s'\n", *i.sopt, *i.arg);
