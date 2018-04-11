@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
 #define SHORT_OPTION_o      SHORT_OPT_MODIFIER("o",  SHORT_OPTION_v)      /* -o */
 #define SHORT_OPTION_v      SHORT_OPT_MODIFIER("v",  SHORT_OPTION_g)      /* -v */
 #define SHORT_OPTION_g      SHORT_OPT_MODIFIER("g",  DASH_SHORT_OPTION_t) /* -g */
-#define DASH_SHORT_OPTION_t SHORT_OPT_MODIFIER("t-", SHORT_OPT_NULL)      /* -trace (equivalent to --trace) */
+#define DASH_SHORT_OPTION_t SHORT_OPT_MODIFIER("t ", SHORT_OPT_NULL)      /* -trace (equivalent to --trace) */
 
 #define SHORT_OPT_NULL      ""
 #define SHORT_OPT_MODIFIER  SHORT_OPT_DEFINER
@@ -113,16 +113,8 @@ int main(int argc, char *argv[])
 				i.arg++; /* skip unknown option */
 				i.sopt = NULL;
 				break;
-			case OPT_BAD_BUNDLE:
-				printf("short option '%c' cannot be bundled: '%s'\n", *i.sopt, *i.arg);
-				i.arg++; /* skip bad option */
-				i.sopt = NULL;
-				break;
 			case OPT_PARAMETER:
 				printf("parameter: %s\n", i.value);
-				break;
-			case OPT_DASH:
-				printf("dash option: '-'\n");
 				break;
 			case OPT_REST_PARAMS:
 				do {
