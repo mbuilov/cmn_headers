@@ -45,7 +45,7 @@ struct opt_info {
 	char *const *args_end;
 
 	/* out: option value or parameter,
-	  as option value may be NULL - if no value was provided for the option */
+	  as option value may be NULL - if no value was specified for the option */
 	char *value;
 
 	/* in/out: next short option in the bundle pointed by arg,
@@ -58,21 +58,21 @@ struct opt_info {
 |
 | 1) get_opt(i) assumes that i->arg < i->args_end, caller must check this prior the call
 |
-| 2) a non-NULL value may be parsed for a long option that do not expects a value,
-|    if a value was provided together with the option, for example: "--option=value"
+| 2) a non-NULL value may be parsed for a long option that do not expects a value
+|    - if a value was specified together with the option, for example: "--option=value"
 |
 | 3) a NULL value may be parsed for an option that expects some value
-|    - if no value was provided for the option in the command line, e.g.: "--option --other"
+|    - if no value was specified for the option at the end of the command line
 |
 | 4) get_opt() accepts *short* options as '\0'-terminated C-string in the following format:
-|    . first symbol  - option name, usually a letter or decimal digit, may be a dash '-', except space character,
-|    . second symbol - option type (optional, not for dash):
+|    . first symbol  - option name, usually a letter or decimal digit, possible a dash '-', except space character,
+|    . second symbol - option type (optional, not for dash option):
 |      a) copy of the first symbol denotes that the option expects a value, like "-oval" or "-o val";
 |      b) space character denotes that the option is the first letter of a long option started with one dash,
-|        for example,  "-file" or "-file=abc", appropriate long option is then looked up in the long options array;
+|        for example, "-file" or "-file=abc", appropriate long option is then looked up in the long options array;
 |      c) any other character means that the option has no type, this character is the name of another short option.
 |
-|    Example of short options string: "xxy z-"
+|    Example of short options format string: "xxy z-"
 |
 | 5) get_opt() accepts *long* options as NULL-terminated array of options names, in the following format:
 |    . each name is a non-empty '\0'-terminated C-string,
@@ -84,10 +84,7 @@ struct opt_info {
 |    get_opt() returns OPT_REST_PARAMS
 |
 | 7) if an option expects a value, but a value wasn't specified together with the option (like "-fabc" or "--file=abc),
-|    get_opt() looks at the next argument after the option:
-|     . if it's a parameter, it is taken as the option value, for example: "-f abc" or "--file abc",
-|     . if it's a '-' (dash), it is also accepted as the option value, e.g.: "-f -" is equivalent to "-f-"
-|     . if it's an another option, the former option will have no value, for example: "-f -x" or "--file --help"
+|    get_opt() takes next argument after the option as its value, for example: "--file --help" is equivalent to "--file=--help"
 |
 ===============================================================================================================================*/
 
@@ -246,7 +243,7 @@ int main(int argc, char *argv[])
 				if (i.value)
 					printf("'a' has value: %s\n", i.value);
 				else
-					printf("no value provided for 'a'\n");
+					printf("no value specified for 'a'\n");
 				break;
 			case SHORT_OPTION_b:
 				/* short option 'b', without a value (which cannot be parsed), may be bundled: '-b' or '-bcdefg' */
@@ -261,18 +258,18 @@ int main(int argc, char *argv[])
 				fprintf(stderr, "assert: short option 'c' was parsed!\n");
 				return 1;
 			case LONG_OPTION_alpha:
-				/* long option "alpha", not expecting a value for it, but the value may be provided, e.g.: --alpha=value */
+				/* long option "alpha", not expecting a value for it, but the value may be specified, e.g.: --alpha=value */
 				if (i.value)
 					printf("warning: not expecting a value for option 'alpha': %s\n", i.value);
 				else
 					printf("option 'alpha'\n");
 				break;
 			case LONG_OPTION_cetera:
-				/* long option "cetera", expecting a value for it, but the value may not be provided, e.g.: --cetera --alpha */
+				/* long option "cetera", expecting a value for it, but the value may not be specified, e.g.: --cetera */
 				if (i.value)
 					printf("'cetera' has value: %s\n", i.value);
 				else
-					printf("no value provided for 'cetera'\n");
+					printf("no value specified for 'cetera'\n");
 				break;
 			case OPT_UNKNOWN:
 				if (i.sopt)
@@ -287,8 +284,8 @@ int main(int argc, char *argv[])
 				break;
 			case OPT_REST_PARAMS:
 				do {
-					printf("parameter: %s\n", *i.arg++);
-				} while (i.arg != i.args_end);
+					printf("parameter: %s\n", *i.arg);
+				} while (++i.arg < i.args_end);
 				break;
 			default:
 				fprintf(stderr, "assert: unexpected get_opt() return value!\n");
@@ -353,7 +350,7 @@ static int get_opt(
 			if (o) {
 				if (' ' == o[1]) {
 					/* option is the first letter of a long option started with one dash:
-					   "-xfile=abc" as equivalent of "-x -file=abc" */
+					   "-xfile=abc" as equivalent of "-x -file=abc" or "-x --file=abc" */
 					ASSERT('-' != *a); /* dash option cannot begin a long option */
 					i->arg++; /* skip bundle */
 					i->sopt = NULL; /* end of short options bundle */
@@ -368,20 +365,11 @@ static int get_opt(
 						/* "-xfabc": set (non-empty) option value */
 						i->value = a + 1; /* skip "f" */
 					}
-					/* no value was passed, like "-xf" */
-					else if (i->arg != i->args_end) {
-						/* option expects a value, try to get one */
-						char *const *const arg = i->arg;
-						a = *arg;
-						if ('-' != *a || !a[1]) {
-							i->arg = arg + 1;
-							i->value = a; /* option value, like "-xf abc" or "-xf -" */
-						}
-						else
-							i->value = NULL; /* no value provided: next argument is an another option */
-					}
+					/* no value was specified together with the option, like "-xf", try to get the next argument */
+					else if (i->arg != i->args_end)
+						i->value = *i->arg++; /* option value, like "-xf abc" or "-xf -" or "-xf --abc" */
 					else
-						i->value = NULL; /* end of args */
+						i->value = NULL; /* no value: end of args */
 				}
 				else if (a[1])
 					i->sopt = a + 1; /* next short option the bundle: "z-" in "yz-" */
@@ -427,27 +415,18 @@ parse_long_option:
 				const char *const *lo = long_opts;
 				for (; *lo; lo++) {
 					const char *n = *lo;
-					ASSERT(*n); /* long option name must be non-empty */
 					if ('=' == *n)
 						n++; /* option expects a value */
+					ASSERT(*n); /* long option name must be non-empty */
 					if (!GET_OPT_STRCMP(a, n)) {
 						if (v) {
 							/* "--file=abc": set (may be empty) option value, even if not expecting one */
 							*v = '='; /* restore */
 							i->value = v + 1; /* skip '=' */
 						}
-						/* no value was passed, like "--help" */
-						else if (n != *lo && i->arg != i->args_end) {
-							/* option expects a value, try to get one */
-							char *const *const arg = i->arg;
-							a = *arg;
-							if ('-' != *a || !a[1]) {
-								i->arg = arg + 1;
-								i->value = a; /* option value, like "--file abc" or "--file -" */
-							}
-							else
-								i->value = NULL; /* no value provided: next argument is an another option */
-						}
+						/* no value was specified together with the option, like "--help" */
+						else if (n != *lo && i->arg != i->args_end)
+							i->value = *i->arg++; /* option expects a value, take the next argument as the option value */
 						else
 							i->value = NULL; /* not expecting a value for the option or end of args */
 						return LONG_OPT((int)(lo - long_opts));
@@ -485,18 +464,9 @@ parse_long_option:
 					i->arg--; /* will point to the bundle */
 				}
 			}
-			/* no value was passed, like "-h" */
-			else if (a[1] == o[1] && i->arg != i->args_end) {
-				/* option expects a value, try to get one */
-				char *const *const arg = i->arg;
-				a = *arg;
-				if ('-' != *a || !a[1]) {
-					i->arg = arg + 1;
-					i->value = a; /* option value, like "-f abc" or "-f -" */
-				}
-				else
-					i->value = NULL; /* no value provided: next argument is an another option */
-			}
+			/* no value was passed, like "-f" */
+			else if (a[1] == o[1] && i->arg != i->args_end)
+				i->value = *i->arg++; /* option expects a value, take the next argument as the option value */
 			else
 				i->value = NULL; /* option do not expects a value or end of args */
 			return SHORT_OPT((int)(o - short_opts));
