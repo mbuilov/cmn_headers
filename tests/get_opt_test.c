@@ -27,10 +27,10 @@ int main(int argc, char *argv[])
 #define SHORT_OPTION_g      SHORT_OPT_MODIFIER("g",  DASH_SHORT_OPTION_t) /* -g */
 #define DASH_SHORT_OPTION_t SHORT_OPT_MODIFIER("t ", SHORT_OPT_NULL)      /* -trace (equivalent to --trace) */
 
-#define SHORT_OPT_NULL      ""
+#define SHORT_OPT_NULL      GET_OPT_TEXT("")
 #define SHORT_OPT_MODIFIER  SHORT_OPT_DEFINER
 
-	static const char short_opts[] = SHORT_OPTION_a;
+	static const GET_OPT_CHAR short_opts[] = SHORT_OPTION_a;
 
 #define LONG_OPTION_file    LONG_OPT_MODIFIER("=file",   LONG_OPTION_level)  /* --file=value  */
 #define LONG_OPTION_level   LONG_OPT_MODIFIER("=level",  LONG_OPTION_debug)  /* --level=value */
@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
 #define LONG_OPT_NULL       NULL
 #define LONG_OPT_MODIFIER   LONG_OPT_DEFINER
 
-	static const char *const long_opts[] = {LONG_OPTION_file};
+	static const GET_OPT_CHAR *const long_opts[] = {LONG_OPTION_file};
 
 #undef  SHORT_OPT_NULL
 #undef  SHORT_OPT_MODIFIER
