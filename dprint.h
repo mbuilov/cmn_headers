@@ -3,7 +3,7 @@
 
 /**********************************************************************************
 * Debugg printing/tracing helpers
-* Copyright (C) 2012-2017 Michael M. Builov, https://github.com/mbuilov/cmn_headers
+* Copyright (C) 2012-2018 Michael M. Builov, https://github.com/mbuilov/cmn_headers
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -15,7 +15,7 @@
   DBGPRINTX(file, line, function, format, ...)
 */
 
-#ifdef _DEBUG
+#ifdef DPRINT_TO_STDERR
 #include <stdio.h> /* for fprintf() */
 #endif
 
@@ -49,55 +49,55 @@ extern "C" {
 #define __func__ ""
 #endif
 
-/* DEBUG_TO_LOG -> print debug messages to log (file)
- else _DEBUG    -> print debug messages to stderr
- else           -> don't print anything */
+/*    DPRINT_TO_LOG    -> print debug messages to log (file)
+ else DPRINT_TO_STDERR -> print debug messages to stderr
+ else                  -> don't print anything */
 
-#ifdef DEBUG_TO_LOG
+#ifdef DPRINT_TO_LOG
 
 A_Printf_format_at(1,2)
-void DEBUG_TO_LOG(A_Printf_format_string const char *format, ...);
+void DPRINT_TO_LOG(A_Printf_format_string const char *format, ...);
 
-#define ___DBGPRINT_1(f) \
-	DEBUG_TO_LOG(THREAD_ID_FORMAT ":%s:%d:%s(): " f, CURRENT_THREAD_ID, __FILE__, __LINE__, __func__)
-#define ___DBGPRINT_2(f,...) \
-	DEBUG_TO_LOG(THREAD_ID_FORMAT ":%s:%d:%s(): " f, CURRENT_THREAD_ID, __FILE__, __LINE__, __func__, __VA_ARGS__)
-#define ___DBGPRINTx1(__d_file,__d_line,__d_function,f) \
-	DEBUG_TO_LOG(THREAD_ID_FORMAT ":%s:%d:%s(): " f, CURRENT_THREAD_ID, __d_file, __d_line, __d_function)
-#define ___DBGPRINTx2(__d_file,__d_line,__d_function,f,...) \
-	DEBUG_TO_LOG(THREAD_ID_FORMAT ":%s:%d:%s(): " f, CURRENT_THREAD_ID, __d_file, __d_line, __d_function, __VA_ARGS__)
+#define DBGPRINT3_1(f) \
+	DPRINT_TO_LOG(THREAD_ID_FORMAT ":%s:%d:%s(): " f, CURRENT_THREAD_ID, __FILE__, __LINE__, __func__)
+#define DBGPRINT3_2(f,...) \
+	DPRINT_TO_LOG(THREAD_ID_FORMAT ":%s:%d:%s(): " f, CURRENT_THREAD_ID, __FILE__, __LINE__, __func__, __VA_ARGS__)
+#define DBGPRINT3x1(__d_file,__d_line,__d_function,f) \
+	DPRINT_TO_LOG(THREAD_ID_FORMAT ":%s:%d:%s(): " f, CURRENT_THREAD_ID, __d_file, __d_line, __d_function)
+#define DBGPRINT3x2(__d_file,__d_line,__d_function,f,...) \
+	DPRINT_TO_LOG(THREAD_ID_FORMAT ":%s:%d:%s(): " f, CURRENT_THREAD_ID, __d_file, __d_line, __d_function, __VA_ARGS__)
 
-#elif defined _DEBUG
+#elif defined DPRINT_TO_STDERR
 
-#define ___DBGPRINT_1(f) \
+#define DBGPRINT3_1(f) \
 	fprintf(stderr, THREAD_ID_FORMAT ":%s:%d:%s(): " f "\n", CURRENT_THREAD_ID, __FILE__, __LINE__, __func__)
-#define ___DBGPRINT_2(f,...) \
+#define DBGPRINT3_2(f,...) \
 	fprintf(stderr, THREAD_ID_FORMAT ":%s:%d:%s(): " f "\n", CURRENT_THREAD_ID, __FILE__, __LINE__, __func__, __VA_ARGS__)
-#define ___DBGPRINTx1(__d_file,__d_line,__d_function,f) \
+#define DBGPRINT3x1(__d_file,__d_line,__d_function,f) \
 	fprintf(stderr, THREAD_ID_FORMAT ":%s:%d:%s(): " f "\n", CURRENT_THREAD_ID, __d_file, __d_line, __d_function)
-#define ___DBGPRINTx2(__d_file,__d_line,__d_function,f,...) \
+#define DBGPRINT3x2(__d_file,__d_line,__d_function,f,...) \
 	fprintf(stderr, THREAD_ID_FORMAT ":%s:%d:%s(): " f "\n", CURRENT_THREAD_ID, __d_file, __d_line, __d_function, __VA_ARGS__)
 
-#endif /* _DEBUG */
+#endif /* DPRINT_TO_STDERR */
 
-#if defined DEBUG_TO_LOG || defined _DEBUG
+#if defined DPRINT_TO_LOG || defined DPRINT_TO_STDERR
 
-#define ___DPRN_ARGS(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20,a21,a22,a23,a24,a25,a26,a27,a28,a29,a30,n,...) n
-#define __DPRN_ARGS(args)     ___DPRN_ARGS args
-#define _DPRN_ARGS(...)       __DPRN_ARGS((__VA_ARGS__,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,0))
-#define ___DBGPRINT(X,N,args) ___DBGPRINT##X##N args
-#define __DBGPRINT(X,N,args)  ___DBGPRINT(X,N,args)
-#define _DBGPRINT(X,N,args)   __DBGPRINT(X,N,args)
+#define DPRN_ARGS2(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20,a21,a22,a23,a24,a25,a26,a27,a28,a29,a30,n,...) n
+#define DPRN_ARGS1(args)    DPRN_ARGS2 args
+#define DPRN_ARGS(...)      DPRN_ARGS1((__VA_ARGS__,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,0))
+#define DBGPRINT3(X,N,args) DBGPRINT3##X##N args
+#define DBGPRINT2(X,N,args) DBGPRINT3(X,N,args)
+#define DBGPRINT1(X,N,args) DBGPRINT2(X,N,args)
 /* add '\n' at end of format string, works for maximum 30 arguments */
-#define DBGPRINT(...)                                 _DBGPRINT(_,_DPRN_ARGS(__VA_ARGS__),(__VA_ARGS__))
-#define DBGPRINTX(__d_file,__d_line,__d_function,...) _DBGPRINT(x,_DPRN_ARGS(__VA_ARGS__),(__d_file,__d_line,__d_function,__VA_ARGS__))
+#define DBGPRINT(...)                                 DBGPRINT1(_,DPRN_ARGS(__VA_ARGS__),(__VA_ARGS__))
+#define DBGPRINTX(__d_file,__d_line,__d_function,...) DBGPRINT1(x,DPRN_ARGS(__VA_ARGS__),(__d_file,__d_line,__d_function,__VA_ARGS__))
 
-#else /* !DEBUG_TO_LOG && !_DEBUG */
+#else /* !DPRINT_TO_LOG && !DPRINT_TO_STDERR */
 
 #define DBGPRINT(...)                                 ((void)0)
 #define DBGPRINTX(__d_file,__d_line,__d_function,...) ((void)(__d_file),(void)(__d_line),(void)(__d_function))
 
-#endif /* !DEBUG_TO_LOG && !_DEBUG */
+#endif /* !DPRINT_TO_LOG && !DPRINT_TO_STDERR */
 
 #ifdef __cplusplus
 }
