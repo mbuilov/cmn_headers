@@ -3,7 +3,7 @@
 
 /**********************************************************************************
 * Assertions
-* Copyright (C) 2012-2017 Michael M. Builov, https://github.com/mbuilov/cmn_headers
+* Copyright (C) 2012-2018 Michael M. Builov, https://github.com/mbuilov/cmn_headers
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -11,7 +11,9 @@
 
 /* defines: ASSERT, DEBUG_CHECK, EMBED_ASSERT, STATIC_ASSERT, COUNT_OF */
 
+#ifndef NDEBUG
 #include <assert.h>
+#endif
 #include "dprint.h"
 
 #ifdef __cplusplus
@@ -25,9 +27,11 @@ extern "C" {
   in RELEASE - unreachable code
 */
 
+#ifndef NDEBUG
 #ifdef _MSC_VER
 #ifdef _DEBUG
 #define ASSERT(cond) assert(cond)
+#endif
 #endif
 #endif
 
@@ -37,27 +41,29 @@ extern "C" {
 
 #ifndef ASSERT
 
-#ifdef _DEBUG
+#ifndef NDEBUG
 
 A_Noreturn_function A_Force_inline_function
-static void _x__assertion_failed(A_In_z const char *cond, A_In_z const char *file, int line, A_In_z const char *function)
+static void asserts_h__assertion_failed(A_In_z const char *cond, A_In_z const char *file, int line, A_In_z const char *function)
 {
 	DBGPRINTX(file, line, function, "assertion failed: %s", cond);
 	*(volatile int*)((char*)0 + fflush(stderr)) = 0; /* generate SIGSEGV */
 	exit(-1);
 }
 
-static inline void _x__assert_(int x, A_In_z const char *cond, A_In_z const char *file, int line, A_In_z const char *function)
+static inline void asserts_h__assert(int x, A_In_z const char *cond, A_In_z const char *file, int line, A_In_z const char *function)
 {
 	if (x)
-		_x__assertion_failed(cond, file, line, function);
+		asserts_h__assertion_failed(cond, file, line, function);
 }
 
-#define ASSERT(cond) _x__assert_(!(cond), #cond, __FILE__, __LINE__, __func__)
+#define ASSERT(cond) asserts_h__assert(!(cond), #cond, __FILE__, __LINE__, __func__)
 
-#else /* !_DEBUG */
+#else /* !NDEBUG */
+
 #define ASSERT(cond) ASSUME(cond)
-#endif /* !_DEBUG */
+
+#endif /* !NDEBUG */
 
 #endif /* !ASSERT */
 
@@ -67,7 +73,7 @@ static inline void _x__assert_(int x, A_In_z const char *cond, A_In_z const char
   in DEBUG   - abnormal program exit
   in RELEASE - _reachable_ code, error must be processed appropriately
 */
-#ifdef _DEBUG
+#ifndef NDEBUG
 #define DEBUG_CHECK(cond) ASSERT(cond)
 #else
 #define DEBUG_CHECK(cond) ((void)0) /* _must_ process an error on runtime if cond is false */
@@ -75,8 +81,8 @@ static inline void _x__assert_(int x, A_In_z const char *cond, A_In_z const char
 
 /* compile-time asserts:
 
-  EMBED_ASSERT(condition)  - evaluates to 0 at compile-time, may be placed inside expression,
-  STATIC_ASSERT(condition) - defines struct, cannot be placed inside expression.
+  EMBED_ASSERT(condition)  - evaluates to 0 at compile-time, may be placed inside an expression,
+  STATIC_ASSERT(condition) - defines struct, cannot be placed inside an expression.
 */
 
 #define EMBED_ASSERT(expr) (0*sizeof(int[1-2*!(expr)]))
@@ -85,9 +91,10 @@ static inline void _x__assert_(int x, A_In_z const char *cond, A_In_z const char
 #undef STATIC_ASSERT
 #endif
 
-#define ___STATIC_ASSERT(expr,line) struct _static_assert_at_line_##line{int _a[1-2*!(expr)];}
-#define __STATIC_ASSERT(expr,line) ___STATIC_ASSERT(expr,line)
-#define STATIC_ASSERT(expr) __STATIC_ASSERT(expr,__LINE__)
+/* note: use ##line to define an unique structure */
+#define STATIC_ASSERT2(expr,line) struct _static_assert_at_line_##line{int _a[1-2*!(expr)];}
+#define STATIC_ASSERT1(expr,line) STATIC_ASSERT2(expr,line)
+#define STATIC_ASSERT(expr)       STATIC_ASSERT1(expr,__LINE__)
 
 /* number of elements in static array:
 
@@ -96,11 +103,12 @@ static inline void _x__assert_(int x, A_In_z const char *cond, A_In_z const char
 */
 
 #ifdef __GNUC__
-#define _COUNT_OF(arr) (sizeof(arr)/sizeof((arr)[0]))
-#define COUNT_OF(arr) (_COUNT_OF(arr) + 0*sizeof(&(arr) - (__typeof__((arr)[0])(*)[_COUNT_OF(arr)])0))
+#define COUNT_OF_(arr) (sizeof(arr)/sizeof((arr)[0]))
+/* check that arr - is an array, not a pointer */
+#define COUNT_OF(arr)  (COUNT_OF_(arr) + 0*sizeof(&(arr) - (__typeof__((arr)[0])(*)[COUNT_OF_(arr)])0))
 #elif defined __cplusplus
-template <typename T, size_t N> char (&_COUNT_OF(T (&array)[N]))[N];
-#define COUNT_OF(arr) (sizeof(_COUNT_OF(arr)))
+template <typename T, size_t N> char (&COUNT_OF_(T (&array)[N]))[N];
+#define COUNT_OF(arr) (sizeof(COUNT_OF_(arr)))
 #else
 #define COUNT_OF(arr) (sizeof(arr)/sizeof((arr)[0]))
 #endif
