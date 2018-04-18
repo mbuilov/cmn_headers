@@ -3,7 +3,7 @@
 
 /**********************************************************************************
 * Byte-order swap routines
-* Copyright (C) 2012-2017 Michael M. Builov, https://github.com/mbuilov/cmn_headers
+* Copyright (C) 2012-2018 Michael M. Builov, https://github.com/mbuilov/cmn_headers
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -15,7 +15,7 @@
 #define BYTESWAP_UINT16(x) _byteswap_ushort(x)
 #define BYTESWAP_UINT32(x) _byteswap_ulong(x)
 #define BYTESWAP_UINT64(x) _byteswap_uint64(x)
-typedef int _ULONG_TYPE_is_not_4_bytes_[1-2*(sizeof(unsigned long) != 4)];
+typedef int ULONG_TYPE_is_not_4_bytes_[1-2*(sizeof(unsigned long) != 4)];
 #endif
 #endif /* _MSC_VER */
 
@@ -50,10 +50,10 @@ extern "C" {
 #endif
 
 /* check that UINT16_TYPE is 16 bits long, UINT32_TYPE - 32 bits and  UINT64_TYPE - 64 bits */
-typedef int _CHAR_TYPE_is_not_8_bits_[1-2*(255 != (unsigned char)~(unsigned char)0)];
-typedef int _UINT16_TYPE_is_not_2_bytes_[1-2*(sizeof(UINT16_TYPE) != 2)];
-typedef int _UINT32_TYPE_is_not_4_bytes_[1-2*(sizeof(UINT32_TYPE) != 4)];
-typedef int _UINT64_TYPE_is_not_8_bytes_[1-2*(sizeof(UINT64_TYPE) != 8)];
+typedef int CHAR_TYPE_is_not_8_bits_[1-2*(255 != (unsigned char)~(unsigned char)0)];
+typedef int UINT16_TYPE_is_not_2_bytes_[1-2*(sizeof(UINT16_TYPE) != 2)];
+typedef int UINT32_TYPE_is_not_4_bytes_[1-2*(sizeof(UINT32_TYPE) != 4)];
+typedef int UINT64_TYPE_is_not_8_bytes_[1-2*(sizeof(UINT64_TYPE) != 8)];
 
 /* endian conversion procedures - swap bytes in a integer */
 
