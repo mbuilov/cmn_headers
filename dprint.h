@@ -118,13 +118,13 @@ void DPRINT_TO_LOG(A_Printf_format_string const char *format, ...);
 #elif defined DPRINT_TO_STREAM
 
 #define DBGPRINT3_1(f) \
-	fprintf(DPRINT_LOCATION_FORMAT f "\n", DPRINT_GET_THREAD_ID, __FILE__, __LINE__, DPRINT_FUNC)
+	fprintf(DPRINT_TO_STREAM, DPRINT_LOCATION_FORMAT f "\n", DPRINT_GET_THREAD_ID, __FILE__, __LINE__, DPRINT_FUNC)
 #define DBGPRINT3_2(f,...) \
-	fprintf(DPRINT_LOCATION_FORMAT f "\n", DPRINT_GET_THREAD_ID, __FILE__, __LINE__, DPRINT_FUNC, __VA_ARGS__)
+	fprintf(DPRINT_TO_STREAM, DPRINT_LOCATION_FORMAT f "\n", DPRINT_GET_THREAD_ID, __FILE__, __LINE__, DPRINT_FUNC, __VA_ARGS__)
 #define DBGPRINT3x1(d_file__,d_line__,d_func__,f) \
-	fprintf(DPRINT_LOCATION_FORMAT f "\n", DPRINT_GET_THREAD_ID, d_file__, d_line__, d_func__)
+	fprintf(DPRINT_TO_STREAM, DPRINT_LOCATION_FORMAT f "\n", DPRINT_GET_THREAD_ID, d_file__, d_line__, d_func__)
 #define DBGPRINT3x2(d_file__,d_line__,d_func__,f,...) \
-	fprintf(DPRINT_LOCATION_FORMAT f "\n", DPRINT_GET_THREAD_ID, d_file__, d_line__, d_func__, __VA_ARGS__)
+	fprintf(DPRINT_TO_STREAM, DPRINT_LOCATION_FORMAT f "\n", DPRINT_GET_THREAD_ID, d_file__, d_line__, d_func__, __VA_ARGS__)
 
 #endif /* DPRINT_TO_STREAM */
 
