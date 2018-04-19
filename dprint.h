@@ -104,7 +104,7 @@ extern "C" {
 #ifdef DPRINT_TO_LOG
 
 A_Printf_format_at(1,2)
-void DPRINT_TO_LOG(A_Printf_format_string const char *format, ...);
+void DPRINT_TO_LOG(A_In_z A_Printf_format_string const char *format, ...);
 
 #define DBGPRINT3_1(f) \
 	DPRINT_TO_LOG(DPRINT_LOCATION_FORMAT f, DPRINT_GET_THREAD_ID, __FILE__, __LINE__, DPRINT_FUNC)
