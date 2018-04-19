@@ -12,9 +12,10 @@
 /* defines: ASSERT, DEBUG_CHECK, EMBED_ASSERT, STATIC_ASSERT, COUNT_OF */
 
 #ifndef NDEBUG
-#include <assert.h>
+#include <stdlib.h> /* for assert() */
+#include <assert.h> /* for exit() */
 #endif
-#include "dprint.h"
+#include "dprint.h" /* for DBGPRINTX() */
 
 #ifdef __cplusplus
 extern "C" {
@@ -61,7 +62,7 @@ static inline void asserts_h__assert(int x, A_In_z const char *cond, A_In_z cons
 		asserts_h__assertion_failed(cond, file, line, function);
 }
 
-#define ASSERT(cond) asserts_h__assert(!(cond), #cond, __FILE__, __LINE__, __func__)
+#define ASSERT(cond) asserts_h__assert(!(cond), #cond, __FILE__, __LINE__, DPRINT_FUNC)
 
 #else /* !NDEBUG */
 
