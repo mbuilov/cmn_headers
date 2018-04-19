@@ -24,9 +24,10 @@ extern "C" {
 
   if condition is false, then:
   in DEBUG   - abnormal program exit
-  in RELEASE - unreachable code
+  in RELEASE - _unreachable_ code
 */
 
+#ifndef ASSERT
 #ifndef NDEBUG
 #ifdef _MSC_VER
 #ifdef _DEBUG
@@ -34,9 +35,12 @@ extern "C" {
 #endif
 #endif
 #endif
+#endif
 
+#ifndef ASSERT
 #ifdef __clang_analyzer__
 #define ASSERT(cond) ASSUME(cond)
+#endif
 #endif
 
 #ifndef ASSERT
@@ -73,28 +77,30 @@ static inline void asserts_h__assert(int x, A_In_z const char *cond, A_In_z cons
   in DEBUG   - abnormal program exit
   in RELEASE - _reachable_ code, error must be processed appropriately
 */
+#ifndef DEBUG_CHECK
 #ifndef NDEBUG
 #define DEBUG_CHECK(cond) ASSERT(cond)
 #else
 #define DEBUG_CHECK(cond) ((void)0) /* _must_ process an error on runtime if cond is false */
 #endif
+#endif
 
 /* compile-time asserts:
 
   EMBED_ASSERT(condition)  - evaluates to 0 at compile-time, may be placed inside an expression,
-  STATIC_ASSERT(condition) - defines struct, cannot be placed inside an expression.
+  STATIC_ASSERT(condition) - defines struct, cannot be placed inside expressions.
 */
 
+#ifndef EMBED_ASSERT
 #define EMBED_ASSERT(expr) (0*sizeof(int[1-2*!(expr)]))
-
-#ifdef STATIC_ASSERT
-#undef STATIC_ASSERT
 #endif
 
-/* note: use ##line to define an unique structure */
-#define STATIC_ASSERT2(expr,line) struct _static_assert_at_line_##line{int _a[1-2*!(expr)];}
+/* note: use ##line for the unique structure name */
+#ifndef STATIC_ASSERT
+#define STATIC_ASSERT2(expr,line) struct asserts_h__static_assert_at_line_##line{int a_[1-2*!(expr)];}
 #define STATIC_ASSERT1(expr,line) STATIC_ASSERT2(expr,line)
 #define STATIC_ASSERT(expr)       STATIC_ASSERT1(expr,__LINE__)
+#endif
 
 /* number of elements in static array:
 
@@ -102,6 +108,7 @@ static inline void asserts_h__assert(int x, A_In_z const char *cond, A_In_z cons
   size_t count = COUNT_OF(arr); // 10
 */
 
+#ifndef COUNT_OF
 #ifdef __GNUC__
 #define COUNT_OF_(arr) (sizeof(arr)/sizeof((arr)[0]))
 /* check that arr - is an array, not a pointer */
@@ -111,6 +118,7 @@ template <typename T, size_t N> char (&COUNT_OF_(T (&array)[N]))[N];
 #define COUNT_OF(arr) (sizeof(COUNT_OF_(arr)))
 #else
 #define COUNT_OF(arr) (sizeof(arr)/sizeof((arr)[0]))
+#endif
 #endif
 
 #ifdef __cplusplus
