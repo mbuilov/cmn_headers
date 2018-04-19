@@ -85,7 +85,7 @@ static inline void *const_cast_void__(const void *p)
 #define CONST_CAST(type, ptr) ((type*)const_cast_void__((ptr) + 0*sizeof(((const type*)(const void*)(ptr) - (ptr)))))
 
 A_Nonnull_all_args A_Const_function A_Check_return A_Ret_never_null A_Ret_range(==,(char*)p - offset)
-static inline void *_container_of__(
+static inline void *container_of__(
 	A_Notnull A_At((char*)p - offset, A_Writable_bytes(offset)) const void *p/*!=NULL*/,
 	size_t offset)
 {
@@ -119,7 +119,7 @@ static inline void *opt_container_of__(
 /* NOTE: must specify const type for const ptr */
 #define CONTAINER_OF(ptr/*!=NULL*/, type, member) \
 	check_constness_(ptr, member, \
-		((type*)_container_of__(ptr, offsetof(type, member) + \
+		((type*)container_of__(ptr, offsetof(type, member) + \
 			0*sizeof((&((type*)const_cast_void__(ptr))->member - (ptr))))))
 
 /* ptr may be NULL, else must point to member of allocated object; returns NULL if ptr is NULL */
