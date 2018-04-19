@@ -15,6 +15,12 @@
   DBGPRINTX(file, line, function, format, ...)
 */
 
+#ifndef DPRINT_TO_STDSTREAM
+#ifndef NDEBUG
+#define DPRINT_TO_STDSTREAM stderr
+#endif
+#endif
+
 #ifdef DPRINT_TO_STDSTREAM
 #include <stdio.h> /* for fprintf() */
 #endif
