@@ -17,10 +17,6 @@
 #endif
 #include "dprint.h" /* for DBGPRINTX() */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /* ASSERT(condition)
 
   if condition is false, then:
@@ -48,6 +44,10 @@ extern "C" {
 
 #ifndef NDEBUG
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 A_Noreturn_function A_Force_inline_function
 static void asserts_h__assertion_failed(A_In_z const char *cond, A_In_z const char *file, int line, A_In_z const char *function)
 {
@@ -61,6 +61,10 @@ static inline void asserts_h__assert(int x, A_In_z const char *cond, A_In_z cons
 	if (x)
 		asserts_h__assertion_failed(cond, file, line, function);
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #define ASSERT(cond) asserts_h__assert(!(cond), #cond, __FILE__, __LINE__, DPRINT_FUNC)
 
@@ -120,10 +124,6 @@ template <typename T, size_t N> char (&COUNT_OF_(T (&array)[N]))[N];
 #else
 #define COUNT_OF(arr) (sizeof(arr)/sizeof((arr)[0]))
 #endif
-#endif
-
-#ifdef __cplusplus
-}
 #endif
 
 #endif /* ASSERTS_H_INCLUDED */
