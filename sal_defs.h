@@ -23,6 +23,7 @@
 #define A_Empty                                  /* empty, use to workaround bugs in compiler */
 #define A_Curr                                   _Curr_
 #define A_Old                                    _Old_
+#define A_Const                                  _Const_
 #define A_In                                     _In_
 #define A_In_opt                                 _In_opt_
 #define A_In_z                                   _In_z_
@@ -45,12 +46,16 @@
 #define A_In_reads_opt(s)                        _In_reads_opt_(s)
 #define A_In_reads_bytes(s)                      _In_reads_bytes_(s)
 #define A_In_reads_bytes_opt(s)                  _In_reads_bytes_opt_(s)
+#define A_In_reads_z(s)                          _In_reads_z_(s)
+#define A_In_reads_opt_z(s)                      _In_reads_opt_z_(s)
 #define A_In_reads_to_ptr(end)                   _In_reads_to_ptr_(end)
 #define A_In_reads_to_ptr_opt(end)               _In_reads_to_ptr_opt_(end)
 #define A_Inout_updates(s)                       _Inout_updates_(s)
 #define A_Inout_updates_opt(s)                   _Inout_updates_opt_(s)
 #define A_Inout_updates_bytes(s)                 _Inout_updates_bytes_(s)
 #define A_Inout_updates_bytes_opt(s)             _Inout_updates_bytes_opt_(s)
+#define A_Inout_updates_z(s)                     _Inout_updates_z_(s)
+#define A_Inout_updates_opt_z(s)                 _Inout_updates_opt_z_(s)
 #define A_Inout_updates_to(s,c)                  _Inout_updates_to_(s,c)
 #define A_Inout_updates_to_opt(s,c)              _Inout_updates_to_opt_(s,c)
 #define A_Inout_updates_all(s)                   _Inout_updates_all_(s)
@@ -63,8 +68,12 @@
 #define A_Out_writes_opt(s)                      _Out_writes_opt_(s)
 #define A_Out_writes_bytes(s)                    _Out_writes_bytes_(s)
 #define A_Out_writes_bytes_opt(s)                _Out_writes_bytes_opt_(s)
+#define A_Out_writes_z(s)                        _Out_writes_z_(s)
+#define A_Out_writes_opt_z(s)                    _Out_writes_opt_z_(s)
 #define A_Out_writes_to_ptr(end)                 _Out_writes_to_ptr_(end)
 #define A_Out_writes_to_ptr_opt(end)             _Out_writes_to_ptr_opt_(end)
+#define A_Out_writes_to_ptr_z(end)               _Out_writes_to_ptr_z_(end)
+#define A_Out_writes_to_ptr_opt_z(end)           _Out_writes_to_ptr_opt_z_(end)
 #define A_Out_writes_to(s,c)                     _Out_writes_to_(s,c)
 #define A_Out_writes_to_opt(s,c)                 _Out_writes_to_opt_(s,c)
 #define A_Out_writes_all(s)                      _Out_writes_all_(s)
@@ -100,6 +109,7 @@
 #define A_Deref_ret_range(l,h)                   _Deref_ret_range_(l,h)
 #define A_Pre_equal_to(v)                        _Pre_equal_to_(v)
 #define A_Post_equal_to(v)                       _Post_equal_to_(v)
+#define A_Unchanged(v)                           _Unchanged_(v)
 #define A_Pre_satisfies(cond)                    _Pre_satisfies_(cond)
 #define A_Post_satisfies(cond)                   _Post_satisfies_(cond)
 #define A_Success(expr)                          _Success_(expr)
@@ -108,6 +118,30 @@
 #define A_Result_zeroonfailure                   _Result_zeroonfailure_
 #define A_Outptr_result_nullonfailure            _Outptr_result_nullonfailure_
 #define A_Outptr_opt_result_nullonfailure        _Outptr_opt_result_nullonfailure_
+#define A_Outptr_result_buffer(s)                        _Outptr_result_buffer_(s)
+#define A_Outptr_opt_result_buffer(s)                    _Outptr_opt_result_buffer_(s)
+#define A_Outptr_result_buffer_to(s,c)                   _Outptr_result_buffer_to_(s,c)
+#define A_Outptr_opt_result_buffer_to(s,c)               _Outptr_opt_result_buffer_to_(s,c)
+#define A_Outptr_result_buffer_all(s)                    _Outptr_result_buffer_all_(s)
+#define A_Outptr_opt_result_buffer_all(s)                _Outptr_opt_result_buffer_all_(s)
+#define A_Outptr_result_buffer_maybenull(s)              _Outptr_result_buffer_maybenull_(s)
+#define A_Outptr_opt_result_buffer_maybenull(s)          _Outptr_opt_result_buffer_maybenull_(s)
+#define A_Outptr_result_buffer_to_maybenull(s,c)         _Outptr_result_buffer_to_maybenull_(s,c)
+#define A_Outptr_opt_result_buffer_to_maybenull(s,c)     _Outptr_opt_result_buffer_to_maybenull_(s,c)
+#define A_Outptr_result_buffer_all_maybenull(s)          _Outptr_result_buffer_all_maybenull_(s)
+#define A_Outptr_opt_result_buffer_all_maybenull(s)      _Outptr_opt_result_buffer_all_maybenull_(s)
+#define A_Outptr_result_bytebuffer(s)                    _Outptr_result_bytebuffer_(s)
+#define A_Outptr_opt_result_bytebuffer(s)                _Outptr_opt_result_bytebuffer_(s)
+#define A_Outptr_result_bytebuffer_to(s,c)               _Outptr_result_bytebuffer_to_(s,c)
+#define A_Outptr_opt_result_bytebuffer_to(s,c)           _Outptr_opt_result_bytebuffer_to_(s,c)
+#define A_Outptr_result_bytebuffer_all(s)                _Outptr_result_bytebuffer_all_(s)
+#define A_Outptr_opt_result_bytebuffer_all(s)            _Outptr_opt_result_bytebuffer_all_(s)
+#define A_Outptr_result_bytebuffer_maybenull(s)          _Outptr_result_bytebuffer_maybenull_(s)
+#define A_Outptr_opt_result_bytebuffer_maybenull(s)      _Outptr_opt_result_bytebuffer_maybenull_(s)
+#define A_Outptr_result_bytebuffer_to_maybenull(s,c)     _Outptr_result_bytebuffer_to_maybenull_(s,c)
+#define A_Outptr_opt_result_bytebuffer_to_maybenull(s,c) _Outptr_opt_result_bytebuffer_to_maybenull_(s,c)
+#define A_Outptr_result_bytebuffer_all_maybenull(s)      _Outptr_result_bytebuffer_all_maybenull_(s)
+#define A_Outptr_opt_result_bytebuffer_all_maybenull(s)  _Outptr_opt_result_bytebuffer_all_maybenull_(s)
 #define A_Printf_format_string                   _Printf_format_string_
 #define e_A_Group(anns,empty)                    _Group_(anns##empty)
 #define A_Group(anns)                            e_A_Group(anns,A_Empty)
@@ -124,6 +158,8 @@
 #define A_Post_null                              _Post_null_
 #define A_Post_notnull                           _Post_notnull_
 #define A_Post_maybenull                         _Post_maybenull_
+#define A_Prepost_z                              _Prepost_z_
+#define A_Pre_z                                  _Pre_z_
 #define A_Pre_valid                              _Pre_valid_
 #define A_Pre_opt_valid                          _Pre_opt_valid_
 #define A_Pre_invalid                            _Pre_invalid_
@@ -214,6 +250,7 @@
 #endif /* no GCC extensions */
 #define A_Curr                                   /* references current function parameter, like A_At(*A_Curr, A_Post_notnull)      */
 #define A_Old                                    /* old value, like A_Old(*A_Curr)                                                 */
+#define A_Const                                  /* object is not changed by a function call                                       */
 #define A_In                                     /* readonly,      !=NULL                                                          */
 #define A_In_opt                                 /* readonly,       NULL?                                                          */
 #define A_In_z                                   /* readonly,      !=NULL, '\0'-terminated string                                  */
@@ -236,12 +273,16 @@
 #define A_In_reads_opt(s)                        /* readonly,       NULL?, reads s-elements                                        */
 #define A_In_reads_bytes(s)                      /* readonly,      !=NULL, reads s-bytes                                           */
 #define A_In_reads_bytes_opt(s)                  /* readonly,       NULL?, reads s-bytes                                           */
+#define A_In_reads_z(s)                          /* readonly,      !=NULL, reads s-chars, '\0'-terminated                          */
+#define A_In_reads_opt_z(s)                      /* readonly,       NULL?, reads s-chars, '\0'-terminated                          */
 #define A_In_reads_to_ptr(end)                   /* readonly,      !=NULL, reads until end                                         */
 #define A_In_reads_to_ptr_opt(end)               /* readonly,       NULL?, reads until end                                         */
 #define A_Inout_updates(s)                       /* read-write,    !=NULL, array of s-elements, unknown number of updated elements */
 #define A_Inout_updates_opt(s)                   /* read-write,     NULL?, array of s-elements, unknown number of updated elements */
 #define A_Inout_updates_bytes(s)                 /* read-write,    !=NULL, array of s-bytes,    unknown number of updated bytes    */
 #define A_Inout_updates_bytes_opt(s)             /* read-write,     NULL?, array of s-bytes,    unknown number of updated bytes    */
+#define A_Inout_updates_z(s)                     /* read-write,    !=NULL, array of s-chars, '\0'-terminated before/after the call */
+#define A_Inout_updates_opt_z(s)                 /* read-write,     NULL?, array of s-chars, '\0'-terminated before/after the call */
 #define A_Inout_updates_to(s,c)                  /* read-write,    !=NULL, array of s-elements, c elements updated                 */
 #define A_Inout_updates_to_opt(s,c)              /* read-write,     NULL?, array of s-elements, c elements updated                 */
 #define A_Inout_updates_all(s)                   /* read-write,    !=NULL, array of s-elements, all elements updated               */
@@ -254,8 +295,12 @@
 #define A_Out_writes_opt(s)                      /* uninitialized,  NULL?, array of s-elements, unknown number of written elements */
 #define A_Out_writes_bytes(s)                    /* uninitialized, !=NULL, array of s-bytes,    unknown number of written bytes    */
 #define A_Out_writes_bytes_opt(s)                /* uninitialized,  NULL?, array of s-bytes,    unknown number of written bytes    */
+#define A_Out_writes_z(s)                        /* uninitialized, !=NULL, array of s-chars, '\0'-terminated after the call        */
+#define A_Out_writes_opt_z(s)                    /* uninitialized,  NULL?, array of s-chars, '\0'-terminated after the call        */
 #define A_Out_writes_to_ptr(end)                 /* uninitialized, !=NULL, writes until end                                        */
 #define A_Out_writes_to_ptr_opt(end)             /* uninitialized,  NULL?, writes until end                                        */
+#define A_Out_writes_to_ptr_z(end)               /* uninitialized, !=NULL, writes until end, '\0'-terminated after the call        */
+#define A_Out_writes_to_ptr_opt_z(end)           /* uninitialized,  NULL?, writes until end, '\0'-terminated after the call        */
 #define A_Out_writes_to(s,c)                     /* uninitialized, !=NULL, array of s-elements, c elements written                 */
 #define A_Out_writes_to_opt(s,c)                 /* uninitialized,  NULL?, array of s-elements, c elements written                 */
 #define A_Out_writes_all(s)                      /* uninitialized, !=NULL, array of s-elements, all elements written               */
@@ -297,6 +342,7 @@
 #define A_Deref_ret_range(l,h)                   /* NULL? pointer to value in given range                                          */
 #define A_Pre_equal_to(v)                        /* shortcut to A_In_range(=,v)                                                    */
 #define A_Post_equal_to(v)                       /* shortcut to A_Out_range(=,v), usable for C++ references                        */
+#define A_Unchanged(v)                           /* value is not changed by a function: A_At(v, A_Post_equal_to(A_Old(v)) A_Const) */
 #define A_Pre_satisfies(cond)                    /* custom condition for input parameter                                           */
 #define A_Post_satisfies(cond)                   /* custom condition for output parameter                                          */
 #define A_Success(expr)                          /* successful return                                                              */
@@ -305,11 +351,35 @@
 #define A_Result_zeroonfailure                   /* out parameter is zero on failure                                               */
 #define A_Outptr_result_nullonfailure            /* A_Outptr     value is NULL on failure                                          */
 #define A_Outptr_opt_result_nullonfailure        /* A_Outptr_opt value is NULL on failure                                          */
+#define A_Outptr_result_buffer(s)                        /* buffer of s-elements, unknown number of written elements               */
+#define A_Outptr_opt_result_buffer(s)                    /* buffer of s-elements, unknown number of written elements               */
+#define A_Outptr_result_buffer_to(s,c)                   /* buffer of s-elements, c elements written                               */
+#define A_Outptr_opt_result_buffer_to(s,c)               /* buffer of s-elements, c elements written                               */
+#define A_Outptr_result_buffer_all(s)                    /* buffer of s-elements, all elements written                             */
+#define A_Outptr_opt_result_buffer_all(s)                /* buffer of s-elements, all elements written                             */
+#define A_Outptr_result_buffer_maybenull(s)              /* optional buffer of s-elements, unknown number of written elements      */
+#define A_Outptr_opt_result_buffer_maybenull(s)          /* optional buffer of s-elements, unknown number of written elements      */
+#define A_Outptr_result_buffer_to_maybenull(s,c)         /* optional buffer of s-elements, c elements written                      */
+#define A_Outptr_opt_result_buffer_to_maybenull(s,c)     /* optional buffer of s-elements, c elements written                      */
+#define A_Outptr_result_buffer_all_maybenull(s)          /* optional buffer of s-elements, all elements written                    */
+#define A_Outptr_opt_result_buffer_all_maybenull(s)      /* optional buffer of s-elements, all elements written                    */
+#define A_Outptr_result_bytebuffer(s)                    /* buffer of s-bytes, unknown number of written bytes                     */
+#define A_Outptr_opt_result_bytebuffer(s)                /* buffer of s-bytes, unknown number of written bytes                     */
+#define A_Outptr_result_bytebuffer_to(s,c)               /* buffer of s-bytes, c bytes written                                     */
+#define A_Outptr_opt_result_bytebuffer_to(s,c)           /* buffer of s-bytes, c bytes written                                     */
+#define A_Outptr_result_bytebuffer_all(s)                /* buffer of s-bytes, all bytes written                                   */
+#define A_Outptr_opt_result_bytebuffer_all(s)            /* buffer of s-bytes, all bytes written                                   */
+#define A_Outptr_result_bytebuffer_maybenull(s)          /* optional buffer of s-bytes, unknown number of written bytes            */
+#define A_Outptr_opt_result_bytebuffer_maybenull(s)      /* optional buffer of s-bytes, unknown number of written bytes            */
+#define A_Outptr_result_bytebuffer_to_maybenull(s,c)     /* optional buffer of s-bytes, c bytes written                            */
+#define A_Outptr_opt_result_bytebuffer_to_maybenull(s,c) /* optional buffer of s-bytes, c bytes written                            */
+#define A_Outptr_result_bytebuffer_all_maybenull(s)      /* optional buffer of s-bytes, all bytes written                          */
+#define A_Outptr_opt_result_bytebuffer_all_maybenull(s)  /* optional buffer of s-bytes, all bytes written                          */
 #define A_Printf_format_string                   /* printf-like format string                                                      */
 #define A_Group(anns)                            /* apply annotations if A_Success(expr) gives true result                         */
 #define A_On_failure(anns)                       /* apply annotations if A_Success(expr) gives false result                        */
 #define A_Always(anns)                           /* apply annotations even if A_Success(expr) gives false result                   */
-#define A_At(at,anns)                            /* A_On_failure(_At(*p, A_Post_null)) T **p                                       */
+#define A_At(at,anns)                            /* A_On_failure(A_At(*p, A_Post_null)) T **p                                      */
 #define A_When(cond,anns)                        /* A_When(return != 0, A_Out_writes(size)) T p[]                                  */
 #define A_Post_z                                 /* !=NULL, buffer will be '\0'-terminated after the call                          */
 #define A_Post_valid                             /* !=NULL,   legal post read:       init(A_Post_valid struct X *x) ;              */
@@ -318,6 +388,8 @@
 #define A_Post_null                              /* ==NULL after the call                                                          */
 #define A_Post_notnull                           /* !=NULL after the call                                                          */
 #define A_Post_maybenull                         /*  NULL? after the call                                                          */
+#define A_Prepost_z                              /* !=NULL, '\0'-terminated before/after the call                                  */
+#define A_Pre_z                                  /* !=NULL, '\0'-terminated before the call                                        */
 #define A_Pre_valid                              /* !=NULL,   legal pre read                                                       */
 #define A_Pre_opt_valid                          /*  NULL?,   legal pre read                                                       */
 #define A_Pre_invalid                            /*  NULL?, illegal pre read                                                       */
@@ -339,10 +411,10 @@
 #define A_Writable_bytes(n)                      /*  NULL? may write given number of bytes                                         */
 #define A_Writable_elements(n)                   /*  NULL? may write given number of elements                                      */
 #define A_Null_terminated                        /*  NULL? '\0'-terminated string                                                  */
-#define A_Pre_readable_size(s)                   /*  NULL? may read  given size of elements before the call                        */
-#define A_Pre_writable_size(s)                   /*  NULL? may write given size of elements before the call                        */
-#define A_Pre_readable_byte_size(s)              /*  NULL? may read  given size of    bytes before the call                        */
-#define A_Pre_writable_byte_size(s)              /*  NULL? may write given size of    bytes before the call                        */
+#define A_Pre_readable_size(s)                   /*  NULL? may read  given size of elements during the call                        */
+#define A_Pre_writable_size(s)                   /*  NULL? may write given size of elements during the call                        */
+#define A_Pre_readable_byte_size(s)              /*  NULL? may read  given size of    bytes during the call                        */
+#define A_Pre_writable_byte_size(s)              /*  NULL? may write given size of    bytes during the call                        */
 #define A_Post_readable_size(s)                  /*  NULL? may read  given size of elements  after the call                        */
 #define A_Post_writable_size(s)                  /*  NULL? may write given size of elements  after the call                        */
 #define A_Post_readable_byte_size(s)             /*  NULL? may read  given size of    bytes  after the call                        */
