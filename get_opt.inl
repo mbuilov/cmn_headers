@@ -31,13 +31,16 @@
 #define ASSERT(x) ((void)0)
 #endif
 
-/* this file defines two inline functions:
+/* this file defines two static functions:
 
    1) void opt_info_init(struct opt_info *i, int argc, GET_OPT_CHAR *const argv[]);
       - used to initialize options parsing state structure 'opt_info' (declared below)
 
    2) int get_opt(struct opt_info *i, const GET_OPT_CHAR short_opts[], const GET_OPT_CHAR *const long_opts[]);
       - get next option value or parameter specified in the command line
+
+   3) void opt_skip_unknown(struct opt_info *i)
+      - skip unrecognized option
 */
 
 /* structure that describes state of options parsing */
@@ -288,12 +291,20 @@ int main(int argc, char *argv[])
 					printf("no value specified for 'cetera'\n");
 				break;
 			case OPT_UNKNOWN:
+				/* Note: processing of an unknown option may be delegated to another module, e.g.:
+				  other_module_process_option(i);
+				    where
+				  void other_module_process_option(struct opt_info *i)
+				  {
+				    switch (get_opt(i, other_short_opts, other_long_opts) {
+				      ...
+				    }
+				  } */
 				if (i.sopt)
 					printf("unknown short option '%c' in the bundle: '%s'\n", *i.sopt, *i.arg);
 				else
 					printf("unknown option: '%s'\n", *i.arg);
-				i.arg++;       /* skip unknown option */
-				i.sopt = NULL; /* and the rest of the bundle, if any */
+				opt_skip_unknown(&i); /* skip unknown option, assume it do not expects a value */
 				break;
 			case OPT_PARAMETER:
 				printf("parameter: %s\n", i.value);
@@ -490,6 +501,24 @@ parse_long_option:
 	}
 	i->arg--;
 	return OPT_UNKNOWN; /* i->arg points to unknown option (or bundle, if i->sopt != NULL) */
+}
+
+#ifdef A_Nonnull_all_args
+A_Nonnull_all_args
+#endif
+static void opt_skip_unknown(
+#ifdef A_Inout
+	A_Inout
+#endif
+	struct opt_info *i
+) {
+	/* skip unknown option, assume it do not expects a value */
+	if (i->sopt) {
+		if (*++(i->sopt))
+			return;
+		i->sopt = NULL;
+	}
+	i->arg++;
 }
 
 #endif /* GET_OPT_INL_INCLUDED */
