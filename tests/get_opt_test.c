@@ -110,16 +110,15 @@ int main(int argc, char *argv[])
 					printf("unknown short option '%c' in the bundle: '%s'\n", *i.sopt, *i.arg);
 				else
 					printf("unknown option: '%s'\n", *i.arg);
-				i.arg++; /* skip unknown option */
-				i.sopt = NULL;
+				opt_skip_unknown(&i);
 				break;
 			case OPT_PARAMETER:
 				printf("parameter: %s\n", i.value);
 				break;
 			case OPT_REST_PARAMS:
 				do {
-					printf("parameter: %s\n", *i.arg++);
-				} while (i.arg != i.args_end);
+					printf("parameter: %s\n", *i.arg);
+				} while (++i.arg != i.args_end);
 				break;
 			default:
 				fprintf(stderr, "assert!\n");
