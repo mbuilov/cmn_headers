@@ -292,7 +292,7 @@ int main(int argc, char *argv[])
 				break;
 			case OPT_UNKNOWN:
 				/* Note: processing of an unknown option may be delegated to another module, e.g.:
-				  other_module_process_option(i);
+				  other_module_process_option(&i);
 				    where
 				  void other_module_process_option(struct opt_info *i)
 				  {
