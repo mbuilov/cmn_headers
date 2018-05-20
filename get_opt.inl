@@ -521,4 +521,8 @@ static void opt_skip_unknown(
 	i->arg++;
 }
 
+typedef int get_opt_t[sizeof(&get_opt)];
+typedef int opt_info_init_t[sizeof(&opt_info_init)];
+typedef int opt_skip_unknown_t[sizeof(&opt_skip_unknown)];
+
 #endif /* GET_OPT_INL_INCLUDED */
