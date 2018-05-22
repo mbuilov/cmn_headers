@@ -64,8 +64,8 @@ static inline UINT16_TYPE bswap2(UINT16_TYPE x)
 #else
 	/* gcc, clang, icc optimizes this to simple ror, cl - can't */
 	return (UINT16_TYPE)(
-		((UINT16_TYPE)(x & 0xFF00) >> 8) |
-		((UINT16_TYPE)(x & 0x00FF) << 8)
+		((UINT16_TYPE)(x & 0xFF00u) >> 8) |
+		((UINT16_TYPE)(x & 0x00FFu) << 8)
 	);
 #endif
 }
@@ -76,7 +76,7 @@ static inline UINT32_TYPE bswap4(UINT32_TYPE x)
 	return BYTESWAP_UINT32(x);
 #else
 	/* gcc, clang, icc optimizes this to simple bswap, cl - can't */
-	return (UINT32_TYPE)(
+	return (
 		((x & 0xFF000000u) >> 24) |
 		((x & 0x00FF0000u) >>  8) |
 		((x & 0x0000FF00u) <<  8) |
@@ -91,7 +91,7 @@ static inline UINT64_TYPE bswap8(UINT64_TYPE x)
 	return BYTESWAP_UINT64(x);
 #else
 	/* gcc, clang, icc optimizes this to simple bswap, cl - can't */
-	return (UINT64_TYPE)(
+	return (
 		((x & 0xFF00000000000000ull) >> 56) |
 		((x & 0x00FF000000000000ull) >> 40) |
 		((x & 0x0000FF0000000000ull) >> 24) |
@@ -113,7 +113,7 @@ static inline UINT16_TYPE hswap2(UINT16_TYPE x)
 /* half-swap 32-bit integer */
 static inline UINT32_TYPE hswap4(UINT32_TYPE x)
 {
-	return (UINT32_TYPE)(
+	return (
 		((x & 0xFFFF0000u) >> 16) |
 		((x & 0x0000FFFFu) << 16)
 	);
@@ -122,7 +122,7 @@ static inline UINT32_TYPE hswap4(UINT32_TYPE x)
 /* half-swap 64-bit integer */
 static inline UINT64_TYPE hswap8(UINT64_TYPE x)
 {
-	return (UINT64_TYPE)(
+	return (
 		((x & 0xFFFFFFFF00000000ull) >> 32) |
 		((x & 0x00000000FFFFFFFFull) << 32)
 	);
