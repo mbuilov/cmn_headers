@@ -31,6 +31,11 @@
 #define ASSERT(x) ((void)0)
 #endif
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4505) /* unreferenced local function has been removed */
+#endif
+
 /* this file defines two static functions:
 
    1) void opt_info_init(struct opt_info *i, int argc, GET_OPT_CHAR *const argv[]);
@@ -521,8 +526,13 @@ static void opt_skip_unknown(
 	i->arg++;
 }
 
+/* suppress warnings about unreferenced static functions */
 typedef int get_opt_t[sizeof(&get_opt)];
 typedef int opt_info_init_t[sizeof(&opt_info_init)];
 typedef int opt_skip_unknown_t[sizeof(&opt_skip_unknown)];
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #endif /* GET_OPT_INL_INCLUDED */
