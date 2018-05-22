@@ -50,7 +50,7 @@ extern "C" {
 #endif
 
 /* check that UINT16_TYPE is 16 bits long, UINT32_TYPE - 32 bits and  UINT64_TYPE - 64 bits */
-typedef int CHAR_TYPE_is_not_8_bits_[1-2*(255 != (unsigned char)~(unsigned char)0)];
+typedef int CHAR_TYPE_is_not_8_bits_[1-2*(255 != (unsigned char)-1)];
 typedef int UINT16_TYPE_is_not_2_bytes_[1-2*(sizeof(UINT16_TYPE) != 2)];
 typedef int UINT32_TYPE_is_not_4_bytes_[1-2*(sizeof(UINT32_TYPE) != 4)];
 typedef int UINT64_TYPE_is_not_8_bytes_[1-2*(sizeof(UINT64_TYPE) != 8)];
