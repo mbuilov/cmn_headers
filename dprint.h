@@ -130,13 +130,16 @@ void DPRINT_TO_LOG(A_In_z A_Printf_format_string const char *format, ...);
 
 #if defined DPRINT_TO_LOG || defined DPRINT_TO_STREAM
 
-#define DPRN_ARGS2(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20,a21,a22,a23,a24,a25,a26,a27,a28,a29,a30,n,...) n
+/* check if number of arguments is 2 or more, works for maximum 32 arguments */
+#define DPRN_ARGS2(a1,a2,a3,a4,a5,a6,a7,a8,a9,b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,c0,c1,c2,c3,c4,c5,c6,c7,c8,c9,d0,d1,d2,n,...) n
 #define DPRN_ARGS1(args)    DPRN_ARGS2 args
-#define DPRN_ARGS(...)      DPRN_ARGS1((__VA_ARGS__,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,0))
+#define DPRN_ARGS(...)      DPRN_ARGS1((__VA_ARGS__,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,0))
+
 #define DBGPRINT3(X,N,args) DBGPRINT3##X##N args
 #define DBGPRINT2(X,N,args) DBGPRINT3(X,N,args)
 #define DBGPRINT1(X,N,args) DBGPRINT2(X,N,args)
-/* add '\n' at end of format string, works for maximum 30 arguments */
+
+/* add '\n' at end of format string, works for maximum 32 arguments */
 #define DBGPRINT(...)                             DBGPRINT1(_,DPRN_ARGS(__VA_ARGS__),(__VA_ARGS__))
 #define DBGPRINTX(d_file__,d_line__,d_func__,...) DBGPRINT1(x,DPRN_ARGS(__VA_ARGS__),(d_file__,d_line__,d_func__,__VA_ARGS__))
 
