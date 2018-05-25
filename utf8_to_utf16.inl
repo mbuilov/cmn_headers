@@ -52,15 +52,14 @@ typedef int (*utf8_to_utf16_bad_UTF8CHAR)[1-2*((UTF8CHAR)-1 < 0 || (UTF8CHAR)-1 
  - if input utf8 string is invalid:
   (*q) - points beyond the last valid UTF8CHAR, if output buffer is too small,
    it may be different from the last successfully converted UTF8CHAR,
-   last valid UTF8CHAR is _not_ 0;
+   the last valid UTF8CHAR is _not_ 0;
   (*b) - if sz > 0, points beyond the last stored (non-0) UTF16CHAR */
-#ifdef SAL_DEFS_H_INCLUDED
-/* include "sal_defs.h" for the annotations */
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Success(return)
 A_At(q, A_Inout) A_At(*q, A_In_z)
-A_When(sz, A_At(b, A_Inout) A_At(*b, A_Out_writes(sz)))
+A_When(sz, A_At(b, A_Notnull) A_At(*b, A_Writable_elements(sz)))
 #endif
-static size_t utf8_to_utf16_z(const UTF8CHAR **q, UTF16CHAR **b, size_t sz)
+static size_t utf8_to_utf16_z(const UTF8CHAR **const q, UTF16CHAR **const b, size_t sz)
 {
 	/* unsigned integer type must be at least of 32 bits */
 	size_t m = 0*sizeof(int(*)[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
@@ -141,7 +140,7 @@ static size_t utf8_to_utf16_z(const UTF8CHAR **q, UTF16CHAR **b, size_t sz)
 			if (!a) {
 				m = (size_t)(d - *b);
 bad_utf8:
-				*q = s; /* (*q) != 0 if bad_utf8 */
+				*q = s; /* (*q) != 0 if bad_utf8, else (*q) points beyond successfully converted 0 */
 				*b = d;
 				return m; /* 0 if bad_utf8, else >0 */
 			}
@@ -159,41 +158,41 @@ small_buf:
 			if (a >= 0xE0) {
 				if (a >= 0xF0) {
 					if (a >= 0xF8)
-						goto bad_utf8_; /* expecting max 4 utf8 bytes for a unicode code point */
+						goto bad_utf8_s; /* expecting max 4 utf8 bytes for a unicode code point */
 					r = s[1];
 					if (0x80 != (r & 0xC0))
-						goto bad_utf8_; /* incomplete utf8 character */
+						goto bad_utf8_s; /* incomplete utf8 character */
 					a = (a << 6) ^ r;
 					r = s[2];
 					if (0x80 != (r & 0xC0))
-						goto bad_utf8_; /* incomplete utf8 character */
+						goto bad_utf8_s; /* incomplete utf8 character */
 					a = (a << 6) ^ r;
 					r = s[3];
 					if (0x80 != (r & 0xC0))
-						goto bad_utf8_; /* incomplete utf8 character */
+						goto bad_utf8_s; /* incomplete utf8 character */
 					a = ((a << 6) ^ r ^ 0xA82080) - 0x10000;
 					/* a        = 11011aaaaabbbbbbbbcccccccc before substracting 0x10000,
 					 a must match 110110xxxxxxxxxxxxxxxxxxxx after  substracting 0x10000 */
 					if (0x3600000 != (a & 0x3F00000))
-						goto bad_utf8_; /* bad utf8 character */
+						goto bad_utf8_s; /* bad utf8 character */
 					s += 4;
 					m += 2; /* + (4 UTF8CHARs - 2 UTF16CHARs) */
 				}
 				else {
 					r = s[1];
 					if (0x80 != (r & 0xC0))
-						goto bad_utf8_; /* incomplete utf8 character */
+						goto bad_utf8_s; /* incomplete utf8 character */
 					a = (a << 6) ^ r;
 					r = s[2];
 					if (0x80 != (r & 0xC0))
-						 goto bad_utf8_; /* incomplete utf8 character */
+						 goto bad_utf8_s; /* incomplete utf8 character */
 					a = (a << 6) ^ r ^ 0xE2080;
 					/* must not begin or end a surrogate pair */
 					if (!a ||
 						0xD800 == (a & 0xFC00) ||
 						0xDC00 == (a & 0xFC00))
 					{
-						goto bad_utf8_; /* overlong/bad utf8 character */
+						goto bad_utf8_s; /* overlong/bad utf8 character */
 					}
 					s += 3;
 					m += 2; /* + (3 UTF8CHARs - 1 UTF16CHAR) */
@@ -202,16 +201,16 @@ small_buf:
 			else if (a >= 0xC0) {
 				r = s[1];
 				if (0x80 != (r & 0xC0))
-					goto bad_utf8_; /* incomplete utf8 character */
+					goto bad_utf8_s; /* incomplete utf8 character */
 				a = (a << 6) ^ r ^ 0x3080;
 				if (!a)
-					goto bad_utf8_; /* overlong utf8 character */
+					goto bad_utf8_s; /* overlong utf8 character */
 				s += 2;
 				m++; /* + (2 UTF8CHARs - 1 UTF16CHAR) */
 			}
 			else {
 				/* not expecting 10xxxxxx */
-bad_utf8_:
+bad_utf8_s:
 				*q = s; /* (*q) != 0 */
 				return 0; /* incomplete utf8 character */
 			}
@@ -240,7 +239,7 @@ bad_utf8_:
   q  - address of the pointer to the beginning of input utf8 string,
   b  - optional address of the pointer to the beginning of output buffer,
   sz - free space in output buffer, in UTF16CHARs, if zero - output buffer is not used.
-  n  - number of UTF8CHARs to convert.
+  n  - number of UTF8CHARs to convert, if zero - input and output buffers are not used.
  returns number of stored UTF16CHARs:
   0     - if 'n' is zero or an invalid utf8 character is encountered,
   <= sz - all 'n' UTF8CHARs were successfully converted to utf16 ones and stored in the output buffer,
@@ -255,36 +254,29 @@ bad_utf8_:
  - if input utf8 string is invalid:
   (*q) - points beyond the last valid UTF8CHAR, if output buffer is too small,
    it may be different from the last successfully converted UTF8CHAR,
-   last valid UTF8CHAR is _not_ the last character of utf8 string;
+   the last valid UTF8CHAR is _not_ the last character of utf8 string;
   (*b) - if sz > 0, points beyond the last successfully converted and stored UTF16CHAR */
 /* Note: zero UTF8CHAR is not treated specially, i.e. conversion do not stops */
-#ifdef SAL_DEFS_H_INCLUDED
-/* include "sal_defs.h" for the annotations */
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_When(!n, A_Ret_range(==,0))
 A_Success(return)
-A_At(q, A_Inout) A_At(*q, A_In_reads(n))
-A_When(sz, A_At(b, A_Inout) A_At(*b, A_Out_writes(sz)))
+A_When(n, A_At(q, A_Inout) A_At(*q, A_In_reads(n)))
+A_When(n && sz, A_At(b, A_Notnull) A_At(*b, A_Writable_elements(sz)))
 #endif
-static size_t utf8_to_utf16(const UTF8CHAR **q, UTF16CHAR **b, size_t sz, size_t n)
+static size_t utf8_to_utf16(const UTF8CHAR **const q, UTF16CHAR **const b, size_t sz, const size_t n)
 {
-	/* unsigned integer type must be at least of 32 bits */
-	size_t m = 0*sizeof(int(*)[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
-	const UTF8CHAR *s = *q;
-	const UTF8CHAR *const se = s + n;
-	const UTF8CHAR *t; /* points beyond the last converted UTF8CHAR */
-	if (!sz)
-		t = s;
-	else {
-		UTF16CHAR *d = *b;
-		UTF16CHAR *const e = d + sz;
-		do {
-			if (s == se) {
-				m = (size_t)(d - *b);
-bad_utf8:
-				*q = s; /* (*q) < se if bad_utf8 */
-				*b = d;
-				return m; /* 0 if n is 0 or bad_utf8, else >0 */
-			}
-			{
+	if (n) {
+		/* unsigned integer type must be at least of 32 bits */
+		size_t m = 0*sizeof(int(*)[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
+		const UTF8CHAR *s = *q;
+		const UTF8CHAR *const se = s + n;
+		const UTF8CHAR *t; /* points beyond the last converted UTF8CHAR */
+		if (!sz)
+			t = s;
+		else {
+			UTF16CHAR *d = *b;
+			UTF16CHAR *const e = d + sz;
+			do {
 				unsigned a = s[0];
 				if (a >= 0x80) {
 					unsigned r;
@@ -357,98 +349,106 @@ bad_utf8:
 				else
 					s++;
 				*d++ = (UTF16CHAR)a;
-			}
-		} while (d != e);
-		/* too small output buffer */
-		t = s;
+				if (s == se) {
+					m = (size_t)(d - *b);
+bad_utf8:
+					*q = s; /* (*q) < se if bad_utf8, else (*q) == se */
+					*b = d;
+					return m; /* 0 if bad_utf8, else >0 */
+				}
+			} while (d != e);
+			/* too small output buffer */
+			t = s;
 small_buf:
-		sz = (size_t)(d - *b);
-		*b = d;
-	}
-	while (s != se) {
-		unsigned a = s[0];
-		if (a >= 0x80) {
-			unsigned r;
-			if (a >= 0xE0) {
-				if (a >= 0xF0) {
-					if (a >= 0xF8)
-						goto bad_utf8_; /* expecting max 4 utf8 bytes for a unicode code point */
-					if ((size_t)(se - s) < 4)
-						goto bad_utf8_; /* incomplete utf8 character */
+			sz = (size_t)(d - *b);
+			*b = d;
+		}
+		do {
+			unsigned a = s[0];
+			if (a >= 0x80) {
+				unsigned r;
+				if (a >= 0xE0) {
+					if (a >= 0xF0) {
+						if (a >= 0xF8)
+							goto bad_utf8_s; /* expecting max 4 utf8 bytes for a unicode code point */
+						if ((size_t)(se - s) < 4)
+							goto bad_utf8_s; /* incomplete utf8 character */
+						r = s[1];
+						if (0x80 != (r & 0xC0))
+							goto bad_utf8_s; /* incomplete utf8 character */
+						a = (a << 6) ^ r;
+						r = s[2];
+						if (0x80 != (r & 0xC0))
+							goto bad_utf8_s; /* incomplete utf8 character */
+						a = (a << 6) ^ r;
+						r = s[3];
+						if (0x80 != (r & 0xC0))
+							goto bad_utf8_s; /* incomplete utf8 character */
+						a = ((a << 6) ^ r ^ 0xA82080) - 0x10000;
+						/* a        = 11011aaaaabbbbbbbbcccccccc before substracting 0x10000,
+						 a must match 110110xxxxxxxxxxxxxxxxxxxx after  substracting 0x10000 */
+						if (0x3600000 != (a & 0x3F00000))
+							goto bad_utf8_s; /* bad utf8 character */
+						s += 4;
+						m += 2; /* + (4 UTF8CHARs - 2 UTF16CHARs) */
+					}
+					else {
+						if ((size_t)(se - s) < 3)
+							goto bad_utf8_s; /* incomplete utf8 character */
+						r = s[1];
+						if (0x80 != (r & 0xC0))
+							goto bad_utf8_s; /* incomplete utf8 character */
+						a = (a << 6) ^ r;
+						r = s[2];
+						if (0x80 != (r & 0xC0))
+							 goto bad_utf8_s; /* incomplete utf8 character */
+						a = (a << 6) ^ r ^ 0xE2080;
+						/* must not begin or end a surrogate pair */
+						if (!a ||
+							0xD800 == (a & 0xFC00) ||
+							0xDC00 == (a & 0xFC00))
+						{
+							goto bad_utf8_s; /* overlong/bad utf8 character */
+						}
+						s += 3;
+						m += 2; /* + (3 UTF8CHARs - 1 UTF16CHAR) */
+					}
+				}
+				else if (a >= 0xC0) {
+					if ((size_t)(se - s) < 2)
+						goto bad_utf8_s; /* incomplete utf8 character */
 					r = s[1];
 					if (0x80 != (r & 0xC0))
-						goto bad_utf8_; /* incomplete utf8 character */
-					a = (a << 6) ^ r;
-					r = s[2];
-					if (0x80 != (r & 0xC0))
-						goto bad_utf8_; /* incomplete utf8 character */
-					a = (a << 6) ^ r;
-					r = s[3];
-					if (0x80 != (r & 0xC0))
-						goto bad_utf8_; /* incomplete utf8 character */
-					a = ((a << 6) ^ r ^ 0xA82080) - 0x10000;
-					/* a        = 11011aaaaabbbbbbbbcccccccc before substracting 0x10000,
-					 a must match 110110xxxxxxxxxxxxxxxxxxxx after  substracting 0x10000 */
-					if (0x3600000 != (a & 0x3F00000))
-						goto bad_utf8_; /* bad utf8 character */
-					s += 4;
-					m += 2; /* + (4 UTF8CHARs - 2 UTF16CHARs) */
+						goto bad_utf8_s; /* incomplete utf8 character */
+					a = (a << 6) ^ r ^ 0x3080;
+					if (!a)
+						goto bad_utf8_s; /* overlong utf8 character */
+					s += 2;
+					m++; /* + (2 UTF8CHARs - 1 UTF16CHAR) */
 				}
 				else {
-					if ((size_t)(se - s) < 3)
-						goto bad_utf8_; /* incomplete utf8 character */
-					r = s[1];
-					if (0x80 != (r & 0xC0))
-						goto bad_utf8_; /* incomplete utf8 character */
-					a = (a << 6) ^ r;
-					r = s[2];
-					if (0x80 != (r & 0xC0))
-						 goto bad_utf8_; /* incomplete utf8 character */
-					a = (a << 6) ^ r ^ 0xE2080;
-					/* must not begin or end a surrogate pair */
-					if (!a ||
-						0xD800 == (a & 0xFC00) ||
-						0xDC00 == (a & 0xFC00))
-					{
-						goto bad_utf8_; /* overlong/bad utf8 character */
-					}
-					s += 3;
-					m += 2; /* + (3 UTF8CHARs - 1 UTF16CHAR) */
+					/* not expecting 10xxxxxx */
+bad_utf8_s:
+					*q = s; /* (*q) < se */
+					return 0; /* incomplete utf8 character */
 				}
 			}
-			else if (a >= 0xC0) {
-				if ((size_t)(se - s) < 2)
-					goto bad_utf8_; /* incomplete utf8 character */
-				r = s[1];
-				if (0x80 != (r & 0xC0))
-					goto bad_utf8_; /* incomplete utf8 character */
-				a = (a << 6) ^ r ^ 0x3080;
-				if (!a)
-					goto bad_utf8_; /* overlong utf8 character */
-				s += 2;
-				m++; /* + (2 UTF8CHARs - 1 UTF16CHAR) */
-			}
-			else {
-				/* not expecting 10xxxxxx */
-bad_utf8_:
-				*q = s; /* (*q) < se */
-				return 0; /* incomplete utf8 character */
-			}
-		}
-		else
-			s++;
+			else
+				s++;
+		} while (s != se);
+		/* no overflow of size_t is possible when counting the length of
+		  resulting utf16 string (in UTF16CHARs), assuming that the
+		  length of utf8 string may be stored in a variable of size_t without loss:
+		 4 UTF8CHARs -> 2 UTF16CHAR (surrogate pair),
+		 3 UTF8CHARs -> 1 UTF16CHAR,
+		 2 UTF8CHARs -> 1 UTF16CHAR,
+		 1 UTF8CHAR  -> 1 UTF16CHAR*/
+		/* append a number of UTF16CHARs in utf8 string started from 't' */
+		sz += (size_t)(s - t) - m;
+		*q = t; /* points after the last successfully converted UTF8CHAR, (*q) < se */
+		return sz; /* ok, >0 */
 	}
-	/* no overflow of size_t is possible when counting the length of
-	  resulting utf16 string (in UTF16CHARs), assuming that the
-	  length of utf8 string may be stored in a variable of size_t without loss:
-	 4 UTF8CHARs -> 2 UTF16CHAR (surrogate pair),
-	 3 UTF8CHARs -> 1 UTF16CHAR,
-	 2 UTF8CHARs -> 1 UTF16CHAR,
-	 1 UTF8CHAR  -> 1 UTF16CHAR*/
-	/* append a number of UTF16CHARs in utf8 string started from 't' */
-	sz += (size_t)(s - t) - m;
-	*q = t; /* points after the last successfully converted UTF8CHAR, if n != 0, then (*q) < se */
-	return sz; /* ok, 0 only if n is 0, else >0 */
+	return 0; /* n is zero */
 }
 
 /* convert utf8 0-terminated string to utf16 0-terminated one,
@@ -456,13 +456,12 @@ bad_utf8_:
  returns number of stored UTF16CHARs, including terminating 0:
   0    - if utf8 string is invalid,
   else - stored utf16 string length, including 0-terminator, in UTF16CHARs */
-#ifdef SAL_DEFS_H_INCLUDED
-/* include "sal_defs.h" for the annotations */
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Success(return)
 A_At(q, A_In_z)
 A_At(buf, A_Post_z A_Post_readable_size(return))
 #endif
-static size_t utf8_to_utf16_z_unsafe_out(const UTF8CHAR *q, UTF16CHAR buf[])
+static size_t utf8_to_utf16_z_unsafe_out(const UTF8CHAR *q, UTF16CHAR *const buf)
 {
 	/* unsigned integer type must be at least of 32 bits */
 	UTF16CHAR *b = buf + 0*sizeof(int(*)[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
@@ -535,14 +534,13 @@ static size_t utf8_to_utf16_z_unsafe_out(const UTF8CHAR *q, UTF16CHAR buf[])
 	}
 }
 
-/* same as utf8_to_utf16_z_unsafe_out(), but also do not check that input utf8 string is invalid */
-#ifdef SAL_DEFS_H_INCLUDED
-/* include "sal_defs.h" for the annotations */
-A_Success(return)
+/* same as utf8_to_utf16_z_unsafe_out(), but also do not check that input utf8 string is valid */
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Ret_range(>,0)
 A_At(q, A_In_z)
 A_At(buf, A_Post_z A_Post_readable_size(return))
 #endif
-static size_t utf8_to_utf16_z_unsafe(const UTF8CHAR *q, UTF16CHAR buf[])
+static size_t utf8_to_utf16_z_unsafe(const UTF8CHAR *q, UTF16CHAR *const buf)
 {
 	/* unsigned integer type must be at least of 32 bits */
 	UTF16CHAR *b = buf + 0*sizeof(int(*)[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
@@ -588,144 +586,150 @@ static size_t utf8_to_utf16_z_unsafe(const UTF8CHAR *q, UTF16CHAR buf[])
 	}
 }
 
-/* convert 'n' UTF8CHARs to utf16 ones,
+/* convert 'n' UTF8CHARs to utf16 ones (if 'n' is zero - input and output buffers are not used),
   do not check if there is enough space in output buffer, assume it is large enough.
  returns number of stored UTF16CHARs:
   0    - if 'n' is zero or an invalid utf8 character is encountered,
   else - number of stored UTF16CHARs */
 /* Note: zero UTF8CHAR is not treated specially, i.e. conversion do not stops */
-#ifdef SAL_DEFS_H_INCLUDED
-/* include "sal_defs.h" for the annotations */
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_When(!n, A_Ret_range(==,0))
 A_Success(return)
-A_At(q, A_In_reads(n))
-A_At(buf, A_Out A_Post_readable_size(return))
+A_When(n, A_At(q, A_In_reads(n)))
+A_When(n, A_At(buf, A_Out A_Post_readable_size(return)))
 #endif
-static size_t utf8_to_utf16_unsafe_out(const UTF8CHAR *q, UTF16CHAR buf[], size_t n)
+static size_t utf8_to_utf16_unsafe_out(const UTF8CHAR *q, UTF16CHAR *const buf, const size_t n)
 {
-	/* unsigned integer type must be at least of 32 bits */
-	UTF16CHAR *b = buf + 0*sizeof(int(*)[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
-	const UTF8CHAR *const qe = q + n;
-	while (q != qe) {
-		unsigned a = q[0];
-		if (a >= 0x80) {
-			unsigned r;
-			if (a >= 0xE0) {
-				if (a >= 0xF0) {
-					if (a >= 0xF8)
-						return 0; /* expecting max 4 utf8 bytes for a unicode code point */
-					if ((size_t)(qe - q) < 4)
-						return 0; /* incomplete utf8 character */
-					r = q[1];
-					if (0x80 != (r & 0xC0))
-						return 0; /* incomplete utf8 character */
-					a = (a << 6) ^ r;
-					r = q[2];
-					if (0x80 != (r & 0xC0))
-						return 0; /* incomplete utf8 character */
-					a = (a << 6) ^ r;
-					r = q[3];
-					if (0x80 != (r & 0xC0))
-						return 0; /* incomplete utf8 character */
-					a = ((a << 6) ^ r ^ 0xA82080) - 0x10000;
-					/* a        = 11011aaaaabbbbbbbbcccccccc before substracting 0x10000,
-					 a must match 110110xxxxxxxxxxxxxxxxxxxx after  substracting 0x10000 */
-					if (0x3600000 != (a & 0x3F00000))
-						return 0; /* bad utf8 character */
-					*b++ = (UTF16CHAR)(a >> 10); /* 110110aaaabbbbbb */
-					a = (a & 0x3FF) + 0xDC00;    /* 110111bbcccccccc */
-					q += 4;
-				}
-				else {
-					if ((size_t)(qe - q) < 3)
-						return 0; /* incomplete utf8 character */
-					r = q[1];
-					if (0x80 != (r & 0xC0))
-						return 0; /* incomplete utf8 character */
-					a = (a << 6) ^ r;
-					r = q[2];
-					if (0x80 != (r & 0xC0))
-						return 0; /* incomplete utf8 character */
-					a = (a << 6) ^ r ^ 0xE2080;
-					/* must not begin or end a surrogate pair */
-					if (!a ||
-						0xD800 == (a & 0xFC00) ||
-						0xDC00 == (a & 0xFC00))
-					{
-						return 0; /* overlong/bad utf8 character */
+	if (n) {
+		/* unsigned integer type must be at least of 32 bits */
+		UTF16CHAR *b = buf + 0*sizeof(int(*)[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
+		const UTF8CHAR *const qe = q + n;
+		do {
+			unsigned a = q[0];
+			if (a >= 0x80) {
+				unsigned r;
+				if (a >= 0xE0) {
+					if (a >= 0xF0) {
+						if (a >= 0xF8)
+							return 0; /* expecting max 4 utf8 bytes for a unicode code point */
+						if ((size_t)(qe - q) < 4)
+							return 0; /* incomplete utf8 character */
+						r = q[1];
+						if (0x80 != (r & 0xC0))
+							return 0; /* incomplete utf8 character */
+						a = (a << 6) ^ r;
+						r = q[2];
+						if (0x80 != (r & 0xC0))
+							return 0; /* incomplete utf8 character */
+						a = (a << 6) ^ r;
+						r = q[3];
+						if (0x80 != (r & 0xC0))
+							return 0; /* incomplete utf8 character */
+						a = ((a << 6) ^ r ^ 0xA82080) - 0x10000;
+						/* a        = 11011aaaaabbbbbbbbcccccccc before substracting 0x10000,
+						 a must match 110110xxxxxxxxxxxxxxxxxxxx after  substracting 0x10000 */
+						if (0x3600000 != (a & 0x3F00000))
+							return 0; /* bad utf8 character */
+						*b++ = (UTF16CHAR)(a >> 10); /* 110110aaaabbbbbb */
+						a = (a & 0x3FF) + 0xDC00;    /* 110111bbcccccccc */
+						q += 4;
 					}
-					q += 3;
+					else {
+						if ((size_t)(qe - q) < 3)
+							return 0; /* incomplete utf8 character */
+						r = q[1];
+						if (0x80 != (r & 0xC0))
+							return 0; /* incomplete utf8 character */
+						a = (a << 6) ^ r;
+						r = q[2];
+						if (0x80 != (r & 0xC0))
+							return 0; /* incomplete utf8 character */
+						a = (a << 6) ^ r ^ 0xE2080;
+						/* must not begin or end a surrogate pair */
+						if (!a ||
+							0xD800 == (a & 0xFC00) ||
+							0xDC00 == (a & 0xFC00))
+						{
+							return 0; /* overlong/bad utf8 character */
+						}
+						q += 3;
+					}
 				}
-			}
-			else if (a >= 0xC0) {
-				if ((size_t)(qe - q) < 2)
-					return 0; /* incomplete utf8 character */
-				r = q[1];
-				if (0x80 != (r & 0xC0))
-					return 0; /* incomplete utf8 character */
-				a = (a << 6) ^ r ^ 0x3080;
-				if (!a)
-					return 0; /* overlong utf8 character */
-				q += 2;
+				else if (a >= 0xC0) {
+					if ((size_t)(qe - q) < 2)
+						return 0; /* incomplete utf8 character */
+					r = q[1];
+					if (0x80 != (r & 0xC0))
+						return 0; /* incomplete utf8 character */
+					a = (a << 6) ^ r ^ 0x3080;
+					if (!a)
+						return 0; /* overlong utf8 character */
+					q += 2;
+				}
+				else
+					return 0; /* not expecting 10xxxxxx */
 			}
 			else
-				return 0; /* not expecting 10xxxxxx */
-		}
-		else
-			q++;
-		*b++ = (UTF16CHAR)a;
+				q++;
+			*b++ = (UTF16CHAR)a;
+		} while (q != qe);
+		return (size_t)(b - buf); /* ok, >0 */
 	}
-	return (size_t)(b - buf); /* ok, 0 only if n is 0, else >0 */
+	return 0; /* n is zero */
 }
 
-/* same as utf8_to_utf16_unsafe_out(), but also do not check that input utf8 string is invalid */
-#ifdef SAL_DEFS_H_INCLUDED
-/* include "sal_defs.h" for the annotations */
-A_Success(return)
-A_At(q, A_In_reads(n))
-A_At(buf, A_Out A_Post_readable_size(return))
+/* same as utf8_to_utf16_unsafe_out(), but also do not check that input utf8 string is valid */
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_When(!n, A_Ret_range(==,0))
+A_When(n, A_Ret_range(>,0))
+A_When(n, A_At(q, A_In_reads(n)))
+A_When(n, A_At(buf, A_Out A_Post_readable_size(return)))
 #endif
-static size_t utf8_to_utf16_unsafe(const UTF8CHAR *q, UTF16CHAR buf[], size_t n)
+static size_t utf8_to_utf16_unsafe(const UTF8CHAR *q, UTF16CHAR *const buf, const size_t n)
 {
-	/* unsigned integer type must be at least of 32 bits */
-	UTF16CHAR *b = buf + 0*sizeof(int(*)[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
-	const UTF8CHAR *const qe = q + n;
-	while (q != qe) {
-		unsigned a = q[0];
-		if (a >= 0x80) {
-			unsigned r;
-			if (a >= 0xE0) {
-				if (a >= 0xF0) {
-					r = q[1];
-					a = (a << 6) ^ r;
-					r = q[2];
-					a = (a << 6) ^ r;
-					r = q[3];
-					a = ((a << 6) ^ r ^ 0xA82080) - 0x10000;
-					/* a        = 11011aaaaabbbbbbbbcccccccc before substracting 0x10000,
-					 a must match 110110xxxxxxxxxxxxxxxxxxxx after  substracting 0x10000 */
-					*b++ = (UTF16CHAR)(a >> 10); /* 110110aaaabbbbbb */
-					a = (a & 0x3FF) + 0xDC00;    /* 110111bbcccccccc */
-					q += 4;
+	if (n) {
+		/* unsigned integer type must be at least of 32 bits */
+		UTF16CHAR *b = buf + 0*sizeof(int(*)[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
+		const UTF8CHAR *const qe = q + n;
+		do {
+			unsigned a = q[0];
+			if (a >= 0x80) {
+				unsigned r;
+				if (a >= 0xE0) {
+					if (a >= 0xF0) {
+						r = q[1];
+						a = (a << 6) ^ r;
+						r = q[2];
+						a = (a << 6) ^ r;
+						r = q[3];
+						a = ((a << 6) ^ r ^ 0xA82080) - 0x10000;
+						/* a        = 11011aaaaabbbbbbbbcccccccc before substracting 0x10000,
+						 a must match 110110xxxxxxxxxxxxxxxxxxxx after  substracting 0x10000 */
+						*b++ = (UTF16CHAR)(a >> 10); /* 110110aaaabbbbbb */
+						a = (a & 0x3FF) + 0xDC00;    /* 110111bbcccccccc */
+						q += 4;
+					}
+					else {
+						r = q[1];
+						a = (a << 6) ^ r;
+						r = q[2];
+						a = (a << 6) ^ r ^ 0xE2080;
+						q += 3;
+					}
 				}
 				else {
 					r = q[1];
-					a = (a << 6) ^ r;
-					r = q[2];
-					a = (a << 6) ^ r ^ 0xE2080;
-					q += 3;
+					a = (a << 6) ^ r ^ 0x3080;
+					q += 2;
 				}
 			}
-			else {
-				r = q[1];
-				a = (a << 6) ^ r ^ 0x3080;
-				q += 2;
-			}
-		}
-		else
-			q++;
-		*b++ = (UTF16CHAR)a;
+			else
+				q++;
+			*b++ = (UTF16CHAR)a;
+		} while (q != qe);
+		return (size_t)(b - buf); /* ok, >0 */
 	}
-	return (size_t)(b - buf); /* ok, 0 only if n is 0, else >0 */
+	return 0; /* n is zero */
 }
 
 /* suppress warnings about unreferenced static functions */
