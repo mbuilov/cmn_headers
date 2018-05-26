@@ -51,8 +51,9 @@ extern "C" {
 A_Noreturn_function A_Force_inline_function
 static void asserts_h__assertion_failed(A_In_z const char *cond, A_In_z const char *file, int line, A_In_z const char *function)
 {
+	volatile int *arr[1] = {NULL};
 	DBGPRINTX(file, line, function, "assertion failed: %s", cond);
-	*(volatile int*)((char*)0 + fflush(stderr)) = 0; /* generate SIGSEGV */
+	*arr[0] = fflush(stderr); /* generate SIGSEGV */
 	exit(-1);
 }
 
