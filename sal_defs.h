@@ -210,12 +210,18 @@
 #define A_Nonnull_arg(i)
 #define A_Printf_format_at(f,v)
 #else /* !_MSC_VER */
-#if defined(__GNUC__) && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 2))
 #if defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
-#define A_Restrict                               restrict
-#else
+#define A_Restrict restrict                      /* standard keyword for c99 */
+#else /* !c99 */
+#if (defined(__GNUC__) && (__GNUC__ >= 4)) || \
+  (defined(__clang__) && (__clang_major__ > 3 || (3 == __clang_major__  && __clang_minor__ >= 7)))
 #define A_Restrict                               __restrict__
-#endif
+#else /* no GCC extensions */
+#define A_Restrict
+#endif /* no GCC extensions */
+#endif /* !c99 */
+#if (defined(__GNUC__) && (__GNUC__ >= 4)) || \
+  (defined(__clang__) && (__clang_major__ > 3 || (3 == __clang_major__  && __clang_minor__ >= 7)))
 #define A_Noreturn_function                      __attribute__ ((noreturn))
 #define A_Const_function                         __attribute__ ((const))
 #define A_Pure_function                          __attribute__ ((pure))
@@ -224,8 +230,11 @@
 #define A_Non_const_function                     __attribute__ ((const))      /* only for function definition - to silence warning */
 #define A_Non_pure_function                      __attribute__ ((pure))       /* only for function definition - to silence warning */
 #define A_Check_return                           __attribute__ ((warn_unused_result))
+#define A_Nonnull_all_args                       __attribute__ ((nonnull))
+#define A_Nonnull_arg(i)                         __attribute__ ((nonnull(i,i)))
+#define A_Printf_format_at(f,v)                  __attribute__ ((format(printf, f, v)))
+#define A_Ret_restrict                           __attribute__ ((malloc))
 #else /* no GCC extensions */
-#define A_Restrict
 #define A_Noreturn_function                      /* function which never returns - calls exit()                                    */
 #define A_Const_function                         /* declare function without side effects, cannot access any memory by pointer     */
 #define A_Pure_function                          /* declare function without side effects, may read but cannot write memory        */
@@ -234,19 +243,16 @@
 #define A_Non_const_function                     /* define function as const to silence "-Wsuggest-attribute=const" warning        */
 #define A_Non_pure_function                      /* define function as pure to silence "-Wsuggest-attribute=pure" warning          */
 #define A_Check_return                           /* caller must check function's return value                                      */
-#endif /* no GCC extensions */
+#define A_Nonnull_all_args                       /* all function arguments pointers are != NULL                                    */
+#define A_Nonnull_arg(i)                         /* function argument number i is != NULL                                          */
+#define A_Printf_format_at(f,v)                  /* f - 1-based index of printf format argument, v - index of va_arg argument      */
 #define A_Ret_restrict                           /* returned pointer is the only alias to allocated memory - result of malloc()    */
+#endif /* no GCC extensions */
 #if (defined(__GNUC__) && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 9))) || \
   (defined(__clang__) && (__clang_major__ > 3 || (3 == __clang_major__  && __clang_minor__ >= 7)))
 #define A_Ret_never_null                         __attribute__ ((returns_nonnull))
-#define A_Nonnull_all_args                       __attribute__ ((nonnull))
-#define A_Nonnull_arg(i)                         __attribute__ ((nonnull(i,i)))
-#define A_Printf_format_at(f,v)                  __attribute__ ((format(printf, f, v)))
 #else /* no GCC extensions */
 #define A_Ret_never_null                         /* never returns NULL, even if A_Success() is false                               */
-#define A_Nonnull_all_args                       /* all function arguments pointers are != NULL                                    */
-#define A_Nonnull_arg(i)                         /* function argument number i is != NULL                                          */
-#define A_Printf_format_at(f,v)                  /* f arg - printf format string, v - va_arg                                       */
 #endif /* no GCC extensions */
 #define A_Curr                                   /* references current function parameter, like A_At(*A_Curr, A_Post_notnull)      */
 #define A_Old                                    /* old value, like A_Old(*A_Curr)                                                 */
