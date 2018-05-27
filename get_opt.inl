@@ -527,9 +527,9 @@ static void opt_skip_unknown(
 }
 
 /* suppress warnings about unreferenced static functions */
-typedef int get_opt_t[sizeof(&get_opt)];
-typedef int opt_info_init_t[sizeof(&opt_info_init)];
-typedef int opt_skip_unknown_t[sizeof(&opt_skip_unknown)];
+typedef int get_opt_unused_[sizeof(&get_opt)];
+typedef int opt_info_init_unused_[sizeof(&opt_info_init)];
+typedef int opt_skip_unknown_unused_[sizeof(&opt_skip_unknown)];
 
 #ifdef _MSC_VER
 #pragma warning(pop)
