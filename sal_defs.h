@@ -535,15 +535,30 @@
    C_destroy(&a->c);
  }
 */
+
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable:6101) /* Returning uninitialized memory '*a' */
 #endif
+
 A_Nonnull_all_args
-static inline void A_Mark_ptr_valid(A_Pre_notnull A_Post_valid void *a)
+static
+#ifndef __cplusplus
+#if !defined(__STDC_VERSION__) || (__STDC_VERSION__ < 199901L)
+#ifdef inline
+inline
+#elif defined _MSC_VER
+__inline
+#else
+__inline__
+#endif /* !inline */
+#endif /* !c99 */
+#endif /* !__cplusplus */
+void A_Mark_ptr_valid(A_Pre_notnull A_Post_valid void *a)
 {
 	(void)a;
 }
+
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
