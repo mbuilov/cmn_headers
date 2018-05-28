@@ -543,17 +543,17 @@
 
 A_Nonnull_all_args
 static
-#ifndef __cplusplus
-#if !defined(__STDC_VERSION__) || (__STDC_VERSION__ < 199901L)
-#ifdef inline
+#ifdef __cplusplus
+inline
+#elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
+inline
+#elif defined inline
 inline
 #elif defined _MSC_VER
 __inline
 #else
 __inline__
-#endif /* !inline */
-#endif /* !c99 */
-#endif /* !__cplusplus */
+#endif
 void A_Mark_ptr_valid(A_Pre_notnull A_Post_valid void *a)
 {
 	(void)a;
