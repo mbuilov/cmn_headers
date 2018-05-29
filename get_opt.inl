@@ -328,50 +328,32 @@ int main(int argc, char *argv[])
 }
 #endif
 
-#ifdef A_Nonnull_all_args
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Nonnull_all_args
+A_At(i, A_Out)
+A_At(argc, A_In_range(>,0))
+A_At(argv, A_In_reads(argc))
 #endif
-static void opt_info_init(
-#ifdef A_Out
-	A_Out
-#endif
-	struct opt_info *i,
-#ifdef A_In_range
-	A_In_range(>,0)
-#endif
-	int argc,
-#ifdef A_In_reads
-	A_In_reads(argc)
-#endif
-	GET_OPT_CHAR *const argv[]
-) {
+static void opt_info_init(struct opt_info *i/*out*/, int argc, GET_OPT_CHAR *const argv[/*argc*/])
+{
 	i->arg = &argv[1];         /* skip program name at argv[0] */
 	i->args_end = &argv[argc];
 	i->sopt = NULL;
 	/*i->value = NULL;*/       /* should be accessed only after an option was successfully parsed */
 }
 
-#ifdef A_Nonnull_arg
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Check_return
 A_Nonnull_arg(1)
-#endif
-#ifdef A_Ret_range
 A_Ret_range(>=,OPT_REST_PARAMS)
-#endif
-#ifdef A_Pre_satisfies
 A_Pre_satisfies(i->arg < i->args_end)
+A_At(i, A_Inout)
+A_At(short_opts, A_In_opt_z)
+A_At(long_opts, A_In_opt)
 #endif
 static int get_opt(
-#ifdef A_Inout
-	A_Inout
-#endif
-	struct opt_info *i,
-#ifdef A_In_opt
-	A_In_opt_z
-#endif
+	struct opt_info *i/*in,out*/,
 	const GET_OPT_CHAR short_opts[]/*NULL?*/,
-#ifdef A_In_opt
-	A_In_opt
-#endif
 	const GET_OPT_CHAR *const long_opts[]/*NULL?*/
 ) {
 	GET_OPT_CHAR *a = i->sopt;
@@ -508,15 +490,12 @@ parse_long_option:
 	return OPT_UNKNOWN; /* i->arg points to unknown option (or bundle, if i->sopt != NULL) */
 }
 
-#ifdef A_Nonnull_all_args
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Nonnull_all_args
+A_At(i, A_Inout)
 #endif
-static void opt_skip_unknown(
-#ifdef A_Inout
-	A_Inout
-#endif
-	struct opt_info *i
-) {
+static void opt_skip_unknown(struct opt_info *i/*in,out*/)
+{
 	/* skip unknown option, assume it do not expects a value */
 	if (i->sopt) {
 		if (*++(i->sopt))
