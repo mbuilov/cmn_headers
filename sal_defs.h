@@ -11,7 +11,7 @@
 #if defined _MSC_VER && _MSC_VER >= 1600 && !defined NO_SAL_ANNOTATIONS
 /* SAL annotations, see http://www.codeproject.com/Reference/879527/SAL-Function-Parameters-Annotations */
 #include <sal.h>
-/* NOTE: post-annotations considered valid only if A_Success() condition is true or not specified */
+/* NOTE: post-annotations are considered only if A_Success() condition is true or not specified */
 #define A_Restrict                               __restrict
 #define A_Noreturn_function                      __declspec(noreturn)
 #define A_Const_function
@@ -150,6 +150,7 @@
 #define e_A_Always(anns,empty)                   _Always_(anns##empty)
 #define A_Always(anns)                           e_A_Always(anns,A_Empty)
 #define A_At(at,anns)                            _At_(at,anns)
+#define A_At_buffer(at,i,c,anns)                 _At_buffer_(at,i,c,anns)
 #define A_When(cond,anns)                        _When_(cond,anns)
 #define A_Post_z                                 _Post_z_
 #define A_Post_valid                             _Post_valid_
@@ -320,8 +321,8 @@
 #define A_Ret_maybenull                          /* returns  NULL?, not initialized object                                         */
 #define A_Ret_z                                  /* returns !=NULL, '\0'-terminated string                                         */
 #define A_Ret_maybenull_z                        /* returns  NULL?, '\0'-terminated string                                         */
-#define A_Ret_valid                              /* returns !=NULL, initialized object                                             */
-#define A_Ret_opt_valid                          /* returns  NULL?, initialized object                                             */
+#define A_Ret_valid                              /* returns !=NULL, initialized object, which references only initialized data     */
+#define A_Ret_opt_valid                          /* returns  NULL?, initialized object, which references only initialized data     */
 #define A_Ret_writes(s)                          /* returns !=NULL, initialized buffer of s-elements                               */
 #define A_Ret_writes_z(s)                        /* returns !=NULL, '\0-terminated buffer of s-elements                            */
 #define A_Ret_writes_bytes(s)                    /* returns !=NULL, initialized buffer of s-bytes                                  */
@@ -386,19 +387,20 @@
 #define A_On_failure(anns)                       /* apply annotations if A_Success(expr) gives false result                        */
 #define A_Always(anns)                           /* apply annotations even if A_Success(expr) gives false result                   */
 #define A_At(at,anns)                            /* A_On_failure(A_At(*p, A_Post_null)) T **p                                      */
+#define A_At_buffer(at,i,c,anns)                 /* A_At_buffer(p,i,c,A_At(p[i],A_In_z)) foo(char *p[], unsigned c);               */
 #define A_When(cond,anns)                        /* A_When(return != 0, A_Out_writes(size)) T p[]                                  */
 #define A_Post_z                                 /* !=NULL, buffer will be '\0'-terminated after the call                          */
-#define A_Post_valid                             /* !=NULL,   legal post read:       init(A_Post_valid struct X *x) ;              */
-#define A_Post_invalid                           /*  NULL?, illegal post read:       fini(A_Post_invalid struct X *x);             */
-#define A_Post_ptr_invalid                       /*  NULL?, illegal post read/write: free(A_Post_ptr_invalid void *p);             */
+#define A_Post_valid                             /* !=NULL,   legal post read, recursive: valid data references only valid data    */
+#define A_Post_invalid                           /*  NULL?, illegal post read, recursive: invalid data cannot reference valid one  */
+#define A_Post_ptr_invalid                       /*  NULL?, illegal post read/write, recursive, invalidates pointer                */
 #define A_Post_null                              /* ==NULL after the call                                                          */
 #define A_Post_notnull                           /* !=NULL after the call                                                          */
 #define A_Post_maybenull                         /*  NULL? after the call                                                          */
 #define A_Prepost_z                              /* !=NULL, '\0'-terminated before/after the call                                  */
 #define A_Pre_z                                  /* !=NULL, '\0'-terminated before the call                                        */
-#define A_Pre_valid                              /* !=NULL,   legal pre read                                                       */
-#define A_Pre_opt_valid                          /*  NULL?,   legal pre read                                                       */
-#define A_Pre_invalid                            /*  NULL?, illegal pre read                                                       */
+#define A_Pre_valid                              /* !=NULL,   legal pre read, recursive: valid data references only valid data     */
+#define A_Pre_opt_valid                          /*  NULL?,   legal pre read, recursive: valid data references only valid data     */
+#define A_Pre_invalid                            /*  NULL?, illegal pre read, recursive: invalid data cannot reference valid one   */
 #define A_Pre_unknown                            /*  NULL? before the call                                                         */
 #define A_Pre_notnull                            /* !=NULL before the call                                                         */
 #define A_Pre_maybenull                          /*  NULL? before the call                                                         */
@@ -409,8 +411,8 @@
 #define A_Null                                   /* ==NULL                                                                         */
 #define A_Notnull                                /* !=NULL                                                                         */
 #define A_Maybenull                              /*  NULL?                                                                         */
-#define A_Valid                                  /*  NULL?   legal read                                                            */
-#define A_Notvalid                               /*  NULL? illegal read                                                            */
+#define A_Valid                                  /*  NULL?   legal read, recursive: valid data references only valid data          */
+#define A_Notvalid                               /*  NULL? illegal read, recursive: invalid data cannot reference valid one        */
 #define A_Maybevalid                             /*  NULL?                                                                         */
 #define A_Readable_bytes(n)                      /*  NULL? may read given number of bytes                                          */
 #define A_Readable_elements(n)                   /*  NULL? may read given number of elements                                       */
@@ -508,60 +510,6 @@
 #define ASSUME(cond) ((void)0) /* assume condition is always true */
 #endif
 #endif /* ASSUME */
-
-/*
- mark pointer as valid to avoid false analyzer warnings
-
- for example:
-
- struct A {
-   struct B b;
-   struct C c;
- };
- void B_destroy(A_Pre_valid A_Post_invalid struct B *b);
- void C_destroy(A_Pre_valid A_Post_invalid struct C *c);
- void A_destroy(A_Pre_valid A_Post_invalid struct A *a)
- {
-   B_destroy(&a->b);
-   C_destroy(&a->c); // here analyzer gives false warning C6001: Using uninitialized memory '*a'
- }
-
- to avoid analyzer warning, use A_Mark_ptr_valid():
-
- void A_destroy(A_Pre_valid A_Post_invalid struct A *a)
- {
-   B_destroy(&a->b);
-   A_Mark_ptr_valid(a);
-   C_destroy(&a->c);
- }
-*/
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable:6101) /* Returning uninitialized memory '*a' */
-#endif
-
-A_Nonnull_all_args
-static
-#ifdef __cplusplus
-inline
-#elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
-inline
-#elif defined inline
-inline
-#elif defined _MSC_VER
-__inline
-#else
-__inline__
-#endif
-void A_Mark_ptr_valid(A_Pre_notnull A_Post_valid void *a)
-{
-	(void)a;
-}
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 #ifdef __NETBEANS_PREPROCESSING
 #undef A_Force_inline_function
