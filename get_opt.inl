@@ -9,11 +9,9 @@
 
 /* get_opt.inl */
 
-/* note: #include <string.h> before this file */
+#include "get_opt_info.h"
 
-#ifndef GET_OPT_CHAR
-#define GET_OPT_CHAR char
-#endif
+/* note: #include <string.h> before this file */
 
 #ifndef GET_OPT_TEXT
 #define GET_OPT_TEXT(text) text
@@ -47,28 +45,6 @@
    3) void opt_skip_unknown(struct opt_info *i)
       - skip unrecognized option
 */
-
-/* structure that describes state of options parsing */
-struct opt_info {
-
-	/* in/out: next argument to check,
-	   except if sopt != NULL - the arg points to the whole short options bundle argument,
-	   initially should be set to &argv[1] (argv[0] is a program name, so skip it) */
-	GET_OPT_CHAR *const *arg;
-
-	/* in: end of program arguments array,
-	   initially should be set to &argv[argc] */
-	GET_OPT_CHAR *const *args_end;
-
-	/* out: option value or parameter,
-	  as option value may be NULL - if no value was specified for the option */
-	GET_OPT_CHAR *value;
-
-	/* in/out: next short option in the bundle pointed by arg,
-	  used when multiple short options are bundled together,
-      e.g.: "-xyz-", which is equivalent of "-x -y -z -" */
-	GET_OPT_CHAR *sopt;
-};
 
 /*=========================== Notes: ============================================================================================
 |
