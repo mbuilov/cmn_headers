@@ -110,10 +110,10 @@ void DPRINT_TO_LOG(A_In_z A_Printf_format_string const char *format, ...);
 	DPRINT_TO_LOG(DPRINT_LOCATION_FORMAT f, DPRINT_GET_THREAD_ID, __FILE__, __LINE__, DPRINT_FUNC)
 #define DBGPRINT3_2(f,...) \
 	DPRINT_TO_LOG(DPRINT_LOCATION_FORMAT f, DPRINT_GET_THREAD_ID, __FILE__, __LINE__, DPRINT_FUNC, __VA_ARGS__)
-#define DBGPRINT3x1(d_file__,d_line__,d_func__,f) \
-	DPRINT_TO_LOG(DPRINT_LOCATION_FORMAT f, DPRINT_GET_THREAD_ID, d_file__, d_line__, d_func__)
-#define DBGPRINT3x2(d_file__,d_line__,d_func__,f,...) \
-	DPRINT_TO_LOG(DPRINT_LOCATION_FORMAT f, DPRINT_GET_THREAD_ID, d_file__, d_line__, d_func__, __VA_ARGS__)
+#define DBGPRINT3x1(d_file_,d_line_,d_func_,f) \
+	DPRINT_TO_LOG(DPRINT_LOCATION_FORMAT f, DPRINT_GET_THREAD_ID, d_file_, d_line_, d_func_)
+#define DBGPRINT3x2(d_file_,d_line_,d_func_,f,...) \
+	DPRINT_TO_LOG(DPRINT_LOCATION_FORMAT f, DPRINT_GET_THREAD_ID, d_file_, d_line_, d_func_, __VA_ARGS__)
 
 #elif defined DPRINT_TO_STREAM
 
@@ -121,10 +121,10 @@ void DPRINT_TO_LOG(A_In_z A_Printf_format_string const char *format, ...);
 	fprintf(DPRINT_TO_STREAM, DPRINT_LOCATION_FORMAT f "\n", DPRINT_GET_THREAD_ID, __FILE__, __LINE__, DPRINT_FUNC)
 #define DBGPRINT3_2(f,...) \
 	fprintf(DPRINT_TO_STREAM, DPRINT_LOCATION_FORMAT f "\n", DPRINT_GET_THREAD_ID, __FILE__, __LINE__, DPRINT_FUNC, __VA_ARGS__)
-#define DBGPRINT3x1(d_file__,d_line__,d_func__,f) \
-	fprintf(DPRINT_TO_STREAM, DPRINT_LOCATION_FORMAT f "\n", DPRINT_GET_THREAD_ID, d_file__, d_line__, d_func__)
-#define DBGPRINT3x2(d_file__,d_line__,d_func__,f,...) \
-	fprintf(DPRINT_TO_STREAM, DPRINT_LOCATION_FORMAT f "\n", DPRINT_GET_THREAD_ID, d_file__, d_line__, d_func__, __VA_ARGS__)
+#define DBGPRINT3x1(d_file_,d_line_,d_func_,f) \
+	fprintf(DPRINT_TO_STREAM, DPRINT_LOCATION_FORMAT f "\n", DPRINT_GET_THREAD_ID, d_file_, d_line_, d_func_)
+#define DBGPRINT3x2(d_file_,d_line_,d_func_,f,...) \
+	fprintf(DPRINT_TO_STREAM, DPRINT_LOCATION_FORMAT f "\n", DPRINT_GET_THREAD_ID, d_file_, d_line_, d_func_, __VA_ARGS__)
 
 #endif /* DPRINT_TO_STREAM */
 
@@ -140,13 +140,13 @@ void DPRINT_TO_LOG(A_In_z A_Printf_format_string const char *format, ...);
 #define DBGPRINT1(X,N,args) DBGPRINT2(X,N,args)
 
 /* add '\n' at end of format string, works for maximum 32 arguments */
-#define DBGPRINT(...)                             DBGPRINT1(_,DPRN_ARGS(__VA_ARGS__),(__VA_ARGS__))
-#define DBGPRINTX(d_file__,d_line__,d_func__,...) DBGPRINT1(x,DPRN_ARGS(__VA_ARGS__),(d_file__,d_line__,d_func__,__VA_ARGS__))
+#define DBGPRINT(...)                          DBGPRINT1(_,DPRN_ARGS(__VA_ARGS__),(__VA_ARGS__))
+#define DBGPRINTX(d_file_,d_line_,d_func_,...) DBGPRINT1(x,DPRN_ARGS(__VA_ARGS__),(d_file_,d_line_,d_func_,__VA_ARGS__))
 
 #else /* !DPRINT_TO_LOG && !DPRINT_TO_STREAM */
 
-#define DBGPRINT(...)                             ((void)0)
-#define DBGPRINTX(d_file__,d_line__,d_func__,...) ((void)(d_file__),(void)(d_line__),(void)(d_func__))
+#define DBGPRINT(...)                          ((void)0)
+#define DBGPRINTX(d_file_,d_line_,d_func_,...) ((void)(d_file_),(void)(d_line_),(void)(d_func_))
 
 #endif /* !DPRINT_TO_LOG && !DPRINT_TO_STREAM */
 

@@ -49,7 +49,7 @@ extern "C" {
 #endif
 
 A_Noreturn_function A_Force_inline_function
-static void asserts_h__assertion_failed(A_In_z const char *cond, A_In_z const char *file, int line, A_In_z const char *function)
+static void asserts_h_assertion_failed(A_In_z const char *cond, A_In_z const char *file, int line, A_In_z const char *function)
 {
 	volatile int *arr[1] = {NULL};
 	DBGPRINTX(file, line, function, "assertion failed: %s", cond);
@@ -57,17 +57,17 @@ static void asserts_h__assertion_failed(A_In_z const char *cond, A_In_z const ch
 	exit(-1);
 }
 
-static inline void asserts_h__assert(int x, A_In_z const char *cond, A_In_z const char *file, int line, A_In_z const char *function)
+static inline void asserts_h_assert(int x, A_In_z const char *cond, A_In_z const char *file, int line, A_In_z const char *function)
 {
 	if (x)
-		asserts_h__assertion_failed(cond, file, line, function);
+		asserts_h_assertion_failed(cond, file, line, function);
 }
 
 #ifdef __cplusplus
 }
 #endif
 
-#define ASSERT(cond) asserts_h__assert(!(cond), #cond, __FILE__, __LINE__, DPRINT_FUNC)
+#define ASSERT(cond) asserts_h_assert(!(cond), #cond, __FILE__, __LINE__, DPRINT_FUNC)
 
 #else /* !NDEBUG */
 
@@ -103,7 +103,7 @@ static inline void asserts_h__assert(int x, A_In_z const char *cond, A_In_z cons
 
 /* note: use ##line for the unique structure name */
 #ifndef STATIC_ASSERT
-#define STATIC_ASSERT2(expr,line) struct asserts_h__static_assert_at_line_##line{int a_[1-2*!(expr)];}
+#define STATIC_ASSERT2(expr,line) struct asserts_h_static_assert_at_line_##line{int a_[1-2*!(expr)];}
 #define STATIC_ASSERT1(expr,line) STATIC_ASSERT2(expr,line)
 #define STATIC_ASSERT(expr)       STATIC_ASSERT1(expr,__LINE__)
 #endif
