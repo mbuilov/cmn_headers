@@ -34,6 +34,11 @@
 #pragma warning(disable:4505) /* unreferenced local function has been removed */
 #endif
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunneeded-internal-declaration"
+#endif
+
 /* this file defines two static functions:
 
    1) void opt_info_init(struct opt_info *i, int argc, GET_OPT_CHAR *const argv[]);
@@ -485,6 +490,10 @@ static void opt_skip_unknown(struct opt_info *i/*in,out*/)
 typedef int get_opt_unused_[sizeof(&get_opt)];
 typedef int opt_info_init_unused_[sizeof(&opt_info_init)];
 typedef int opt_skip_unknown_unused_[sizeof(&opt_skip_unknown)];
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 #ifdef _MSC_VER
 #pragma warning(pop)
