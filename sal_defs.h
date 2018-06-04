@@ -214,7 +214,7 @@
 #if defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
 #define A_Restrict restrict                      /* standard keyword for c99 */
 #else /* !c99 */
-#if (defined(__GNUC__) && (__GNUC__ >= 4)) || \
+#if (defined(__GNUC__) && (__GNUC__ >= 3)) || \
   (defined(__clang__) && (__clang_major__ > 3 || (3 == __clang_major__  && __clang_minor__ >= 7)))
 #define A_Restrict                               __restrict__
 #else /* no GCC extensions */
