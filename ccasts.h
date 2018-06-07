@@ -55,12 +55,11 @@ static inline const void *c_cast_constant_void_(const void *p)
 A_Const_function A_Check_return A_Ret_range(==,p)
 static inline void *c_const_cast_void_(const void *p)
 {
-	union {
-		const void *c;
-		void *v;
-	} u;
-	u.c = p;
-	return u.v;
+#if defined __GNUC__ && __GNUC__ > 4 || __GNUC__ == 4 2 4
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnonnull-compare" /* warning: nonnull argument 'p' compared to NULL */
+#endif
+	return (void*)p;
 }
 
 /* cast non-const pointer to one type to const/non-const pointer to another type:
@@ -68,6 +67,7 @@ static inline void *c_const_cast_void_(const void *p)
   struct my_type1 *p;
   struct my_type2 *q = CAST(struct my_type2, p);
 */
+/* compiler will generate a warning if 'ptr' is const */
 #define CAST(type, ptr) ((type*)c_cast_void_(ptr))
 
 /* cast const/non-const pointer to one type to const pointer to another type:
@@ -75,6 +75,7 @@ static inline void *c_const_cast_void_(const void *p)
   const struct my_type1 *p;
   const struct my_type2 *q = CAST_CONSTANT(const struct my_type2, p);
 */
+/* compiler will generate a warning if 'type' is non-const */
 #define CAST_CONSTANT(type, ptr) ((type*)c_cast_constant_void_(ptr))
 
 /* cast const pointer to non-const one for the same type:
@@ -82,6 +83,7 @@ static inline void *c_const_cast_void_(const void *p)
   const struct my_type *p;
   struct my_type *q = CONST_CAST(struct my_type, p);
 */
+/* compiler will generate a warning if type of 'ptr' is not 'type' */
 #define CONST_CAST(type, ptr) ((type*)c_const_cast_void_((ptr) + 0*sizeof(((const type*)(const void*)(ptr) - (ptr)))))
 
 A_Nonnull_all_args A_Const_function A_Check_return A_Ret_never_null A_Ret_range(==,(char*)p - offset)
@@ -108,16 +110,23 @@ static inline void *c_opt_container_of_(
 	return p ? (char*)c_const_cast_void_(p) - offset : NULL;
 }
 
+#ifdef __cplusplus
+}
+#endif
+
 /* check that CONTAINER_OF() doesn't discard const qualifier */
-#ifdef __GNUC__
-#define c_check_constness_(ptr, member, x) ((x) + 0*sizeof(*(__typeof__(&(x)->member)*)NULL = (ptr)))
+#if defined __cplusplus && __cplusplus >= 201103L
+#define c_check_constness_(ptr, member, x) ((x) + 0*sizeof(*(decltype(&(x)->member)*)0 = (ptr)))
+#elif defined __GNUC__
+#define c_check_constness_(ptr, member, x) ((x) + 0*sizeof(*(__typeof__(&(x)->member)*)0 = (ptr)))
 #else
 #define c_check_constness_(ptr, member, x) (x)
 #endif
 
 #if defined _MSC_VER && defined __cplusplus
 /* if type is constant, msvc2017 C++ compiler crashes while evaluating standard offsetof() from <stddef.h> */
-#define c_casts_offsetof_(type, member) ((size_t)((const char*)&((type*)0)->member - (const char*)0))
+template <class T> struct c_casts_offsetof_1 {typedef T XT;};
+#define c_casts_offsetof_(type, member) offsetof(c_casts_offsetof_1<type>::XT, member)
 #else
 #define c_casts_offsetof_(type, member) offsetof(type, member)
 #endif
@@ -135,9 +144,5 @@ static inline void *c_opt_container_of_(
 	c_check_constness_(ptr, member, \
 		((type*)c_opt_container_of_(ptr, c_casts_offsetof_(type, member) + \
 			0*sizeof((&((type*)c_const_cast_void_(ptr))->member - (ptr))))))
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* CCASTS_H_INCLUDED */
