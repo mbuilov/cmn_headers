@@ -55,11 +55,14 @@ static inline const void *c_cast_constant_void_(const void *p)
 A_Const_function A_Check_return A_Ret_range(==,p)
 static inline void *c_const_cast_void_(const void *p)
 {
-#if defined __GNUC__ && __GNUC__ > 4 || __GNUC__ == 4 2 4
+#if defined(__GNUC__) && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 2))
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wnonnull-compare" /* warning: nonnull argument 'p' compared to NULL */
+#pragma GCC diagnostic ignored "-Wcast-qual" /* warning: cast from type 'const void*' to type 'void*' casts away qualifiers */
 #endif
 	return (void*)p;
+#if defined(__GNUC__) && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 2))
+#pragma GCC diagnostic pop
+#endif
 }
 
 /* cast non-const pointer to one type to const/non-const pointer to another type:
