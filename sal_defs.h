@@ -504,6 +504,8 @@
 #define ASSUME(cond) ((void)(!(cond) ? __builtin_unreachable(), 0 : 1))
 #elif defined __clang__
 #define ASSUME(cond) __builtin_assume(!!(cond))
+#elif defined __INTEL_COMPILER
+#define ASSUME(cond) ((void)0) /* ICC compiles calls to __builtin_unreachable() as jumps somewhere... */
 #elif defined __GNUC__ && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5))
 #define ASSUME(cond) ((void)(!(cond) ? __builtin_unreachable(), 0 : 1))
 #else
