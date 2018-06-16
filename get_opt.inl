@@ -53,7 +53,7 @@
 
 /*=========================== Notes: ============================================================================================
 |
-| 1) get_opt(i) assumes that i->arg < i->args_end, caller must check this prior the call
+| 1) get_opt(i) assumes that i->arg[0] != NULL (or i->arg < i->args_end), caller must check this prior the call
 |
 | 2) a non-NULL value may be parsed for a long option that do not expects a value
 |    - if a value was specified together with the option, for example: "--option=value"
@@ -241,7 +241,7 @@ int main(int argc, char *argv[])
 	struct opt_info i;
 	opt_info_init(&i, argc, argv);
 
-	while (i.arg < i.args_end) {
+	while (!opt_info_is_end(&i)) {
 		switch (get_opt(&i, short_opts, long_opts)) {
 			case SHORT_OPTION_a:
 				/* short option 'a', may be with value: '-aval', '-a val', may be bundled: '-baval' or '-ba val' */
@@ -298,7 +298,8 @@ int main(int argc, char *argv[])
 			case OPT_REST_PARAMS:
 				do {
 					printf("parameter: %s\n", *i.arg);
-				} while (++i.arg < i.args_end);
+					i.arg++;
+				} while (!opt_info_is_end(&i));
 				break;
 			default:
 				fprintf(stderr, "assert: unexpected get_opt() return value!\n");
@@ -312,22 +313,51 @@ int main(int argc, char *argv[])
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Nonnull_all_args
 A_At(i, A_Out)
+#ifdef GET_OPT_ARGV_NZ
 A_At(argc, A_In_range(>,0))
 A_At(argv, A_In_reads(argc))
+#else
+A_At(argv, A_In)
 #endif
+#endif
+#ifdef GET_OPT_ARGV_NZ
 static void opt_info_init(struct opt_info *i/*out*/, int argc, GET_OPT_CHAR *const argv[/*argc*/])
+#else
+static void opt_info_init(struct opt_info *i/*out*/, GET_OPT_CHAR *const argv[]/*NULL-terminated*/)
+#endif
 {
 	i->arg = &argv[1];         /* skip program name at argv[0] */
+#ifdef GET_OPT_ARGV_NZ
 	i->args_end = &argv[argc];
+#endif
 	i->sopt = NULL;
 	/*i->value = NULL;*/       /* should be accessed only after an option was successfully parsed */
+}
+
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Nonnull_all_args
+A_At(i, A_In)
+A_Ret_range(0,1)
+A_Check_return
+#endif
+static int opt_info_is_end(const struct opt_info *i/*in*/)
+{
+#ifdef GET_OPT_ARGV_NZ
+	return i->arg == i->args_end;
+#else
+	return !i->arg[0];
+#endif
 }
 
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Check_return
 A_Nonnull_arg(1)
 A_Ret_range(>=,OPT_REST_PARAMS)
+#ifdef GET_OPT_ARGV_NZ
 A_Pre_satisfies(i->arg < i->args_end)
+#else
+A_Pre_satisfies(i->arg[0])
+#endif
 A_At(i, A_Inout)
 A_At(short_opts, A_In_opt_z)
 A_At(long_opts, A_In_opt)
@@ -338,6 +368,11 @@ static int get_opt(
 	const GET_OPT_CHAR *const long_opts[]/*NULL?*/
 ) {
 	GET_OPT_CHAR *a = i->sopt;
+#ifdef GET_OPT_ARGV_NZ
+	ASSERT(i->arg < i->args_end);
+#else
+	ASSERT(i->arg[0]);
+#endif
 	if (a) {
 		/* next short option in the bundle, like "yz-" in "-xyz-" */
 		if (short_opts) {
@@ -361,7 +396,7 @@ static int get_opt(
 						i->value = a + 1; /* skip "f" */
 					}
 					/* no value was specified together with the option, like "-xf", try to get the next argument */
-					else if (i->arg != i->args_end)
+					else if (!opt_info_is_end(i))
 						i->value = *i->arg++; /* option value, like "-xf abc" or "-xf -" or "-xf --abc" */
 					else
 						i->value = NULL; /* no value: end of args */
@@ -420,7 +455,7 @@ parse_long_option:
 							i->value = v + 1; /* skip '=' */
 						}
 						/* no value was specified together with the option, like "--help" */
-						else if (n != *lo && i->arg != i->args_end)
+						else if (n != *lo && !opt_info_is_end(i))
 							i->value = *i->arg++; /* option expects a value, take the next argument as the option value */
 						else
 							i->value = NULL; /* not expecting a value for the option or end of args */
@@ -460,7 +495,7 @@ parse_long_option:
 				}
 			}
 			/* no value was passed, like "-f" */
-			else if (a[1] == o[1] && i->arg != i->args_end)
+			else if (a[1] == o[1] && !opt_info_is_end(i))
 				i->value = *i->arg++; /* option expects a value, take the next argument as the option value */
 			else
 				i->value = NULL; /* option do not expects a value or end of args */
