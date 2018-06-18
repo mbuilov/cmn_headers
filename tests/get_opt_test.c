@@ -1,10 +1,20 @@
 /**********************************************************************************
 * Program options and parameters parsing test
-* Copyright (C) 2012-2017 Michael M. Builov, https://github.com/mbuilov/cmn_headers
+* Copyright (C) 2012-2018 Michael M. Builov, https://github.com/mbuilov/cmn_headers
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
 /* get_opt_test.c */
+
+/* compile with
+  gcc get_opt_test.c -o get_opt_test
+ or
+  gcc -DGET_OPT_ARGV_NZ get_opt_test.c -o get_opt_test
+
+ and run the test:
+  ./get_opt_test --help 3 --file 2 -b3 --level=4 -l 5 -d6 --debug 7 -o 8 -vr --output=9 -fg -f g\
+    --verbose 1 --verbose=4 -g 3 -g1 -9 - --trace --trace q --trace=v -t -tra -trace -h 6 -ogv- -- 4 -b --y 9
+*/
 
 #include <stdio.h>
 #include <string.h>
@@ -62,9 +72,13 @@ int main(int argc, char *argv[])
 #define LONG_OPT_MODIFIER   LONG_OPT_ENCODER
 
 	struct opt_info i;
+#ifdef GET_OPT_ARGV_NZ
 	opt_info_init(&i, argc, argv);
+#else
+	opt_info_init(&i, argv);
+#endif
 
-	while (i.arg < i.args_end) {
+	while (!opt_info_is_end(&i)) {
 		switch (get_opt(&i, short_opts, long_opts)) {
 			case SHORT_OPTION_a:
 				printf("a:%s\n", i.value ? i.value : "<null>");
@@ -118,7 +132,8 @@ int main(int argc, char *argv[])
 			case OPT_REST_PARAMS:
 				do {
 					printf("parameter: %s\n", *i.arg);
-				} while (++i.arg != i.args_end);
+					i.arg++;
+				} while (!opt_info_is_end(&i));
 				break;
 			default:
 				fprintf(stderr, "assert!\n");
