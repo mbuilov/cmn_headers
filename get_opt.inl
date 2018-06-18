@@ -356,7 +356,7 @@ A_Ret_range(>=,OPT_REST_PARAMS)
 #ifdef GET_OPT_ARGV_NZ
 A_Pre_satisfies(i->arg < i->args_end)
 #else
-A_Pre_satisfies(i->arg[0])
+A_Pre_satisfies(!!i->arg[0])
 #endif
 A_At(i, A_Inout)
 A_At(short_opts, A_In_opt_z)
