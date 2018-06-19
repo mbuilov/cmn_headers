@@ -130,10 +130,8 @@ int main(int argc, char *argv[])
 				printf("parameter: %s\n", i.value);
 				break;
 			case OPT_REST_PARAMS:
-				do {
+				for (; !opt_info_is_end(&i); i.arg++)
 					printf("parameter: %s\n", *i.arg);
-					i.arg++;
-				} while (!opt_info_is_end(&i));
 				break;
 			default:
 				fprintf(stderr, "assert!\n");
