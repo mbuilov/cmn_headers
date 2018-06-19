@@ -93,7 +93,7 @@
 
 #define OPT_PARAMETER   -2 /* i->value points to non-NULL parameter value */
 
-#define OPT_REST_PARAMS -3 /* "--" option was parsed, all rest arguments starting with current i->arg - parameters */
+#define OPT_REST_PARAMS -3 /* "--" option was parsed, all rest arguments, if any, starting with current i->arg - parameters */
 
 
 /* else, get_opt() returns matched option position (non-negative), encoded as follows: */
