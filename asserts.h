@@ -69,11 +69,11 @@ static inline void asserts_h_assert(int x, A_In_z const char *cond, A_In_z const
 
 #define ASSERT(cond) asserts_h_assert(!(cond), #cond, __FILE__, __LINE__, DPRINT_FUNC)
 
-#else /* !NDEBUG */
+#else /* NDEBUG */
 
 #define ASSERT(cond) ASSUME(cond)
 
-#endif /* !NDEBUG */
+#endif /* NDEBUG */
 
 #endif /* !ASSERT */
 
@@ -86,9 +86,9 @@ static inline void asserts_h_assert(int x, A_In_z const char *cond, A_In_z const
 #ifndef DEBUG_CHECK
 #ifndef NDEBUG
 #define DEBUG_CHECK(cond) ASSERT(cond)
-#else
+#else /* NDEBUG */
 #define DEBUG_CHECK(cond) ((void)0) /* _must_ process an error on runtime if cond is false */
-#endif
+#endif /* NDEBUG */
 #endif
 
 /* compile-time asserts:
