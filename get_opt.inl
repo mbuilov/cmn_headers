@@ -49,6 +49,9 @@
 
    3) void opt_skip_unknown(struct opt_info *i)
       - skip unrecognized option
+
+   Note: get_opt() considers all strings referenced via argv[] as constants, ignoring that they are declared
+     as non-constant ones - C language does not allow conversion 'char **' -> 'const char *const *' (but C++ does).
 */
 
 /*=========================== Notes: ============================================================================================
