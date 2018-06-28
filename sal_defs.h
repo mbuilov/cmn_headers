@@ -205,7 +205,9 @@
 #define A_Field_size_bytes_full_opt(s)           _Field_size_bytes_full_opt_(s)
 #define A_Field_z                                _Field_z_
 #define A_Field_range(min,max)                   _Field_range_(min,max)
-#define A_Ret_restrict                           __declspec(restrict)
+#define A_Ret_restrict                           __declspec(restrict) /* auto-mark pointer that accepts return value as A_Restrict */
+#define A_Ret_malloc                             A_Ret_restrict
+#define A_Alloc_size(i)
 #define A_Ret_never_null                         _Ret_notnull_ /* note: if there is A_Success() condition, add A_Always(A_Ret_notnull) */
 #define A_Nonnull_all_args
 #define A_Nonnull_arg(i)
@@ -234,7 +236,9 @@
 #define A_Nonnull_all_args                       __attribute__ ((nonnull))
 #define A_Nonnull_arg(i)                         __attribute__ ((nonnull(i,i)))
 #define A_Printf_format_at(f,v)                  __attribute__ ((format(printf, f, v)))
-#define A_Ret_restrict                           __attribute__ ((malloc))
+#define A_Ret_restrict
+#define A_Ret_malloc                             __attribute__ ((malloc))
+#define A_Alloc_size(i)                          __attribute__ ((alloc_size(i)))
 #else /* no GCC extensions */
 #define A_Noreturn_function                      /* function which never returns - calls exit()                                    */
 #define A_Const_function                         /* declare function without side effects, cannot access any memory by pointer     */
@@ -247,7 +251,9 @@
 #define A_Nonnull_all_args                       /* all function arguments pointers are != NULL                                    */
 #define A_Nonnull_arg(i)                         /* function argument number i is != NULL                                          */
 #define A_Printf_format_at(f,v)                  /* f - 1-based index of printf format argument, v - index of va_arg argument      */
-#define A_Ret_restrict                           /* returned pointer is the only alias to allocated memory - result of malloc()    */
+#define A_Ret_restrict                           /* function returns restricted pointer - assign it to A_Restrict variable         */
+#define A_Ret_malloc                             /* like A_Ret_restrict, but also returned memory do not contains valid pointers   */
+#define A_Alloc_size(i)                          /* function argument number i is the size of allocated memory                     */
 #endif /* no GCC extensions */
 #if (defined(__GNUC__) && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 9))) || \
   (defined(__clang__) && (__clang_major__ > 3 || (3 == __clang_major__  && __clang_minor__ >= 7)))
