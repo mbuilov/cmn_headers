@@ -101,11 +101,17 @@ static inline void asserts_h_assert(int x, A_In_z const char *cond, A_In_z const
 #define EMBED_ASSERT(expr) (0*sizeof(int[1-2*!(expr)]))
 #endif
 
-/* note: use ##line for the unique structure name */
+/* note: use ##line for the unique name */
 #ifndef STATIC_ASSERT
-#define STATIC_ASSERT2(expr,line) struct asserts_h_static_assert_at_line_##line{int a_[1-2*!(expr)];}
+#ifdef __COUNTER__
+#define STATIC_ASSERT2(expr,line,counter) typedef int static_assert_##counter##_at_line_##line[1-2*!(expr)]
+#define STATIC_ASSERT1(expr,line,counter) STATIC_ASSERT2(expr,line,counter)
+#define STATIC_ASSERT(expr)               STATIC_ASSERT1(expr,__LINE__,__COUNTER__)
+#else
+#define STATIC_ASSERT2(expr,line) typedef int static_assert_at_line_##line[1-2*!(expr)]
 #define STATIC_ASSERT1(expr,line) STATIC_ASSERT2(expr,line)
 #define STATIC_ASSERT(expr)       STATIC_ASSERT1(expr,__LINE__)
+#endif
 #endif
 
 /* number of elements in static array:
@@ -115,16 +121,16 @@ static inline void asserts_h_assert(int x, A_In_z const char *cond, A_In_z const
 */
 
 #ifndef COUNT_OF
-#ifdef __GNUC__
+#ifdef __cplusplus
+template <typename T, size_t N> char (&COUNT_OF_(T (&arr)[N]))[N];
+#define COUNT_OF(arr) sizeof(COUNT_OF_(arr))
+#elif defined __GNUC__
 #define COUNT_OF_(arr) (sizeof(arr)/sizeof((arr)[0]))
-/* check that arr - is an array, not a pointer */
+/* check that arr - is an array, not just a pointer */
 #define COUNT_OF(arr)  (COUNT_OF_(arr) + 0*sizeof(&(arr) - (__typeof__((arr)[0])(*)[COUNT_OF_(arr)])0))
-#elif defined __cplusplus
-template <typename T, size_t N> char (&COUNT_OF_(T (&array)[N]))[N];
-#define COUNT_OF(arr) (sizeof(COUNT_OF_(arr)))
-#else
+#else /* !__GNUC__ */
 #define COUNT_OF(arr) (sizeof(arr)/sizeof((arr)[0]))
 #endif
-#endif
+#endif /* !COUNT_OF */
 
 #endif /* ASSERTS_H_INCLUDED */
