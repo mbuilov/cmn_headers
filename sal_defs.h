@@ -238,7 +238,6 @@
 #define A_Printf_format_at(f,v)                  __attribute__ ((format(printf, f, v)))
 #define A_Ret_restrict
 #define A_Ret_malloc                             __attribute__ ((malloc))
-#define A_Alloc_size(i)                          __attribute__ ((alloc_size(i)))
 #else /* no GCC extensions */
 #define A_Noreturn_function                      /* function which never returns - calls exit()                                    */
 #define A_Const_function                         /* declare function without side effects, cannot access any memory by pointer     */
@@ -253,6 +252,11 @@
 #define A_Printf_format_at(f,v)                  /* f - 1-based index of printf format argument, v - index of va_arg argument      */
 #define A_Ret_restrict                           /* function returns restricted pointer - assign it to A_Restrict variable         */
 #define A_Ret_malloc                             /* like A_Ret_restrict, but also returned memory do not contains valid pointers   */
+#endif /* no GCC extensions */
+#if (defined(__GNUC__) && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 3))) || \
+  (defined(__clang__) && (__clang_major__ >= 4))
+#define A_Alloc_size(i)                          __attribute__ ((alloc_size(i)))
+#else /* no GCC extensions */
 #define A_Alloc_size(i)                          /* function argument number i is the size of allocated memory                     */
 #endif /* no GCC extensions */
 #if (defined(__GNUC__) && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 9))) || \
