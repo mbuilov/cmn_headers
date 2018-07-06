@@ -419,8 +419,8 @@
 #define A_Pre                                    /* marks pre-condition                                                            */
 #define A_Post                                   /* marks post-condition                                                           */
 #define A_Null                                   /* ==NULL                                                                         */
-#define A_Notnull                                /* !=NULL                                                                         */
-#define A_Maybenull                              /*  NULL?                                                                         */
+#define A_Notnull                                /* !=NULL may be applied to a field: struct P {A_Notnull void *ptr;};             */
+#define A_Maybenull                              /*  NULL? may be applied to a field: struct S {A_Field_z A_Maybenull char *s;};   */
 #define A_Valid                                  /*  NULL?   legal read, recursive: valid data references only valid data          */
 #define A_Notvalid                               /*  NULL? illegal read, recursive: invalid data cannot reference valid one        */
 #define A_Maybevalid                             /*  NULL?                                                                         */
@@ -450,7 +450,7 @@
 #define A_Field_size_bytes_part_opt(s,c)         /*  NULL? partially initialized field of s writable bytes, but only c readable    */
 #define A_Field_size_bytes_full(s)               /* !=NULL fully initialized field of s r/w bytes                                  */
 #define A_Field_size_bytes_full_opt(s)           /*  NULL? fully initialized field of s r/w bytes                                  */
-#define A_Field_z                                /*  NULL? '\0'-terminated field                                                   */
+#define A_Field_z                                /*  NULL? '\0'-terminated field, may be combined with add A_Notnull/A_Maybenull   */
 #define A_Field_range(min,max)                   /* field value is in given range                                                  */
 #endif /* !_MSC_VER */
 
