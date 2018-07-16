@@ -53,7 +53,14 @@ static void asserts_h_assertion_failed(A_In_z const char *cond, A_In_z const cha
 {
 	volatile int *arr[1] = {NULL};
 	DBGPRINTX(file, line, function, "assertion failed: %s", cond);
+#if defined __GNUC__ && __GNUC__ >= 6
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnull-dereference"
+#endif
 	*arr[0] = fflush(stderr); /* generate SIGSEGV */
+#if defined __GNUC__ && __GNUC__ >= 6
+#pragma GCC diagnostic pop
+#endif
 	exit(-1);
 }
 
@@ -129,13 +136,20 @@ static inline void asserts_h_assert(int x, A_In_z const char *cond, A_In_z const
 */
 
 #ifndef COUNT_OF
-#ifdef __GNUC__
+#ifdef __cplusplus
+#if defined __GNUC__ && __GNUC__ >= 6
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wtemplates"
+#endif
+template <typename T, size_t N> char (&COUNT_OF_(T (&arr)[N]))[N];
+#if defined __GNUC__ && __GNUC__ >= 6
+#pragma GCC diagnostic pop
+#endif
+#define COUNT_OF(arr) sizeof(COUNT_OF_(arr))
+#elif defined __GNUC__
 #define COUNT_OF_(arr) (sizeof(arr)/sizeof((arr)[0]))
 /* check that arr - is an array, not just a pointer */
 #define COUNT_OF(arr)  (COUNT_OF_(arr) + 0*sizeof(&(arr) - (__typeof__((arr)[0])(*)[COUNT_OF_(arr)])0))
-#elif defined __cplusplus
-template <typename T, size_t N> char (&COUNT_OF_(T (&arr)[N]))[N];
-#define COUNT_OF(arr) sizeof(COUNT_OF_(arr))
 #else /* fallback */
 #define COUNT_OF(arr) (sizeof(arr)/sizeof((arr)[0]))
 #endif
