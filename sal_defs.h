@@ -101,6 +101,7 @@
 #define A_Ret_writes_bytes_to_maybenull(s,c)     _Ret_writes_bytes_to_maybenull_(s,c)
 #define A_Check_return                           _Check_return_
 #define A_Must_inspect_result                    _Must_inspect_result_
+#define A_String_length(p)                       _String_length_(p)
 #define A_In_range(l,h)                          _In_range_(l,h)
 #define A_Out_range(l,h)                         _Out_range_(l,h)
 #define A_Ret_range(l,h)                         _Ret_range_(l,h)
@@ -351,6 +352,7 @@
 #define A_Ret_writes_to_t(s,c)                   /* for typedef                                                                    */
 #define A_Ret_writes_bytes_to_t(s,c)             /* for typedef                                                                    */
 #define A_Must_inspect_result                    /* caller must check value of out-parameter                                       */
+#define A_String_length(p)                       /* length of C-string passed in parameter p, i.e. strlen(p)                       */
 #define A_In_range(l,h)                          /* input parameter value is in given range                                        */
 #define A_Out_range(l,h)                         /* NULL? output parameter value is in given range, usable for C++ references      */
 #define A_Ret_range(l,h)                         /* return value is in given range                                                 */
@@ -450,7 +452,7 @@
 #define A_Field_size_bytes_part_opt(s,c)         /*  NULL? partially initialized field of s writable bytes, but only c readable    */
 #define A_Field_size_bytes_full(s)               /* !=NULL fully initialized field of s r/w bytes                                  */
 #define A_Field_size_bytes_full_opt(s)           /*  NULL? fully initialized field of s r/w bytes                                  */
-#define A_Field_z                                /*  NULL? '\0'-terminated field, may be combined with add A_Notnull/A_Maybenull   */
+#define A_Field_z                                /*  NULL? '\0'-terminated field, may be combined with A_Notnull/A_Maybenull       */
 #define A_Field_range(min,max)                   /* field value is in given range                                                  */
 #endif /* !_MSC_VER */
 
