@@ -522,10 +522,48 @@ static void opt_skip_unknown(struct opt_info *i/*in,out*/)
 	i->arg++;
 }
 
+/* check if option value is specified in a separate argument, like: "-o value" or "--option value" */
+/* old_arg - value of i->arg before the call to get_opt():
+  struct opt_info i;
+  GET_OPT_CHAR *const *old_arg = i.arg;
+  int opt = get_opt(&i, short_opts, long_opts);
+  if (opt_is_separate_value(&i, old_arg)) {
+    opt_unread_separate_value(&i);
+    opt = get_opt(&i, short_opts, long_opts);
+    ...
+  }
+*/
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Nonnull_all_args
+A_Check_return
+A_At(i, A_In)
+A_At(old_arg, A_Notnull)
+#endif
+static int opt_is_separate_value(
+	const struct opt_info *i,
+	GET_OPT_CHAR *const *old_arg
+) {
+	ASSERT(i->value);
+	return (i->arg - 1) != old_arg;
+}
+
+/* unread option value specified in a separate argument, like: "-o value" or "--option value" */
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Nonnull_all_args
+A_At(i, A_Inout)
+#endif
+static void opt_unread_separate_value(struct opt_info *i/*in,out*/)
+{
+	i->arg--;
+	ASSERT(*i->arg == i->value);
+}
+
 /* suppress warnings about unreferenced static functions */
 typedef int get_opt_unused_[sizeof(&get_opt)];
 typedef int opt_info_init_unused_[sizeof(&opt_info_init)];
 typedef int opt_skip_unknown_unused_[sizeof(&opt_skip_unknown)];
+typedef int opt_is_separate_value_unused_[sizeof(&opt_is_separate_value)];
+typedef int opt_unread_separate_value_unused_[sizeof(&opt_unread_separate_value)];
 
 #ifdef __clang__
 #pragma clang diagnostic pop
