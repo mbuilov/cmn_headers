@@ -14,10 +14,10 @@
 /* NOTE: post-annotations are considered only if A_Success() condition is true or not specified */
 #define A_Restrict                               __restrict
 #define A_Noreturn_function                      __declspec(noreturn)
-#define A_Const_function
-#define A_Pure_function
 #define A_Force_inline_function                  __forceinline
 #define A_Non_inline_function                    __declspec(noinline)
+#define A_Const_function
+#define A_Pure_function
 #define A_Non_const_function
 #define A_Non_pure_function
 #define A_Empty                                  /* empty, use to workaround bugs in compiler */
@@ -213,45 +213,62 @@
 #define A_Nonnull_all_args
 #define A_Nonnull_arg(i)
 #define A_Printf_format_at(f,v)
-#else /* !_MSC_VER */
+#else /* !_MSC_VER || NO_SAL_ANNOTATIONS */
 #if defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
 #define A_Restrict restrict                      /* standard keyword for c99 */
-#else /* !c99 */
-#if (defined(__GNUC__) && (__GNUC__ >= 3)) || \
+#elif defined _MSC_VER
+#define A_Restrict                               __restrict
+#elif (defined(__GNUC__) && (__GNUC__ >= 3)) || \
   (defined(__clang__) && (__clang_major__ > 3 || (3 == __clang_major__  && __clang_minor__ >= 7)))
 #define A_Restrict                               __restrict__
 #else /* no GCC extensions */
 #define A_Restrict
 #endif /* no GCC extensions */
-#endif /* !c99 */
-#if (defined(__GNUC__) && (__GNUC__ >= 4)) || \
+#ifdef _MSC_VER
+#define A_Noreturn_function                      __declspec(noreturn)
+#define A_Force_inline_function                  __forceinline
+#define A_Non_inline_function                    __declspec(noinline)
+#elif (defined(__GNUC__) && (__GNUC__ >= 4)) || \
   (defined(__clang__) && (__clang_major__ > 3 || (3 == __clang_major__  && __clang_minor__ >= 7)))
 #define A_Noreturn_function                      __attribute__ ((noreturn))
-#define A_Const_function                         __attribute__ ((const))
-#define A_Pure_function                          __attribute__ ((pure))
 #define A_Force_inline_function                  __attribute__ ((always_inline)) inline
 #define A_Non_inline_function                    __attribute__ ((noinline))
+#else /* no GCC extensions */
+#define A_Noreturn_function                      /* function which never returns - calls exit()                                    */
+#define A_Force_inline_function inline           /* forcibly inlined function                                                      */
+#define A_Non_inline_function                    /* forbid inlining a function                                                     */
+#endif /* no GCC extensions */
+#if (defined(__GNUC__) && (__GNUC__ >= 4)) || \
+  (defined(__clang__) && (__clang_major__ > 3 || (3 == __clang_major__  && __clang_minor__ >= 7)))
+#define A_Const_function                         __attribute__ ((const))
+#define A_Pure_function                          __attribute__ ((pure))
 #define A_Non_const_function                     __attribute__ ((const))      /* only for function definition - to silence warning */
 #define A_Non_pure_function                      __attribute__ ((pure))       /* only for function definition - to silence warning */
 #define A_Check_return                           __attribute__ ((warn_unused_result))
 #define A_Nonnull_all_args                       __attribute__ ((nonnull))
 #define A_Nonnull_arg(i)                         __attribute__ ((nonnull(i,i)))
 #define A_Printf_format_at(f,v)                  __attribute__ ((format(printf, f, v)))
-#define A_Ret_restrict
-#define A_Ret_malloc                             __attribute__ ((malloc))
 #else /* no GCC extensions */
-#define A_Noreturn_function                      /* function which never returns - calls exit()                                    */
 #define A_Const_function                         /* declare function without side effects, cannot access any memory by pointer     */
 #define A_Pure_function                          /* declare function without side effects, may read but cannot write memory        */
-#define A_Force_inline_function inline           /* forcibly inlined function                                                      */
-#define A_Non_inline_function                    /* forbid inlining a function                                                     */
 #define A_Non_const_function                     /* define function as const to silence "-Wsuggest-attribute=const" warning        */
 #define A_Non_pure_function                      /* define function as pure to silence "-Wsuggest-attribute=pure" warning          */
 #define A_Check_return                           /* caller must check function's return value                                      */
 #define A_Nonnull_all_args                       /* all function arguments pointers are != NULL                                    */
 #define A_Nonnull_arg(i)                         /* function argument number i is != NULL                                          */
 #define A_Printf_format_at(f,v)                  /* f - 1-based index of printf format argument, v - index of va_arg argument      */
+#endif /* no GCC extensions */
+#ifdef _MSC_VER
+#define A_Ret_restrict                           __declspec(restrict) /* auto-mark pointer that accepts return value as A_Restrict */
+#else /* !_MSC_VER */
 #define A_Ret_restrict                           /* function returns restricted pointer - assign it to A_Restrict variable         */
+#endif /* !_MSC_VER */
+#ifdef _MSC_VER
+#define A_Ret_malloc                             A_Ret_restrict
+#elif (defined(__GNUC__) && (__GNUC__ >= 4)) || \
+  (defined(__clang__) && (__clang_major__ > 3 || (3 == __clang_major__  && __clang_minor__ >= 7)))
+#define A_Ret_malloc                             __attribute__ ((malloc))
+#else /* no GCC extensions */
 #define A_Ret_malloc                             /* like A_Ret_restrict, but also returned memory do not contains valid pointers   */
 #endif /* no GCC extensions */
 #if (defined(__GNUC__) && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 3))) || \
@@ -524,6 +541,19 @@
 #define ASSUME(cond) ((void)0) /* assume condition is always true */
 #endif
 #endif /* ASSUME */
+
+#ifndef FALLTHROUGH
+#if defined __cplusplus && __cplusplus >= 201703L
+#define FALLTHROUGH [[fallthrough]]
+#elif defined(__GNUC__) && (__GNUC__ >= 7)
+#define FALLTHROUGH __attribute__ ((fallthrough))
+#elif defined __cplusplus && defined(__clang__) && (__clang_major__ > 3 || \
+	(3 == __clang_major__  && __clang_minor__ >= 6))
+#define FALLTHROUGH [[clang::fallthrough]]
+#else
+#define FALLTHROUGH ((void)0)
+#endif
+#endif /* FALLTHROUGH */
 
 #ifdef __NETBEANS_PREPROCESSING
 #undef A_Force_inline_function
