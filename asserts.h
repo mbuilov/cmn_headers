@@ -53,12 +53,17 @@ static void asserts_h_assertion_failed(A_In_z const char *cond, A_In_z const cha
 {
 	volatile int *arr[1] = {NULL};
 	DBGPRINTX(file, line, function, "assertion failed: %s", cond);
-#if defined __GNUC__ && __GNUC__ >= 6
+#if defined _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:6011) /* Dereferencing NULL pointer 'arr[0]' */
+#elif defined __GNUC__ && __GNUC__ >= 6
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wnull-dereference"
 #endif
 	*arr[0] = fflush(stderr); /* generate SIGSEGV */
-#if defined __GNUC__ && __GNUC__ >= 6
+#if defined _MSC_VER
+#pragma warning(pop)
+#elif defined __GNUC__ && __GNUC__ >= 6
 #pragma GCC diagnostic pop
 #endif
 	exit(-1);
