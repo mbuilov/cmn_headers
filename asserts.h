@@ -3,13 +3,13 @@
 
 /**********************************************************************************
 * Assertions
-* Copyright (C) 2012-2018 Michael M. Builov, https://github.com/mbuilov/cmn_headers
+* Copyright (C) 2012-2019 Michael M. Builov, https://github.com/mbuilov/cmn_headers
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
 /* asserts.h */
 
-/* defines: ASSERT, DEBUG_CHECK, EMBED_ASSERT, STATIC_ASSERT, COUNT_OF */
+/* defines: ASSERT, ASSERT_PTR, DEBUG_CHECK, EMBED_ASSERT, STATIC_ASSERT, COUNT_OF */
 
 #ifndef NDEBUG
 #include <stdlib.h> /* for assert() */
@@ -34,22 +34,40 @@
 #endif
 #endif
 
+#ifndef ASSERT_PTR
+#ifndef NDEBUG
+#ifdef _MSC_VER
+#ifdef _DEBUG
+#define ASSERT_PTR(ptr) assert(ptr)
+#endif
+#endif
+#endif
+#endif
+
 #ifndef ASSERT
 #ifdef __clang_analyzer__
 #define ASSERT(cond) ASSUME(cond)
 #endif
 #endif
 
-#ifndef ASSERT
+#ifndef ASSERT_PTR
+#ifdef __clang_analyzer__
+#define ASSERT_PTR(ptr) ASSUME(ptr)
+#endif
+#endif
 
-#ifndef NDEBUG
+#if !defined(NDEBUG) && (!defined(ASSERT) || !defined(ASSERT_PTR))
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 A_Noreturn_function A_Force_inline_function
-static void asserts_h_assertion_failed(A_In_z const char *cond, A_In_z const char *file, int line, A_In_z const char *function)
+static void asserts_h_assertion_failed(
+	A_In_z const char *const cond,
+	A_In_z const char *const file,
+	const int line,
+	A_In_z const char *const function)
 {
 	volatile int *arr[1] = {NULL};
 	DBGPRINTX(file, line, function, "assertion failed: %s", cond);
@@ -69,7 +87,26 @@ static void asserts_h_assertion_failed(A_In_z const char *cond, A_In_z const cha
 	exit(-1);
 }
 
-static inline void asserts_h_assert(int x, A_In_z const char *cond, A_In_z const char *file, int line, A_In_z const char *function)
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* !NDEBUG && (!ASSERT || !ASSERT_PTR) */
+
+#ifndef ASSERT
+
+#ifndef NDEBUG
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+static inline void asserts_h_assert(
+	const int x,
+	A_In_z const char *const cond,
+	A_In_z const char *const file,
+	const int line,
+	A_In_z const char *const function)
 {
 	if (x)
 		asserts_h_assertion_failed(cond, file, line, function);
@@ -88,6 +125,39 @@ static inline void asserts_h_assert(int x, A_In_z const char *cond, A_In_z const
 #endif /* NDEBUG */
 
 #endif /* !ASSERT */
+
+#ifndef ASSERT_PTR
+
+#ifndef NDEBUG
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+static inline void asserts_h_assert_ptr(
+	const void *const ptr,
+	A_In_z const char *const cond,
+	A_In_z const char *const file,
+	const int line,
+	A_In_z const char *const function)
+{
+	if (!ptr)
+		asserts_h_assertion_failed(cond, file, line, function);
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+#define ASSERT_PTR(ptr) asserts_h_assert_ptr(ptr, #ptr, __FILE__, __LINE__, DPRINT_FUNC)
+
+#else /* NDEBUG */
+
+#define ASSERT_PTR(ptr) ASSUME(ptr)
+
+#endif /* NDEBUG */
+
+#endif /* !ASSERT_PTR */
 
 /* DEBUG_CHECK(condition)
 
