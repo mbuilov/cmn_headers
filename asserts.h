@@ -9,7 +9,7 @@
 
 /* asserts.h */
 
-/* defines: ASSERT, ASSERT_PTR, DEBUG_CHECK, EMBED_ASSERT, STATIC_ASSERT, COUNT_OF */
+/* defines: ASSERT, ASSERT_PTR, DEBUG_CHECK, DEBUG_CHECK_PTR, EMBED_ASSERT, STATIC_ASSERT, COUNT_OF */
 
 #ifndef NDEBUG
 #include <stdlib.h> /* for assert() */
@@ -17,9 +17,9 @@
 #endif
 #include "dprint.h" /* for DBGPRINTX() */
 
-/* ASSERT(condition)
+/* ASSERT(condition), ASSERT_PTR(pointer)
 
-  if condition is false, then:
+  if condition is false or pointer is NULL, then:
   in DEBUG   - abnormal program exit
   in RELEASE - _unreachable_ code
 */
@@ -34,29 +34,14 @@
 #endif
 #endif
 
-#ifndef ASSERT_PTR
-#ifndef NDEBUG
-#ifdef _MSC_VER
-#ifdef _DEBUG
-#define ASSERT_PTR(ptr) assert(ptr)
-#endif
-#endif
-#endif
-#endif
-
 #ifndef ASSERT
 #ifdef __clang_analyzer__
 #define ASSERT(cond) ASSUME(cond)
 #endif
 #endif
 
-#ifndef ASSERT_PTR
-#ifdef __clang_analyzer__
-#define ASSERT_PTR(ptr) ASSUME(ptr)
-#endif
-#endif
-
-#if !defined(NDEBUG) && (!defined(ASSERT) || !defined(ASSERT_PTR))
+#ifndef ASSERT
+#ifndef NDEBUG
 
 #ifdef __cplusplus
 extern "C" {
@@ -87,20 +72,6 @@ static void asserts_h_assertion_failed(
 	exit(-1);
 }
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* !NDEBUG && (!ASSERT || !ASSERT_PTR) */
-
-#ifndef ASSERT
-
-#ifndef NDEBUG
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static inline void asserts_h_assert(
 	const int x,
 	A_In_z const char *const cond,
@@ -118,17 +89,7 @@ static inline void asserts_h_assert(
 
 #define ASSERT(cond) asserts_h_assert(!(cond), #cond, __FILE__, __LINE__, DPRINT_FUNC)
 
-#else /* NDEBUG */
-
-#define ASSERT(cond) ASSUME(cond)
-
-#endif /* NDEBUG */
-
-#endif /* !ASSERT */
-
 #ifndef ASSERT_PTR
-
-#ifndef NDEBUG
 
 #ifdef __cplusplus
 extern "C" {
@@ -151,26 +112,38 @@ static inline void asserts_h_assert_ptr(
 
 #define ASSERT_PTR(ptr) asserts_h_assert_ptr(ptr, #ptr, __FILE__, __LINE__, DPRINT_FUNC)
 
-#else /* NDEBUG */
-
-#define ASSERT_PTR(ptr) ASSUME(ptr)
-
-#endif /* NDEBUG */
-
 #endif /* !ASSERT_PTR */
 
-/* DEBUG_CHECK(condition)
+#else /* NDEBUG */
 
-  if condition is false, then:
+#define ASSERT(cond) ASSUME(cond)
+
+#endif /* NDEBUG */
+#endif /* !ASSERT */
+
+#ifndef ASSERT_PTR
+#define ASSERT_PTR(ptr) ASSERT(ptr)
+#endif
+
+/* DEBUG_CHECK(condition), DEBUG_CHECK_PTR(pointer)
+
+  if condition is false or pointer is NULL, then:
   in DEBUG   - abnormal program exit
   in RELEASE - _reachable_ code, error must be processed appropriately
 */
 #ifndef DEBUG_CHECK
 #ifndef NDEBUG
 #define DEBUG_CHECK(cond) ASSERT(cond)
+#ifndef DEBUG_CHECK_PTR
+#define DEBUG_CHECK_PTR(ptr) ASSERT_PTR(ptr)
+#endif
 #else /* NDEBUG */
 #define DEBUG_CHECK(cond) ((void)0) /* _must_ process an error on runtime if cond is false */
 #endif /* NDEBUG */
+#endif /* !DEBUG_CHECK */
+
+#ifndef DEBUG_CHECK_PTR
+#define DEBUG_CHECK_PTR(ptr) DEBUG_CHECK(ptr)
 #endif
 
 /* compile-time asserts:
