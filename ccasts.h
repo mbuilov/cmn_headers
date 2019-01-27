@@ -123,26 +123,19 @@ static inline struct c_casts_void_ *c_const_cast_void_(const void *p)
 #define CAST_PP(type_, pp_) ((void)sizeof(c_cast_constant_void_(*(pp_))), (type_*)c_const_cast_void_(pp_))
 #endif
 
-A_Nonnull_all_args A_Const_function A_Check_return A_Ret_never_null A_Ret_range(==,(char*)p - offset)
+A_Nonnull_all_args A_Const_function A_Check_return A_Ret_never_null A_Success(1) A_Ret_range(==,(char*)p - offset) A_Ret_valid
 static inline struct c_casts_void_ *c_container_of_(
-	A_Notnull A_At((char*)p - offset, A_Writable_bytes(offset)) const void *p/*!=NULL*/,
-	size_t offset)
+	A_In A_At((char*)p - offset, A_Writable_bytes(offset)) const void *p/*!=NULL*/,
+	size_t offset/*0?*/)
 {
-#if defined __GNUC__ && __GNUC__ >= 6
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wnonnull-compare" /* warning: nonnull argument 'p' compared to NULL */
-#endif
-	ASSERT(p); /* p must be != NULL */
-#if defined __GNUC__ && __GNUC__ >= 6
-#pragma GCC diagnostic pop
-#endif
+	ASSERT_PTR(p); /* p must be != NULL */
 	return (struct c_casts_void_*)((char*)c_const_cast_void_(p) - offset);
 }
 
-A_Const_function A_Check_return A_When(!p, A_Ret_null) A_When(p, A_Ret_notnull A_Ret_range(==,(char*)p - offset))
+A_Const_function A_Check_return A_When(!p, A_Ret_null) A_When(!!p, A_Ret_range(==,(char*)p - offset) A_Ret_valid)
 static inline struct c_casts_void_ *c_opt_container_of_(
-	A_When(p, A_At((char*)p - offset, A_Writable_bytes(offset))) const void *p/*NULL?*/,
-	size_t offset)
+	A_In_opt A_When(!!p, A_At((char*)p - offset, A_Writable_bytes(offset))) const void *p/*NULL?*/,
+	size_t offset/*0?*/)
 {
 	return (struct c_casts_void_*)(p ? (char*)c_const_cast_void_(p) - offset : NULL);
 }

@@ -47,7 +47,7 @@
 extern "C" {
 #endif
 
-A_Noreturn_function A_Force_inline_function
+A_Noreturn_function A_Force_inline_function A_Nonnull_all_args
 static void asserts_h_assertion_failed(
 	A_In_z const char *const cond,
 	A_In_z const char *const file,
@@ -72,6 +72,7 @@ static void asserts_h_assertion_failed(
 	exit(-1);
 }
 
+A_Nonnull_all_args
 static inline void asserts_h_assert(
 	const int x,
 	A_In_z const char *const cond,
@@ -95,6 +96,10 @@ static inline void asserts_h_assert(
 extern "C" {
 #endif
 
+/* to avoid "-Wnonnull-compare", don't mark ptr as non-null */
+A_Nonnull_arg(2)
+A_Nonnull_arg(3)
+A_Nonnull_arg(5)
 static inline void asserts_h_assert_ptr(
 	const void *const ptr,
 	A_In_z const char *const cond,
