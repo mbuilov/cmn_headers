@@ -532,17 +532,19 @@
 
 #ifdef __cplusplus
 
+template <class T>
 A_Ret_valid A_Ret_range(==,p)
-template <class T> __forceinline T *A_Mark_valid(
+__forceinline T *A_Mark_valid(
 	A_Notnull A_Pre_invalid A_Post_valid T *const p/*!=NULL*/)
 {
 	return const_cast<T*>(p);
 }
 
+template <class T>
 A_When(!p, A_Ret_null)
 A_When(!!p, A_Ret_valid)
 A_Ret_range(==,p)
-template <class T> __forceinline T *A_Mark_opt_valid(
+__forceinline T *A_Mark_opt_valid(
 	A_Maybenull A_Pre_invalid A_Post_valid T *const p/*NULL?*/)
 {
 	return const_cast<T*>(p);
