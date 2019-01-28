@@ -101,8 +101,8 @@
 #define A_Check_return                    _Check_return_                    /* -> check */
 #define A_Must_inspect_result             _Must_inspect_result_             /* -> check */
 #define A_String_length(p)                _Inexpressible_(p)                /* as of MSVC v15.9.5: _String_length_("x") == 0 (sic!) */
-#define A_Pre_ptrdiff_count_(e)           _Pre_ptrdiff_count_(e)            /* <- !null valid pdiff(e)   */
-#define A_Pre_opt_ptrdiff_count_(e)       _Pre_opt_ptrdiff_count_(e)        /* <- null? valid pdiff(e)   */
+#define A_Pre_ptrdiff_count(e)            _Pre_ptrdiff_count_(e)            /* <- !null valid pdiff(e)   */
+#define A_Pre_opt_ptrdiff_count(e)        _Pre_opt_ptrdiff_count_(e)        /* <- null? valid pdiff(e)   */
 #define A_In_range(l,h)                   _In_range_(l,h)                   /* <-       l <= param  <= h */
 #define A_Out_range(l,h)                  _Out_range_(l,h)                  /* ->       l <= param  <= h */
 #define A_Ret_range(l,h)                  _Ret_range_(l,h)                  /* ->       l <= return <= h */
@@ -114,7 +114,7 @@
 #define A_Unchanged(p)                    _Unchanged_(p)                    /* <- read -> p == old(p) */
 #define A_Pre_satisfies(cond)             _Pre_satisfies_(cond)             /* <- cond != 0 */
 #define A_Post_satisfies(cond)            _Post_satisfies_(cond)            /* -> cond != 0 */
-#define A_Success(expr)                   _Success_(expr)                   /* -> expr != 0 */
+#define A_Success(expr)                   _Success_(!!(expr))               /* -> expr != 0 */
 #define A_Return_type_success(expr)       _Return_type_success_(expr)       /* -> expr != 0 */
 #define A_Result_zeroonfailure            _Result_zeroonfailure_            /* (failed -> deref == 0) (null-ness?) */
 #define A_Result_nullonfailure            _Result_nullonfailure_            /* (failed -> deref null) (null-ness?) */
@@ -144,77 +144,78 @@
 #define A_Outptr_result_bytebuffer_all_maybenull(s)      _Outptr_result_bytebuffer_all_maybenull_(s)      /* <- !null w_e=1 -> valid (deref null? v_b=s)       */
 #define A_Outptr_opt_result_bytebuffer_all(s)            _Outptr_opt_result_bytebuffer_all_(s)            /* <- null? w_e=1 -> valid (deref !null v_b=s)       */
 #define A_Outptr_opt_result_bytebuffer_all_maybenull(s)  _Outptr_opt_result_bytebuffer_all_maybenull_(s)  /* <- null? w_e=1 -> valid (deref null? v_b=s)       */
-#define A_Printf_format_string                   _Printf_format_string_           /* <->                 (null-ness?, validity?)  */
-#define e_A_Group(anns,empty)                    _Group_(anns##empty)
-#define A_Group(anns)                            e_A_Group(anns,A_Empty)
-#define e_A_On_failure(anns,empty)               _On_failure_(anns##empty)
-#define A_On_failure(anns)                       e_A_On_failure(anns,A_Empty)
-#define e_A_Always(anns,empty)                   _Always_(anns##empty)
-#define A_Always(anns)                           e_A_Always(anns,A_Empty)
-#define A_At(at,anns)                            _At_(at,anns)
-#define A_At_buffer(buf,i,cnt,anns)              _At_buffer_(buf,i,cnt,anns)      /* i - iterator name to use in anns (null-ness?, validity?) */
-#define A_When(cond,anns)                        _When_(cond,anns)
-#define A_Post_z                                 _Post_z_                         /* -> valid 0-term     (null-ness?)             */
-#define A_Post_maybez                            _Post_maybez_                    /* -> 0-term?          (null-ness?, validity?)  */
-#define A_Post_valid                             _Post_valid_                     /* -> valid            (null-ness?)             */
-#define A_Post_invalid                           _Post_invalid_                   /* -> deref invalid    (null-ness?)             */
-#define A_Post_ptr_invalid                       _Post_ptr_invalid_               /* -> invalid          (null-ness?)             */
-#define A_Post_null                              _Post_null_                      /* -> null                                      */
-#define A_Post_notnull                           _Post_notnull_                   /* -> !null            (validity?)              */
-#define A_Post_maybenull                         _Post_maybenull_                 /* -> null?            (validity?)              */
-#define A_Prepost_z                              _Prepost_z_                      /* <- valid 0-term -> valid 0-term (null-ness?) */
-#define A_Pre_z                                  _Pre_z_                          /* <- valid 0-term     (null-ness?)             */
-#define A_Pre_valid                              _Pre_valid_                      /* <- !null valid                               */
-#define A_Pre_opt_valid                          _Pre_opt_valid_                  /* <- null? valid                               */
-#define A_Pre_invalid                            _Pre_invalid_                    /* <- deref invalid    (null-ness?)             */
-#define A_Pre_unknown                            _Pre_unknown_                    /* <- valid?           (null-ness?)             */
-#define A_Pre_notnull                            _Pre_notnull_                    /* <- !null            (validity?)              */
-#define A_Pre_maybenull                          _Pre_maybenull_                  /* <- null?            (validity?)              */
-#define A_Pre_null                               _Pre_null_                       /* <- null                                      */
-#define A_Use_decl_annotations                   _Use_decl_annotations_
-#define A_Pre                                    _Pre_                            /* <-                  (null-ness?, validity?)  */
-#define A_Post                                   _Post_                           /* ->                  (null-ness?, validity?)  */
-#define A_Null                                   _Null_                           /* <-> null                                     */
-#define A_Notnull                                _Notnull_                        /* <-> !null           (validity?)              */
-#define A_Maybenull                              _Maybenull_                      /* <-> null?           (validity?)              */
-#define A_Valid                                  _Valid_                          /* <-> valid           (null-ness?)             */
-#define A_Notvalid                               _Notvalid_                       /* <-> invalid         (null-ness?)             */
-#define A_Maybevalid                             _Maybevalid_                     /* <-> valid?          (null-ness?)             */
-#define A_Readable_bytes(n)                      _Readable_bytes_(n)              /* <-> r_b=n           (null-ness?, validity?)  */
-#define A_Readable_elements(n)                   _Readable_elements_(n)           /* <-> r_e=n           (null-ness?, validity?)  */
-#define A_Writable_bytes(n)                      _Writable_bytes_(n)              /* <-> w_b=n           (null-ness?, validity?)  */
-#define A_Writable_elements(n)                   _Writable_elements_(n)           /* <-> w_e=n           (null-ness?, validity?)  */
-#define A_Null_terminated                        _Null_terminated_                /* <-> 0-term          (null-ness?, validity?)  */
-#define A_Pre_readable_size(s)                   _Pre_readable_size_(s)           /* <- valid v_e=s      (null-ness?)             */
-#define A_Pre_writable_size(s)                   _Pre_writable_size_(s)           /* <- w_e=s            (null-ness?, validity?)  */
-#define A_Pre_readable_byte_size(s)              _Pre_readable_byte_size_(s)      /* <- valid v_b=s      (null-ness?)             */
-#define A_Pre_writable_byte_size(s)              _Pre_writable_byte_size_(s)      /* <- w_b=s            (null-ness?, validity?)  */
-#define A_Post_readable_size(s)                  _Post_readable_size_(s)          /* -> valid v_e=s      (null-ness?)             */
-#define A_Post_writable_size(s)                  _Post_writable_size_(s)          /* -> w_e=s            (null-ness?, validity?)  */
-#define A_Post_readable_byte_size(s)             _Post_readable_byte_size_(s)     /* -> valid v_b=s      (null-ness?)             */
-#define A_Post_writable_byte_size(s)             _Post_writable_byte_size_(s)     /* -> w_b=s            (null-ness?, validity?)  */
-#define A_Struct_size_bytes(s)                   _Struct_size_bytes_(s)           /* <-> w_b=s           (null-ness?, validity?)  */
-#define A_Field_size(s)                          _Field_size_(s)                  /* <-> !null w_e=s       (validity?)            */
-#define A_Field_size_opt(s)                      _Field_size_opt_(s)              /* <-> null? w_e=s       (validity?)            */
-#define A_Field_size_part(s,c)                   _Field_size_part_(s,c)           /* <-> !null w_e=s r_e=c (validity?)            */
-#define A_Field_size_part_opt(s,c)               _Field_size_part_opt_(s,c)       /* <-> null? w_e=s r_e=c (validity?)            */
-#define A_Field_size_full(s)                     _Field_size_full_(s)             /* <-> !null w_e=s r_e=s (validity?)            */
-#define A_Field_size_full_opt(s)                 _Field_size_full_opt_(s)         /* <-> null? w_e=s r_e=s (validity?)            */
-#define A_Field_size_bytes(s)                    _Field_size_bytes_(s)            /* <-> !null w_b=s       (validity?)            */
-#define A_Field_size_bytes_opt(s)                _Field_size_bytes_opt_(s)        /* <-> null? w_b=s       (validity?)            */
-#define A_Field_size_bytes_part(s,c)             _Field_size_bytes_part_(s,c)     /* <-> !null w_b=s r_b=c (validity?)            */
-#define A_Field_size_bytes_part_opt(s,c)         _Field_size_bytes_part_opt_(s,c) /* <-> null? w_b=s r_b=c (validity?)            */
-#define A_Field_size_bytes_full(s)               _Field_size_bytes_full_(s)       /* <-> !null w_b=s r_b=c (validity?)            */
-#define A_Field_size_bytes_full_opt(s)           _Field_size_bytes_full_opt_(s)   /* <-> null? w_b=s r_b=c (validity?)            */
-#define A_Field_z                                _Field_z_                        /* <-> 0-term            (null-ness?, validity?) */
-#define A_Field_range(l,h)                       _Field_range_(l,h)               /* <-> l <= field <= h                           */
-#define A_Ret_restrict                           __declspec(restrict) /* auto-mark pointer that accepts return value as A_Restrict */
-#define A_Ret_malloc                             A_Ret_restrict
-#define A_Ret_never_null                         _Always_(_Ret_notnull_) /* if there is no A_Success() annotation, add A_Success(1) */
-#define A_Alloc_size(i)                          /* gcc-specific */
-#define A_Nonnull_all_args                       /* gcc-specific */
-#define A_Nonnull_arg(i)                         /* gcc-specific */
-#define A_Printf_format_at(f,v)                  /* gcc-specific */
+#define A_Printf_format_string           _Printf_format_string_           /* <->                 (null-ness?, validity?)  */
+#define e_A_Group(anns,empty)            _Group_(anns##empty)
+#define A_Group(anns)                    e_A_Group(anns,A_Empty)
+#define e_A_On_failure(anns,empty)       _On_failure_(anns##empty)
+#define A_On_failure(anns)               e_A_On_failure(anns,A_Empty)
+#define e_A_Always(anns,empty)           _Always_(anns##empty)
+#define A_Always(anns)                   e_A_Always(anns,A_Empty)
+#define A_At(at,anns)                    _At_(at,anns)
+#define A_At_buffer(buf,i,cnt,anns)      _At_buffer_(buf,i,cnt,anns)      /* i - iterator name to use in anns (null-ness?, validity?) */
+#define A_When(cond,anns)                _When_(cond,anns)
+#define A_Post_z                         _Post_z_                         /* -> valid 0-term     (null-ness?)                      */
+#define A_Post_maybez                    _Post_maybez_                    /* -> 0-term?          (null-ness?, validity?)           */
+#define A_Post_valid                     _Post_valid_                     /* -> valid            (null-ness?)                      */
+#define A_Post_invalid                   _Post_invalid_                   /* -> deref invalid    (null-ness?)                      */
+#define A_Post_ptr_invalid               _Post_ptr_invalid_               /* -> invalid          (null-ness?)                      */
+#define A_Post_null                      _Post_null_                      /* -> null                                               */
+#define A_Post_notnull                   _Post_notnull_                   /* -> !null            (validity?)                       */
+#define A_Post_maybenull                 _Post_maybenull_                 /* -> null?            (validity?)                       */
+#define A_Prepost_z                      _Prepost_z_                      /* <- valid 0-term -> valid 0-term (null-ness?)          */
+#define A_Pre_z                          _Pre_z_                          /* <- valid 0-term     (null-ness?)                      */
+#define A_Pre_valid                      _Pre_valid_                      /* <- !null valid                                        */
+#define A_Pre_opt_valid                  _Pre_opt_valid_                  /* <- null? valid                                        */
+#define A_Pre_invalid                    _Pre_invalid_                    /* <- deref invalid    (null-ness?)                      */
+#define A_Pre_unknown                    _Pre_unknown_                    /* <- valid?           (null-ness?)                      */
+#define A_Pre_notnull                    _Pre_notnull_                    /* <- !null            (validity?)                       */
+#define A_Pre_maybenull                  _Pre_maybenull_                  /* <- null?            (validity?)                       */
+#define A_Pre_null                       _Pre_null_                       /* <- null                                               */
+#define A_Use_decl_annotations           _Use_decl_annotations_
+#define A_Pre                            _Pre_                            /* <-                  (null-ness?, validity?)           */
+#define A_Post                           _Post_                           /* ->                  (null-ness?, validity?)           */
+#define A_Null                           _Null_                           /* <-> null                                              */
+#define A_Notnull                        _Notnull_                        /* <-> !null           (validity?)                       */
+#define A_Maybenull                      _Maybenull_                      /* <-> null?           (validity?)                       */
+#define A_Valid                          _Valid_                          /* <-> valid           (null-ness?)                      */
+#define A_Notvalid                       _Notvalid_                       /* <-> invalid         (null-ness?)                      */
+#define A_Maybevalid                     _Maybevalid_                     /* <-> valid?          (null-ness?)                      */
+#define A_Readable_bytes(n)              _Readable_bytes_(n)              /* <-> r_b=n           (null-ness?, validity?)           */
+#define A_Readable_elements(n)           _Readable_elements_(n)           /* <-> r_e=n           (null-ness?, validity?)           */
+#define A_Writable_bytes(n)              _Writable_bytes_(n)              /* <-> w_b=n           (null-ness?, validity?)           */
+#define A_Writable_elements(n)           _Writable_elements_(n)           /* <-> w_e=n           (null-ness?, validity?)           */
+#define A_Null_terminated                _Null_terminated_                /* <-> 0-term          (null-ness?, validity?)           */
+#define A_Pre_readable_size(s)           _Pre_readable_size_(s)           /* <- valid v_e=s      (null-ness?)                      */
+#define A_Pre_writable_size(s)           _Pre_writable_size_(s)           /* <- w_e=s            (null-ness?, validity?)           */
+#define A_Pre_readable_byte_size(s)      _Pre_readable_byte_size_(s)      /* <- valid v_b=s      (null-ness?)                      */
+#define A_Pre_writable_byte_size(s)      _Pre_writable_byte_size_(s)      /* <- w_b=s            (null-ness?, validity?)           */
+#define A_Post_readable_size(s)          _Post_readable_size_(s)          /* -> valid v_e=s      (null-ness?)                      */
+#define A_Post_writable_size(s)          _Post_writable_size_(s)          /* -> w_e=s            (null-ness?, validity?)           */
+#define A_Post_readable_byte_size(s)     _Post_readable_byte_size_(s)     /* -> valid v_b=s      (null-ness?)                      */
+#define A_Post_writable_byte_size(s)     _Post_writable_byte_size_(s)     /* -> w_b=s            (null-ness?, validity?)           */
+#define A_Struct_size_bytes(s)           _Struct_size_bytes_(s)           /* <-> w_b=s           (null-ness?, validity?)           */
+#define A_Field_size(s)                  _Field_size_(s)                  /* <-> !null w_e=s       (validity?)                     */
+#define A_Field_size_opt(s)              _Field_size_opt_(s)              /* <-> null? w_e=s       (validity?)                     */
+#define A_Field_size_part(s,c)           _Field_size_part_(s,c)           /* <-> !null w_e=s r_e=c (validity?)                     */
+#define A_Field_size_part_opt(s,c)       _Field_size_part_opt_(s,c)       /* <-> null? w_e=s r_e=c (validity?)                     */
+#define A_Field_size_full(s)             _Field_size_full_(s)             /* <-> !null w_e=s r_e=s (validity?)                     */
+#define A_Field_size_full_opt(s)         _Field_size_full_opt_(s)         /* <-> null? w_e=s r_e=s (validity?)                     */
+#define A_Field_size_bytes(s)            _Field_size_bytes_(s)            /* <-> !null w_b=s       (validity?)                     */
+#define A_Field_size_bytes_opt(s)        _Field_size_bytes_opt_(s)        /* <-> null? w_b=s       (validity?)                     */
+#define A_Field_size_bytes_part(s,c)     _Field_size_bytes_part_(s,c)     /* <-> !null w_b=s r_b=c (validity?)                     */
+#define A_Field_size_bytes_part_opt(s,c) _Field_size_bytes_part_opt_(s,c) /* <-> null? w_b=s r_b=c (validity?)                     */
+#define A_Field_size_bytes_full(s)       _Field_size_bytes_full_(s)       /* <-> !null w_b=s r_b=c (validity?)                     */
+#define A_Field_size_bytes_full_opt(s)   _Field_size_bytes_full_opt_(s)   /* <-> null? w_b=s r_b=c (validity?)                     */
+#define A_Field_z                        _Field_z_                        /* <-> 0-term            (null-ness?, validity?)         */
+#define A_Field_range(l,h)               _Field_range_(l,h)               /* <-> l <= field <= h                                   */
+#define A_Ret_restrict                   __declspec(restrict) /* auto-mark pointer that accepts return value as A_Restrict         */
+#define A_Ret_malloc                     A_Ret_restrict
+#define A_Ret_never_null                 _Success_(1) _Always_(_Ret_notnull_) /* for a custom A_Success() use A_Ret_never_null_but */
+#define A_Ret_never_null_but             _Always_(_Ret_notnull_)          /* for a custom expression of A_Success(expr)            */
+#define A_Alloc_size(i)                  /* gcc-specific */
+#define A_Nonnull_all_args               /* gcc-specific */
+#define A_Nonnull_arg(i)                 /* gcc-specific */
+#define A_Printf_format_at(f,v)          /* gcc-specific */
 
 #else /* !_MSC_VER || NO_SAL_ANNOTATIONS */
 
@@ -279,8 +280,10 @@
 #if (defined(__GNUC__) && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 9))) || \
   (defined(__clang__) && (__clang_major__ > 3 || (3 == __clang_major__  && __clang_minor__ >= 7)))
 #define A_Ret_never_null                         __attribute__ ((returns_nonnull))
+#define A_Ret_never_null_but                     __attribute__ ((returns_nonnull))
 #else /* no GCC extensions */
-#define A_Ret_never_null                         /* never returns NULL, even if expr of A_Success(expr) is 0                       */
+#define A_Ret_never_null                         /* never returns NULL (if there is no A_Success() annotation)                     */
+#define A_Ret_never_null_but                     /* never returns NULL, even if expr of A_Success(expr) is 0                       */
 #endif /* no GCC extensions */
 
 #if (defined(__GNUC__) && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 3))) || \
@@ -368,17 +371,10 @@
 #define A_Ret_writes_to_maybenull(s,c)           /* returns NULL? ptr to array of s writable elems, c elems are valid              */
 #define A_Ret_writes_bytes_to(s,c)               /* returns !NULL ptr to array of s writable bytes, c bytes are valid              */
 #define A_Ret_writes_bytes_to_maybenull(s,c)     /* returns NULL? ptr to array of s writable bytes, c bytes are valid              */
-#define A_Ret_z_t                                /* for typedef                                                                    */
-#define A_Ret_valid_t                            /* for typedef                                                                    */
-#define A_Ret_writes_t(s)                        /* for typedef                                                                    */
-#define A_Ret_writes_z_t(s)                      /* for typedef                                                                    */
-#define A_Ret_writes_bytes_t(s)                  /* for typedef                                                                    */
-#define A_Ret_writes_to_t(s,c)                   /* for typedef                                                                    */
-#define A_Ret_writes_bytes_to_t(s,c)             /* for typedef                                                                    */
 #define A_Must_inspect_result                    /* caller must check value of out-parameter (*ptr) (NULL-ness?, validity?)        */
 #define A_String_length(p)                       /* length of C-string passed in parameter p, i.e. strlen(p)/wsclen(p)             */
-#define A_Pre_ptrdiff_count_(e)                  /* before the call: number of elements in array until ptr e                       */
-#define A_Pre_opt_ptrdiff_count_(e)              /* before the call: number of elements in optional array until ptr e              */
+#define A_Pre_ptrdiff_count(e)                   /* before the call: number of elements in array until ptr e                       */
+#define A_Pre_opt_ptrdiff_count(e)               /* before the call: number of elements in optional array until ptr e              */
 #define A_In_range(l,h)                          /* value is in given range (inclusive) before the call                            */
 #define A_Out_range(l,h)                         /* value is in given range (inclusive) after the call, usable for C++ references  */
 #define A_Ret_range(l,h)                         /* return value is in given range (inclusive)                                     */

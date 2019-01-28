@@ -123,7 +123,7 @@ static inline struct c_casts_void_ *c_const_cast_void_(const void *p)
 #define CAST_PP(type_, pp_) ((void)sizeof(c_cast_constant_void_(*(pp_))), (type_*)c_const_cast_void_(pp_))
 #endif
 
-A_Nonnull_all_args A_Const_function A_Check_return A_Ret_never_null A_Success(1) A_Ret_range(==,(char*)p - offset) A_Ret_valid
+A_Nonnull_all_args A_Const_function A_Check_return A_Ret_never_null A_Ret_range(==,(char*)p - offset) A_Ret_valid
 static inline struct c_casts_void_ *c_container_of_(
 	A_In A_At((char*)p - offset, A_Writable_bytes(offset)) const void *p/*!=NULL*/,
 	size_t offset/*0?*/)
