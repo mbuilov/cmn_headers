@@ -154,45 +154,46 @@
 #define A_At(at,anns)                    _At_(at,anns)
 #define A_At_buffer(buf,i,cnt,anns)      _At_buffer_(buf,i,cnt,anns)      /* i - iterator name to use in anns (null-ness?, validity?) */
 #define A_When(cond,anns)                _When_(cond,anns)
-#define A_Post_z                         _Post_z_                         /* -> valid 0-term     (null-ness?)                      */
-#define A_Post_maybez                    _Post_maybez_                    /* -> 0-term?          (null-ness?, validity?)           */
-#define A_Post_valid                     _Post_valid_                     /* -> valid            (null-ness?)                      */
-#define A_Post_invalid                   _Post_invalid_                   /* -> deref invalid    (null-ness?)                      */
-#define A_Post_ptr_invalid               _Post_ptr_invalid_               /* -> invalid          (null-ness?)                      */
-#define A_Post_null                      _Post_null_                      /* -> null                                               */
-#define A_Post_notnull                   _Post_notnull_                   /* -> !null            (validity?)                       */
-#define A_Post_maybenull                 _Post_maybenull_                 /* -> null?            (validity?)                       */
-#define A_Prepost_z                      _Prepost_z_                      /* <- valid 0-term -> valid 0-term (null-ness?)          */
-#define A_Pre_z                          _Pre_z_                          /* <- valid 0-term     (null-ness?)                      */
-#define A_Pre_valid                      _Pre_valid_                      /* <- !null valid                                        */
-#define A_Pre_opt_valid                  _Pre_opt_valid_                  /* <- null? valid                                        */
-#define A_Pre_invalid                    _Pre_invalid_                    /* <- deref invalid    (null-ness?)                      */
-#define A_Pre_unknown                    _Pre_unknown_                    /* <- valid?           (null-ness?)                      */
-#define A_Pre_notnull                    _Pre_notnull_                    /* <- !null            (validity?)                       */
-#define A_Pre_maybenull                  _Pre_maybenull_                  /* <- null?            (validity?)                       */
-#define A_Pre_null                       _Pre_null_                       /* <- null                                               */
-#define A_Use_decl_annotations           _Use_decl_annotations_
 #define A_Pre                            _Pre_                            /* <-                  (null-ness?, validity?)           */
-#define A_Post                           _Post_                           /* ->                  (null-ness?, validity?)           */
+#define A_Post                           _Post_                           /*  ->                 (null-ness?, validity?)           */
+#define A_Pre_z                          _Pre_z_                          /* <-  valid 0-term    (null-ness?)                      */
+#define A_Post_z                         _Post_z_                         /*  -> valid 0-term    (null-ness?)                      */
+#define A_Prepost_z                      _Prepost_z_                      /* <-  valid 0-term -> valid 0-term (null-ness?)         */
+#define A_Post_maybez                    _Post_maybez_                    /*  -> 0-term?         (null-ness?, validity?)           */
+#define A_Pre_null                       _Pre_null_                       /* <-  null                                              */
+#define A_Post_null                      _Post_null_                      /*  -> null                                              */
 #define A_Null                           _Null_                           /* <-> null                                              */
+#define A_Pre_notnull                    _Pre_notnull_                    /* <-  !null           (validity?)                       */
+#define A_Post_notnull                   _Post_notnull_                   /*  -> !null           (validity?)                       */
 #define A_Notnull                        _Notnull_                        /* <-> !null           (validity?)                       */
+#define A_Pre_maybenull                  _Pre_maybenull_                  /* <-  null?           (validity?)                       */
+#define A_Post_maybenull                 _Post_maybenull_                 /*  -> null?           (validity?)                       */
 #define A_Maybenull                      _Maybenull_                      /* <-> null?           (validity?)                       */
+#define A_Pre_valid                      _Pre_valid_                      /* <-  !null valid                                       */
+#define A_Pre_opt_valid                  _Pre_opt_valid_                  /* <-  null? valid                                       */
+#define A_Post_valid                     _Post_valid_                     /*  -> valid           (null-ness?)                      */
 #define A_Valid                          _Valid_                          /* <-> valid           (null-ness?)                      */
+#define A_Pre_deref_invalid              _Pre_invalid_                    /* <-  deref invalid   (null-ness?)                      */
+#define A_Post_deref_invalid             _Post_invalid_                   /*  -> deref invalid   (null-ness?)                      */
+#define A_Deref_invalid                  _Pre_invalid_ _Post_invalid_     /* <-> deref invalid   (null-ness?)                      */
 #define A_Notvalid                       _Notvalid_                       /* <-> invalid         (null-ness?)                      */
+#define A_Post_ptr_invalid               _Post_ptr_invalid_               /*  -> invalid         (null-ness?)                      */
+#define A_Pre_unknown                    _Pre_unknown_                    /* <-  valid?          (null-ness?)                      */
 #define A_Maybevalid                     _Maybevalid_                     /* <-> valid?          (null-ness?)                      */
+#define A_Use_decl_annotations           _Use_decl_annotations_
 #define A_Readable_bytes(n)              _Readable_bytes_(n)              /* <-> r_b=n           (null-ness?, validity?)           */
-#define A_Readable_elements(n)           _Readable_elements_(n)           /* <-> r_e=n           (null-ness?, validity?)           */
 #define A_Writable_bytes(n)              _Writable_bytes_(n)              /* <-> w_b=n           (null-ness?, validity?)           */
+#define A_Readable_elements(n)           _Readable_elements_(n)           /* <-> r_e=n           (null-ness?, validity?)           */
 #define A_Writable_elements(n)           _Writable_elements_(n)           /* <-> w_e=n           (null-ness?, validity?)           */
 #define A_Null_terminated                _Null_terminated_                /* <-> 0-term          (null-ness?, validity?)           */
-#define A_Pre_readable_size(s)           _Pre_readable_size_(s)           /* <- valid v_e=s      (null-ness?)                      */
-#define A_Pre_writable_size(s)           _Pre_writable_size_(s)           /* <- w_e=s            (null-ness?, validity?)           */
-#define A_Pre_readable_byte_size(s)      _Pre_readable_byte_size_(s)      /* <- valid v_b=s      (null-ness?)                      */
-#define A_Pre_writable_byte_size(s)      _Pre_writable_byte_size_(s)      /* <- w_b=s            (null-ness?, validity?)           */
-#define A_Post_readable_size(s)          _Post_readable_size_(s)          /* -> valid v_e=s      (null-ness?)                      */
-#define A_Post_writable_size(s)          _Post_writable_size_(s)          /* -> w_e=s            (null-ness?, validity?)           */
-#define A_Post_readable_byte_size(s)     _Post_readable_byte_size_(s)     /* -> valid v_b=s      (null-ness?)                      */
-#define A_Post_writable_byte_size(s)     _Post_writable_byte_size_(s)     /* -> w_b=s            (null-ness?, validity?)           */
+#define A_Pre_readable_size(s)           _Pre_readable_size_(s)           /* <-  valid v_e=s      (null-ness?)                     */
+#define A_Post_readable_size(s)          _Post_readable_size_(s)          /*  -> valid v_e=s      (null-ness?)                     */
+#define A_Pre_writable_size(s)           _Pre_writable_size_(s)           /* <-  w_e=s            (null-ness?, validity?)          */
+#define A_Post_writable_size(s)          _Post_writable_size_(s)          /*  -> w_e=s            (null-ness?, validity?)          */
+#define A_Pre_readable_byte_size(s)      _Pre_readable_byte_size_(s)      /* <-  valid v_b=s      (null-ness?)                     */
+#define A_Post_readable_byte_size(s)     _Post_readable_byte_size_(s)     /*  -> valid v_b=s      (null-ness?)                     */
+#define A_Pre_writable_byte_size(s)      _Pre_writable_byte_size_(s)      /* <-  w_b=s            (null-ness?, validity?)          */
+#define A_Post_writable_byte_size(s)     _Post_writable_byte_size_(s)     /*  -> w_b=s            (null-ness?, validity?)          */
 #define A_Struct_size_bytes(s)           _Struct_size_bytes_(s)           /* <-> w_b=s           (null-ness?, validity?)           */
 #define A_Field_size(s)                  _Field_size_(s)                  /* <-> !null w_e=s       (validity?)                     */
 #define A_Field_size_opt(s)              _Field_size_opt_(s)              /* <-> null? w_e=s       (validity?)                     */
@@ -423,44 +424,45 @@
 #define A_At(at,anns)            /* at location, e.g.: A_On_failure(A_At(*p, A_Post_null)) T **p                                  */
 #define A_At_buffer(b,i,c,anns)  /* A_At_buffer(b,i,c,A_At(b[i],A_In_z)) foo(char *b[], unsigned c); (NULL-ness?, validity?)      */
 #define A_When(cond,anns)        /* A_When(return != 0, A_Out_writes(size)) T p[]                                                 */
-#define A_Post_z                 /* post valid 0-term           (NULL-ness?)                                                      */
-#define A_Post_maybez            /* post 0-term?                (NULL-ness?, validity?)                                           */
-#define A_Post_valid             /* post points to valid data   (NULL-ness?) (down-recursive: valid pointer references only valid data)        */
-#define A_Post_invalid           /* post points to invalid data (NULL-ness?) (up-recursive: valid data cannot contain pointers to invalid one) */
-#define A_Post_ptr_invalid       /* post invalid pointer        (NULL-ness?) (up-recursive: valid data cannot contain invalid pointers)        */
-#define A_Post_null              /* post NULL                                                                                     */
-#define A_Post_notnull           /* post !NULL                  (validity?)                                                       */
-#define A_Post_maybenull         /* post NULL?                  (validity?)                                                       */
-#define A_Prepost_z              /* pre/post valid and 0-term   (NULL-ness?)                                                      */
-#define A_Pre_z                  /* pre valid and 0-term        (NULL-ness?)                                                      */
-#define A_Pre_valid              /* pre !NULL and valid    (down-recursive: valid pointer references only valid data)             */
-#define A_Pre_opt_valid          /* pre NULL? and valid    (down-recursive: valid pointer references only valid data)             */
-#define A_Pre_invalid            /* pre points to invalid data  (NULL-ness?)                                                      */
-#define A_Pre_unknown            /* pre valid?                  (NULL-ness?)                                                      */
-#define A_Pre_notnull            /* pre !NULL                   (validity?)                                                       */
-#define A_Pre_maybenull          /* pre NULL?                   (validity?)                                                       */
-#define A_Pre_null               /* pre NULL                                                                                      */
-#define A_Use_decl_annotations   /* use annotations from function declaration for the function definition                         */
 #define A_Pre                    /* marks pre-condition         (NULL-ness?, validity?)                                           */
 #define A_Post                   /* marks post-condition        (NULL-ness?, validity?)                                           */
+#define A_Pre_z                  /* pre valid and 0-term        (NULL-ness?)                                                      */
+#define A_Post_z                 /* post valid 0-term           (NULL-ness?)                                                      */
+#define A_Prepost_z              /* pre/post valid and 0-term   (NULL-ness?)                                                      */
+#define A_Post_maybez            /* post 0-term?                (NULL-ness?, validity?)                                           */
+#define A_Pre_null               /* pre NULL                                                                                      */
+#define A_Post_null              /* post NULL                                                                                     */
 #define A_Null                   /* pre/post NULL                                                                                 */
-#define A_Notnull                /* pre/post !NULL   (validity?)  can be applied to a field: struct P {A_Notnull void *ptr;};     */
-#define A_Maybenull              /* pre/post NULL?   (validity?)  can be applied to a field: struct S {A_Maybenull char *s;};     */
-#define A_Valid                  /* pre/post points to valid data   (NULL-ness?) (down-recursive: valid pointer references only valid data)        */
-#define A_Notvalid               /* pre/post points to invalid data (NULL-ness?) (up-recursive: valid data cannot contain pointers to invalid one) */
-#define A_Maybevalid             /* pre/post valid?                 (NULL-ness?)                                           */
+#define A_Pre_notnull            /* pre !NULL                   (validity?)                                                       */
+#define A_Post_notnull           /* post !NULL                  (validity?)                                                       */
+#define A_Notnull                /* pre/post !NULL              (validity?)  can be applied to a field: struct P {A_Notnull void *ptr;}; */
+#define A_Pre_maybenull          /* pre NULL?                   (validity?)                                                       */
+#define A_Post_maybenull         /* post NULL?                  (validity?)                                                       */
+#define A_Maybenull              /* pre/post NULL?              (validity?)  can be applied to a field: struct S {A_Maybenull char *s;}; */
+#define A_Pre_valid              /* pre !NULL and valid                        (down-recursive: valid pointer references only valid data) */
+#define A_Pre_opt_valid          /* pre NULL? and valid                        (down-recursive: valid pointer references only valid data) */
+#define A_Post_valid             /* post points to valid data     (NULL-ness?) (down-recursive: valid pointer references only valid data) */
+#define A_Valid                  /* pre/post points to valid data (NULL-ness?) (down-recursive: valid pointer references only valid data) */
+#define A_Pre_deref_invalid      /* pre points to invalid data      (NULL-ness?) (up-recursive: valid data cannot contain pointers to invalid one) */
+#define A_Post_deref_invalid     /* post points to invalid data     (NULL-ness?) (up-recursive: valid data cannot contain pointers to invalid one) */
+#define A_Deref_invalid          /* pre/post points to invalid data (NULL-ness?) (up-recursive: valid data cannot contain pointers to invalid one) */
+#define A_Notvalid               /* pre/post invalid pointer (data) (NULL-ness?) (up-recursive: valid data cannot contain invalid pointers) */
+#define A_Post_ptr_invalid       /* post invalid pointer            (NULL-ness?) (up-recursive: valid data cannot contain invalid pointers) */
+#define A_Pre_unknown            /* pre valid?                      (NULL-ness?) (up-recursive: valid data cannot contain invalid pointers) */
+#define A_Maybevalid             /* pre/post valid?                 (NULL-ness?) (up-recursive: valid data cannot contain invalid pointers) */
+#define A_Use_decl_annotations   /* use annotations from function declaration for the function definition                  */
 #define A_Readable_bytes(n)      /* pre/post ptr to n readable bytes    (NULL-ness?, validity?)                            */
-#define A_Readable_elements(n)   /* pre/post ptr to n readable elems    (NULL-ness?, validity?)                            */
 #define A_Writable_bytes(n)      /* pre/post ptr to n writable bytes    (NULL-ness?, validity?)                            */
+#define A_Readable_elements(n)   /* pre/post ptr to n readable elems    (NULL-ness?, validity?)                            */
 #define A_Writable_elements(n)   /* pre/post ptr to n writable elems    (NULL-ness?, validity?)                            */
 #define A_Null_terminated        /* pre/post ptr to 0-term string       (NULL-ness?, validity?)                            */
 #define A_Pre_readable_size(s)       /* pre array with s valid elems       (NULL-ness?)                                    */
-#define A_Pre_writable_size(s)       /* pre array with s writable elems    (NULL-ness?, validity?)                         */
-#define A_Pre_readable_byte_size(s)  /* pre array with s valid bytes       (NULL-ness?)                                    */
-#define A_Pre_writable_byte_size(s)  /* pre array with s writable byets    (NULL-ness?, validity?)                         */
 #define A_Post_readable_size(s)      /* post array with s valid elems      (NULL-ness?)                                    */
+#define A_Pre_writable_size(s)       /* pre array with s writable elems    (NULL-ness?, validity?)                         */
 #define A_Post_writable_size(s)      /* post array with s writable elems   (NULL-ness?, validity?)                         */
+#define A_Pre_readable_byte_size(s)  /* pre array with s valid bytes       (NULL-ness?)                                    */
 #define A_Post_readable_byte_size(s) /* post array with s valid bytes      (NULL-ness?)                                    */
+#define A_Pre_writable_byte_size(s)  /* pre array with s writable bytes    (NULL-ness?, validity?)                         */
 #define A_Post_writable_byte_size(s) /* post array with s writable bytes   (NULL-ness?, validity?)                         */
 #define A_Struct_size_bytes(s)       /* pre/post array of s writable bytes       (NULL-ness?, validity?)                   */
 #define A_Field_size(s)              /* pre/post !NULL array of s writable elems                 (validity?)               */
