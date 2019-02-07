@@ -408,7 +408,7 @@ static int get_opt(
 					i->arg++; /* skip bundle */
 					i->sopt = NULL; /* end of short options bundle */
 				}
-				return SHORT_OPT((int)(o - short_opts));
+				return SHORT_OPT((int)(unsigned)(o - short_opts));
 			}
 		}
 		return OPT_UNKNOWN; /* unknown short option in the short options bundle */
@@ -426,7 +426,7 @@ static int get_opt(
 			if (o) {
 				/* dash option cannot begin a long option and cannot have a value */
 				ASSERT(GET_OPT_TEXT(' ') != o[1] && GET_OPT_TEXT('-') != o[1]);
-				return SHORT_OPT((int)(o - short_opts));
+				return SHORT_OPT((int)(unsigned)(o - short_opts));
 			}
 		}
 	}
@@ -460,7 +460,7 @@ parse_long_option:
 							i->value = *i->arg++; /* option expects a value, take the next argument as the option value */
 						else
 							i->value = NULL; /* not expecting a value for the option or end of args */
-						return LONG_OPT((int)(lo - long_opts));
+						return LONG_OPT((int)(unsigned)(lo - long_opts));
 					}
 				}
 			}
@@ -500,7 +500,7 @@ parse_long_option:
 				i->value = *i->arg++; /* option expects a value, take the next argument as the option value */
 			else
 				i->value = NULL; /* option do not expects a value or end of args */
-			return SHORT_OPT((int)(o - short_opts));
+			return SHORT_OPT((int)(unsigned)(o - short_opts));
 		}
 	}
 	i->arg--;
@@ -534,6 +534,7 @@ static void opt_skip_unknown(struct opt_info *i/*in,out*/)
   }
 */
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Pure_function
 A_Nonnull_all_args
 A_Check_return
 A_At(i, A_In)
