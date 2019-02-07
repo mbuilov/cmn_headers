@@ -21,6 +21,7 @@
 #define A_Pure_function                   /* gcc-specific */
 #define A_Empty                           /* empty, use to workaround bugs in analyzer */
 #define A_Curr                            _Curr_
+#define A_Param(i)                        _Param_(i)
 #define A_Old                             _Old_
 #define A_Const                           _Const_                           /* <- read                               */
 #define A_In                              _In_                              /* <- !null valid (deref read)           */
@@ -215,8 +216,8 @@
 #define A_Ret_never_null_but             _Always_(_Ret_notnull_)          /* for a custom expression of A_Success(expr)            */
 #define A_Alloc_size(i)                  /* gcc-specific */
 #define A_Nonnull_all_args               /* gcc-specific */
-#define A_Nonnull_arg(i)                 /* gcc-specific */
-#define A_Printf_format_at(f,v)          /* gcc-specific */
+#define A_Nonnull_arg(i)                 _At_(_Param_(i), _Notnull_)
+#define A_Printf_format_at(f,v)          _At_(_Param_(f), _Printf_format_string_)
 
 #else /* !_MSC_VER || NO_SAL_ANNOTATIONS */
 
@@ -295,6 +296,7 @@
 #endif /* no GCC extensions */
 
 #define A_Curr                                   /* references current function parameter, like A_At(*A_Curr, A_Post_notnull)      */
+#define A_Param(i)                               /* references function parameter number i, like A_At(A_Param(1), A_Notnull)       */
 #define A_Old                                    /* old value, like A_Old(*A_Curr)                                                 */
 #define A_Const                                  /* structure member is read-only: A_At(s->m, A_Const)                             */
 #define A_In                                     /* !NULL ptr to read-only valid object                                            */
@@ -507,9 +509,9 @@
    struct B b;
    struct C c;
  };
- void B_destroy(A_Pre_valid A_Post_invalid struct B *b);
- void C_destroy(A_Pre_valid A_Post_invalid struct C *c);
- void A_destroy(A_Pre_valid A_Post_invalid struct A *a)
+ void B_destroy(A_Pre_valid A_Post_deref_invalid struct B *b);
+ void C_destroy(A_Pre_valid A_Post_deref_invalid struct C *c);
+ void A_destroy(A_Pre_valid A_Post_deref_invalid struct A *a)
  {
    B_destroy(&a->b);
    C_destroy(&a->c); // here analyzer gives (false) warning C6001: Using uninitialized memory '*a'
@@ -517,7 +519,7 @@
 
  to suppress analyzer warning, use A_Mark_valid():
 
- void A_destroy(A_Pre_valid A_Post_invalid struct A *a)
+ void A_destroy(A_Pre_valid A_Post_deref_invalid struct A *a)
  {
    B_destroy(&a->b);
    C_destroy(A_Mark_valid(&a->c));
@@ -533,7 +535,7 @@
 template <class T>
 A_Ret_valid A_Ret_range(==,p)
 __forceinline T *A_Mark_valid(
-	A_Notnull A_Pre_invalid A_Post_valid T *const p/*!=NULL*/)
+	A_Notnull A_Pre_deref_invalid A_Post_valid T *const p/*!=NULL*/)
 {
 	return const_cast<T*>(p);
 }
@@ -543,7 +545,7 @@ A_When(!p, A_Ret_null)
 A_When(!!p, A_Ret_valid)
 A_Ret_range(==,p)
 __forceinline T *A_Mark_opt_valid(
-	A_Maybenull A_Pre_invalid A_Post_valid T *const p/*NULL?*/)
+	A_Maybenull A_Pre_deref_invalid A_Post_valid T *const p/*NULL?*/)
 {
 	return const_cast<T*>(p);
 }
@@ -552,7 +554,7 @@ __forceinline T *A_Mark_opt_valid(
 
 A_Ret_valid A_Ret_range(==,p)
 static __forceinline void *A_Mark_valid(
-	A_Notnull A_Pre_invalid A_Post_valid void *const p/*!=NULL*/)
+	A_Notnull A_Pre_deref_invalid A_Post_valid void *const p/*!=NULL*/)
 {
 	return p;
 }
@@ -561,7 +563,7 @@ A_When(!p, A_Ret_null)
 A_When(!!p, A_Ret_valid)
 A_Ret_range(==,p)
 static __forceinline void *A_Mark_opt_valid(
-	A_Maybenull A_Pre_invalid A_Post_valid void *const p/*NULL?*/)
+	A_Maybenull A_Pre_deref_invalid A_Post_valid void *const p/*NULL?*/)
 {
 	return (void*)p;
 }
