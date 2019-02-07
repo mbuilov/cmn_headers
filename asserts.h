@@ -9,7 +9,14 @@
 
 /* asserts.h */
 
-/* defines: ASSERT, ASSERT_PTR, DEBUG_CHECK, DEBUG_CHECK_PTR, EMBED_ASSERT, STATIC_ASSERT, COUNT_OF */
+/* defines:
+  ASSERT(cond)
+  ASSERT_PTR(ptr)
+  DEBUG_CHECK(cond)
+  DEBUG_CHECK_PTR(ptr)
+  EMBED_ASSERT(const_expr)
+  STATIC_ASSERT(const_expr)
+*/
 
 #ifndef NDEBUG
 #include <stdlib.h> /* for assert() */
@@ -72,8 +79,9 @@ static void asserts_h_assertion_failed(
 	exit(-1);
 }
 
+A_Force_inline_function
 A_Nonnull_all_args
-static inline void asserts_h_assert(
+static void asserts_h_assert(
 	const int x,
 	A_In_z const char *const cond,
 	A_In_z const char *const file,
@@ -97,10 +105,11 @@ extern "C" {
 #endif
 
 /* to avoid "-Wnonnull-compare", don't mark ptr as non-null */
+A_Force_inline_function
 A_Nonnull_arg(2)
 A_Nonnull_arg(3)
 A_Nonnull_arg(5)
-static inline void asserts_h_assert_ptr(
+static void asserts_h_assert_ptr(
 	const void *const ptr,
 	A_In_z const char *const cond,
 	A_In_z const char *const file,
@@ -153,59 +162,33 @@ static inline void asserts_h_assert_ptr(
 
 /* compile-time asserts:
 
-  EMBED_ASSERT(condition)  - evaluates to 0 at compile-time, may be placed inside an expression,
-  STATIC_ASSERT(condition) - defines struct, cannot be placed inside expressions.
+  EMBED_ASSERT(const_expr)  - evaluates to 0 at compile-time, may be placed inside an expression,
+  STATIC_ASSERT(const_expr) - defines struct, cannot be placed inside expressions.
 */
 
 #ifndef EMBED_ASSERT
-#define EMBED_ASSERT(expr) (0*sizeof(int[1-2*!(expr)]))
+#define EMBED_ASSERT(const_expr) (0*sizeof(int[1-2*!(const_expr)]))
 #endif
 
 /* note: use ##line for the unique name */
 #ifndef STATIC_ASSERT
 #ifdef __COUNTER__
 #ifdef __GNUC__
-#define STATIC_ASSERT2(expr,line,counter) typedef __attribute__ ((unused)) int static_assert_##counter##_at_line_##line[1-2*!(expr)]
+#define STATIC_ASSERT2(cexpr,line,counter) typedef __attribute__ ((unused)) int static_assert_##counter##_at_line_##line[1-2*!(cexpr)]
 #else /* !__GNUC__ */
-#define STATIC_ASSERT2(expr,line,counter) typedef int static_assert_##counter##_at_line_##line[1-2*!(expr)]
+#define STATIC_ASSERT2(cexpr,line,counter) typedef int static_assert_##counter##_at_line_##line[1-2*!(cexpr)]
 #endif /* !__GNUC__ */
-#define STATIC_ASSERT1(expr,line,counter) STATIC_ASSERT2(expr,line,counter)
-#define STATIC_ASSERT(expr)               STATIC_ASSERT1(expr,__LINE__,__COUNTER__)
+#define STATIC_ASSERT1(cexpr,line,counter) STATIC_ASSERT2(cexpr,line,counter)
+#define STATIC_ASSERT(cexpr)               STATIC_ASSERT1(cexpr,__LINE__,__COUNTER__)
 #else /* !__COUNTER__ */
 #ifdef __GNUC__
-#define STATIC_ASSERT2(expr,line) typedef __attribute__ ((unused)) int static_assert_at_line_##line[1-2*!(expr)]
+#define STATIC_ASSERT2(cexpr,line) typedef __attribute__ ((unused)) int static_assert_at_line_##line[1-2*!(cexpr)]
 #else /* !__GNUC__ */
-#define STATIC_ASSERT2(expr,line) typedef int static_assert_at_line_##line[1-2*!(expr)]
+#define STATIC_ASSERT2(cexpr,line) typedef int static_assert_at_line_##line[1-2*!(cexpr)]
 #endif /* !__GNUC__ */
-#define STATIC_ASSERT1(expr,line) STATIC_ASSERT2(expr,line)
-#define STATIC_ASSERT(expr)       STATIC_ASSERT1(expr,__LINE__)
+#define STATIC_ASSERT1(cexpr,line) STATIC_ASSERT2(cexpr,line)
+#define STATIC_ASSERT(cexpr)       STATIC_ASSERT1(cexpr,__LINE__)
 #endif /* !__COUNTER__ */
 #endif
-
-/* number of elements in static array:
-
-  int arr[10];
-  size_t count = COUNT_OF(arr); // 10
-*/
-
-#ifndef COUNT_OF
-#ifdef __cplusplus
-#if defined __GNUC__ && __GNUC__ >= 6
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wtemplates"
-#endif
-template <typename T, size_t N> char (&COUNT_OF_(T (&arr)[N]))[N];
-#if defined __GNUC__ && __GNUC__ >= 6
-#pragma GCC diagnostic pop
-#endif
-#define COUNT_OF(arr) sizeof(COUNT_OF_(arr))
-#elif defined __GNUC__
-#define COUNT_OF_(arr) (sizeof(arr)/sizeof((arr)[0]))
-/* check that arr - is an array, not just a pointer */
-#define COUNT_OF(arr)  (COUNT_OF_(arr) + 0*sizeof(&(arr) - (__typeof__((arr)[0])(*)[COUNT_OF_(arr)])0))
-#else /* fallback */
-#define COUNT_OF(arr) (sizeof(arr)/sizeof((arr)[0]))
-#endif
-#endif /* !COUNT_OF */
 
 #endif /* ASSERTS_H_INCLUDED */
