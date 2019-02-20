@@ -43,22 +43,30 @@ extern "C" {
 struct c_casts_void_;
 
 /* for casting pointer to one type -> pointer to another type */
-A_Const_function A_Check_return A_Ret_range(==,p)
-static inline struct c_casts_void_ *c_cast_void_(void *p)
+A_Const_function
+A_Force_inline_function
+A_Check_return
+A_Ret_range(==,p)
+static struct c_casts_void_ *c_cast_void_(void *p)
 {
 	return (struct c_casts_void_*)p;
 }
 
 /* for casting pointer to one const type -> pointer to another const type */
-A_Const_function A_Check_return A_Ret_range(==,p)
-static inline const struct c_casts_void_ *c_cast_constant_void_(const void *p)
+A_Const_function
+A_Force_inline_function
+A_Check_return A_Ret_range(==,p)
+static const struct c_casts_void_ *c_cast_constant_void_(const void *p)
 {
 	return (const struct c_casts_void_*)p;
 }
 
 /* for removing 'constness' of the pointed type */
-A_Const_function A_Check_return A_Ret_range(==,p)
-static inline struct c_casts_void_ *c_const_cast_void_(const void *p)
+A_Const_function
+A_Force_inline_function
+A_Check_return
+A_Ret_range(==,p)
+static struct c_casts_void_ *c_const_cast_void_(const void *p)
 {
 #if defined(__GNUC__) && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 2))
 #pragma GCC diagnostic push
@@ -123,8 +131,14 @@ static inline struct c_casts_void_ *c_const_cast_void_(const void *p)
 #define CAST_PP(type_, pp_) ((void)sizeof(c_cast_constant_void_(*(pp_))), (type_*)c_const_cast_void_(pp_))
 #endif
 
-A_Nonnull_all_args A_Const_function A_Check_return A_Ret_never_null A_Ret_range(==,(char*)p - offset) A_Ret_valid
-static inline struct c_casts_void_ *c_container_of_(
+A_Nonnull_all_args
+A_Const_function
+A_Force_inline_function
+A_Check_return
+A_Ret_never_null
+A_Ret_range(==,(char*)p - offset)
+A_Ret_valid
+static struct c_casts_void_ *c_container_of_(
 	A_In A_At((char*)p - offset, A_Writable_bytes(offset)) const void *p/*!=NULL*/,
 	size_t offset/*0?*/)
 {
@@ -132,8 +146,12 @@ static inline struct c_casts_void_ *c_container_of_(
 	return (struct c_casts_void_*)((char*)c_const_cast_void_(p) - offset);
 }
 
-A_Const_function A_Check_return A_When(!p, A_Ret_null) A_When(!!p, A_Ret_range(==,(char*)p - offset) A_Ret_valid)
-static inline struct c_casts_void_ *c_opt_container_of_(
+A_Const_function
+A_Force_inline_function
+A_Check_return
+A_When(!p, A_Ret_null)
+A_When(!!p, A_Ret_range(==,(char*)p - offset) A_Ret_valid)
+static struct c_casts_void_ *c_opt_container_of_(
 	A_In_opt A_When(!!p, A_At((char*)p - offset, A_Writable_bytes(offset))) const void *p/*NULL?*/,
 	size_t offset/*0?*/)
 {
