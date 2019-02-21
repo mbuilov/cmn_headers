@@ -68,12 +68,12 @@ A_Check_return
 A_Ret_range(==,p)
 static struct c_casts_void_ *c_const_cast_void_(const void *p)
 {
-#if defined(__GNUC__) && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 2))
+#if defined __clang__ || (defined(__GNUC__) && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 6)))
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual" /* warning: cast from type 'const void*' to type 'void*' casts away qualifiers */
 #endif
 	return (struct c_casts_void_*)p;
-#if defined(__GNUC__) && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 2))
+#if defined __clang__ || (defined(__GNUC__) && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 6)))
 #pragma GCC diagnostic pop
 #endif
 }
