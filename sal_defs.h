@@ -611,14 +611,23 @@ static inline void *A_Mark_opt_valid_(void *const p/*NULL?*/)
 
 /* if all values of a switched enum are handled in cases,
   clang knows that 'default' case is not applicable here,
-  use DEFAULT_CASE to avoid -Wswitch-default gcc warning */
-#ifndef DEFAULT_CASE
-#ifndef __clang__
-#define DEFAULT_CASE default:
-#else
-#define DEFAULT_CASE
-#endif
-#endif /* !DEFAULT_CASE */
+  use NO_DEFAULT_CASE to avoid -Wswitch-default gcc warning:
+  enum E {A,B};
+  enum E e = A;
+  switch (e) {
+   case A: break;
+   case B: break;
+   NO_DEFAULT_CASE
+  } */
+#ifndef NO_DEFAULT_CASE
+#ifdef __clang__
+#define NO_DEFAULT_CASE
+#elif defined ASSERT
+#define NO_DEFAULT_CASE default: ASSERT(0);
+#else /* !ASSERT */
+#define NO_DEFAULT_CASE default: ASSUME(0);
+#endif /* !ASSERT */
+#endif /* !NO_DEFAULT_CASE */
 
 #ifdef __NETBEANS_PREPROCESSING
 #undef A_Force_inline_function
