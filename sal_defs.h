@@ -218,6 +218,20 @@
 #define A_Nonnull_all_args               /* gcc-specific */
 #define A_Nonnull_arg(i)                 _At_(_Param_(i), _Notnull_)
 #define A_Printf_format_at(f,v)          _At_(_Param_(f), _Printf_format_string_)
+/* note: use "/analyze:plugin EspXEngine.dll" for this annotations */
+#define A_Acquires_lock(expr)                _Acquires_lock_(expr)              /* (rw-)semaphores, mutexes, spin-locks */
+#define A_Acquires_shared_lock(expr)         _Acquires_shared_lock_(expr)       /* (rw-)semaphores                      */
+#define A_Acquires_exclusive_lock(expr)      _Acquires_exclusive_lock_(expr)    /* (re-entrant) mutexes                 */
+#define A_Acquires_nonreentrant_lock(expr)   _Acquires_nonreentrant_lock_(expr) /* non-reentrant mutexes, spin-locks    */
+#define A_Releases_lock(expr)                _Releases_lock_(expr)
+#define A_Releases_shared_lock(expr)         _Releases_shared_lock_(expr)
+#define A_Releases_exclusive_lock(expr)      _Releases_exclusive_lock_(expr)
+#define A_Releases_nonreentrant_lock(expr)   _Releases_nonreentrant_lock_(expr)
+#define A_Requires_lock_held(expr)           _Requires_lock_held_(expr)
+#define A_Requires_shared_lock_held(expr)    _Requires_shared_lock_held_(expr)
+#define A_Requires_exclusive_lock_held(expr) _Requires_exclusive_lock_held_(expr)
+#define A_Requires_lock_not_held(expr)       _Requires_lock_not_held_(expr)
+#define A_Requires_no_locks_held             _Requires_no_locks_held_
 
 #else /* !_MSC_VER || NO_SAL_ANNOTATIONS */
 
@@ -481,6 +495,19 @@
 #define A_Field_size_bytes_full_opt(s)   /* pre/post NULL? array of s read/writable bytes            (validity?)           */
 #define A_Field_z                    /* pre/post 0-term array of chars     (NULL-ness?, validity?)                         */
 #define A_Field_range(l,h)           /* pre/post field value is in given range (inclusive)                                 */
+#define A_Acquires_lock(expr)                /* increments lock counter of (rw-)semaphore, mutex or spin-lock              */
+#define A_Acquires_shared_lock(expr)         /* increments lock counter of (rw-)semaphore                                  */
+#define A_Acquires_exclusive_lock(expr)      /* increments lock counter of (re-entrant) mutex                              */
+#define A_Acquires_nonreentrant_lock(expr)   /* increments lock counter of non-reentrant mutex or spin-lock                */
+#define A_Releases_lock(expr)                /* decrements lock counter of (rw-)semaphore, mutex or spin-lock              */
+#define A_Releases_shared_lock(expr)         /* decrements lock counter of (rw-)semaphore                                  */
+#define A_Releases_exclusive_lock(expr)      /* decrements lock counter of (re-entrant) mutex                              */
+#define A_Releases_nonreentrant_lock(expr)   /* resets must-be-non-zero lock counter of non-reentrant mutex or spin-lock   */
+#define A_Requires_lock_held(expr)           /* checks for non-zero lock counter of (rw-)semaphore, mutex or spin-lock     */
+#define A_Requires_shared_lock_held(expr)    /* checks for non-zero lock counter of (rw-)semaphore                         */
+#define A_Requires_exclusive_lock_held(expr) /* checks for non-zero lock counter (re-entrant) mutex                        */
+#define A_Requires_lock_not_held(expr)       /* checks for zero lock counter of (rw-)semaphore, mutex or spin-lock         */
+#define A_Requires_no_locks_held             /* no known locks must be held */
 
 #endif /* !_MSC_VER || NO_SAL_ANNOTATIONS */
 
