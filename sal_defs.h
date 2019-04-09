@@ -17,7 +17,11 @@
 #define A_Noreturn_function               __declspec(noreturn)
 #define A_Force_inline_function           __forceinline
 #define A_Non_inline_function             __declspec(noinline)
+#if defined __cplusplus && __cplusplus >= 201402L
+#define A_Const_function                  constexpr
+#else
 #define A_Const_function                  /* gcc-specific */
+#endif
 #define A_Pure_function                   /* gcc-specific */
 #define A_Empty                           /* empty, use to workaround bugs in analyzer */
 #define A_Curr                            _Curr_
@@ -564,7 +568,7 @@ A_Ret_valid A_Ret_range(==,p)
 __forceinline T *A_Mark_valid(
 	A_Notnull A_Pre_deref_invalid A_Post_valid T *const p/*!=NULL*/)
 {
-	return const_cast<T*>(p);
+	return p;
 }
 
 template <class T>
@@ -574,7 +578,7 @@ A_Ret_range(==,p)
 __forceinline T *A_Mark_opt_valid(
 	A_Maybenull A_Pre_deref_invalid A_Post_valid T *const p/*NULL?*/)
 {
-	return const_cast<T*>(p);
+	return p;
 }
 
 #else /* !__cplusplus */
@@ -592,7 +596,7 @@ A_Ret_range(==,p)
 static __forceinline void *A_Mark_opt_valid(
 	A_Maybenull A_Pre_deref_invalid A_Post_valid void *const p/*NULL?*/)
 {
-	return (void*)p;
+	return p;
 }
 
 #endif /* !__cplusplus */
