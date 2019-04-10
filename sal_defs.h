@@ -531,6 +531,16 @@
 #endif
 #endif /* ASSUME */
 
+/* constant expression */
+#if defined __cplusplus && __cplusplus >= 201703L
+#define A_Const_expr(expr) constexpr(expr)
+#elif defined _MSC_VER && _MSC_VER >= 1600
+/* 4127: conditional expression is constant */
+#define A_Const_expr(expr) (__pragma(warning(push)) __pragma(warning(disable:4127)) (expr) __pragma(warning(pop)))
+#else
+#define A_Const_expr(expr) (expr)
+#endif
+
 /*
  mark pointer as valid to avoid false analyzer warnings
 
