@@ -2,7 +2,7 @@
 #define ASSERTS_H_INCLUDED
 
 /**********************************************************************************
-* Assertions
+* Runtime assertions
 * Copyright (C) 2012-2019 Michael M. Builov, https://github.com/mbuilov/cmn_headers
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
@@ -14,8 +14,6 @@
   ASSERT_PTR(ptr)
   DEBUG_CHECK(cond)
   DEBUG_CHECK_PTR(ptr)
-  EMBED_ASSERT(const_expr)
-  STATIC_ASSERT(const_expr)
 */
 
 #ifndef NDEBUG
@@ -158,37 +156,6 @@ static void asserts_h_assert_ptr(
 
 #ifndef DEBUG_CHECK_PTR
 #define DEBUG_CHECK_PTR(ptr) DEBUG_CHECK(ptr)
-#endif
-
-/* compile-time asserts:
-
-  EMBED_ASSERT(const_expr)  - evaluates to 0 at compile-time, may be placed inside an expression,
-  STATIC_ASSERT(const_expr) - defines struct, cannot be placed inside expressions.
-*/
-
-#ifndef EMBED_ASSERT
-#define EMBED_ASSERT(const_expr) (0*sizeof(int[1-2*!(const_expr)]))
-#endif
-
-/* note: use ##line for the unique name */
-#ifndef STATIC_ASSERT
-#ifdef __COUNTER__
-#ifdef __GNUC__
-#define STATIC_ASSERT2(cexpr,line,counter) typedef __attribute__ ((unused)) int static_assert_##counter##_at_line_##line[1-2*!(cexpr)]
-#else /* !__GNUC__ */
-#define STATIC_ASSERT2(cexpr,line,counter) typedef int static_assert_##counter##_at_line_##line[1-2*!(cexpr)]
-#endif /* !__GNUC__ */
-#define STATIC_ASSERT1(cexpr,line,counter) STATIC_ASSERT2(cexpr,line,counter)
-#define STATIC_ASSERT(cexpr)               STATIC_ASSERT1(cexpr,__LINE__,__COUNTER__)
-#else /* !__COUNTER__ */
-#ifdef __GNUC__
-#define STATIC_ASSERT2(cexpr,line) typedef __attribute__ ((unused)) int static_assert_at_line_##line[1-2*!(cexpr)]
-#else /* !__GNUC__ */
-#define STATIC_ASSERT2(cexpr,line) typedef int static_assert_at_line_##line[1-2*!(cexpr)]
-#endif /* !__GNUC__ */
-#define STATIC_ASSERT1(cexpr,line) STATIC_ASSERT2(cexpr,line)
-#define STATIC_ASSERT(cexpr)       STATIC_ASSERT1(cexpr,__LINE__)
-#endif /* !__COUNTER__ */
 #endif
 
 #endif /* ASSERTS_H_INCLUDED */
