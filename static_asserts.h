@@ -17,10 +17,10 @@
 
 #ifndef STATIC_EXPR
 #ifdef _MSC_VER
-#define STATIC_EXPR(const_expr) ( \
+#define STATIC_EXPR(const_expr) (                                   \
 	__pragma(warning(push))                                         \
 	__pragma(warning(disable:4296)) /* expression is always true */ \
-	(const_expr)                                                          \
+	(const_expr)                                                    \
 	__pragma(warning(pop)))
 #else /* !_MSC_VER */
 #define STATIC_EXPR(const_expr) (const_expr)
