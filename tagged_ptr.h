@@ -31,7 +31,7 @@ constexpr
   (defined(__clang__) && (__clang_major__ > 3 || (3 == __clang_major__  && __clang_minor__ >= 7)))
 __attribute__ ((const))
 #endif
-static inline void *ptr_add_tag_(void *const ptr, const unsigned tag/*>0*/)
+static inline void *ptr_add_tag_(void *const ptr/*NULL?*/, const unsigned tag/*>=0*/)
 {
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -56,7 +56,7 @@ constexpr
   (defined(__clang__) && (__clang_major__ > 3 || (3 == __clang_major__  && __clang_minor__ >= 7)))
 __attribute__ ((const))
 #endif
-static inline void *ptr_clear_tags_(void *const ptr, const unsigned align/*>0*/)
+static inline void *ptr_clear_tags_(void *const ptr/*NULL?*/, const unsigned align/*>0*/)
 {
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -81,7 +81,7 @@ constexpr
   (defined(__clang__) && (__clang_major__ > 3 || (3 == __clang_major__  && __clang_minor__ >= 7)))
 __attribute__ ((const))
 #endif
-static inline unsigned ptr_get_tags_(const void *const ptr, const unsigned align/*>0*/)
+static inline unsigned ptr_get_tags_(const void *const ptr/*NULL?*/, const unsigned align/*>0*/)
 {
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -104,7 +104,7 @@ constexpr
   (defined(__clang__) && (__clang_major__ > 3 || (3 == __clang_major__  && __clang_minor__ >= 7)))
 __attribute__ ((const))
 #endif
-static inline void *ptr_make_tagged_(const unsigned value, const unsigned tag/*>0*/)
+static inline void *ptr_make_tagged_(const unsigned value, const unsigned tag/*>=0*/)
 {
 	return (void*)(value + tag);
 }
