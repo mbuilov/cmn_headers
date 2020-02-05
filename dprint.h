@@ -2,8 +2,8 @@
 #define DPRINT_H_INCLUDED
 
 /**********************************************************************************
-* Debugg printing/tracing helpers
-* Copyright (C) 2012-2018 Michael M. Builov, https://github.com/mbuilov/cmn_headers
+* Debug printing/tracing helpers
+* Copyright (C) 2012-2020 Michael M. Builov, https://github.com/mbuilov/cmn_headers
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -15,9 +15,17 @@
   DBGPRINTX(file, line, function, format, ...)
 */
 
+/* Note: DPRINT_TO_LOG - name of logging function (for its prototype - see below);
+  if defined, then it is used for printing log messages (even in release builds). */
+
+/* Note: DPRINT_TO_STREAM - name of output stream to print log messages to,
+  if not defined, then in debug builds - it is defined as stderr. */
 #ifndef DPRINT_TO_STREAM
 #ifndef NDEBUG
+/* define DPRINT_DISABLE to disable logging even in debug builds */
+#ifndef DPRINT_DISABLE
 #define DPRINT_TO_STREAM stderr
+#endif
 #endif
 #endif
 
@@ -33,6 +41,7 @@ extern "C" {
 
 #if defined DPRINT_TO_LOG || defined DPRINT_TO_STREAM
 
+/* define DPRINT_SHOW_THREAD_ID globally to print thread ID in log messages */
 #ifdef DPRINT_SHOW_THREAD_ID
 
 /* format specifier for DPRINT_GET_THREAD_ID */
@@ -42,6 +51,7 @@ extern "C" {
 
 #define DPRINT_THREAD_ID_SEP ":"
 
+/* DPRINT_GET_THREAD_ID - function that returns current thread ID */
 #ifndef DPRINT_GET_THREAD_ID
 
 /* NOTE: #include <windows.h> or <pthread.h> before this file */
@@ -65,6 +75,7 @@ extern "C" {
 
 #ifndef DPRINT_NO_FUNC
 
+/* DPRINT_FUNC - macro to obtain compiled source file name */
 #ifndef DPRINT_FUNC
 
 #if defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
@@ -88,21 +99,23 @@ extern "C" {
 
 #endif /* DPRINT_NO_FUNC */
 
+/* printf-like format of source file name and line number */
 #ifndef DPRINT_FILE_LINE_FORMAT
 #define DPRINT_FILE_LINE_FORMAT "%s:%d:"
 #endif
 
-/* "%llx:%s:%d:%s(): " */
+/* log messages prefix, e.g.: "%llx:%s:%d:%s(): " */
 #define DPRINT_LOCATION_FORMAT DPRINT_THREAD_ID_FORMAT DPRINT_THREAD_ID_SEP DPRINT_FILE_LINE_FORMAT DPRINT_FUNC_FORMAT " "
 
 #endif /* DPRINT_TO_STREAM || DPRINT_TO_LOG */
 
-/*    DPRINT_TO_LOG    -> print debug messages to log (file)
+/*    DPRINT_TO_LOG    -> print debug messages via custom function (to file, socket, etc.)
  else DPRINT_TO_STREAM -> print debug messages to standard stream (stderr or stdout)
- else                  -> don't print anything */
+ else                  -> don't print anything (in release, when NDEBUG is defined) */
 
 #ifdef DPRINT_TO_LOG
 
+/* prototype of custom logging function - it must be defined elsewhere */
 A_Printf_format_at(1,2)
 void DPRINT_TO_LOG(A_In_z A_Printf_format_string const char *format, ...);
 
