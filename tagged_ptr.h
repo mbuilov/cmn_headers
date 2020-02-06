@@ -3,7 +3,7 @@
 
 /**********************************************************************************
 * Add a tag to a pointer value
-* Copyright (C) 2019 Michael M. Builov, https://github.com/mbuilov/cmn_headers
+* Copyright (C) 2019-2020 Michael M. Builov, https://github.com/mbuilov/cmn_headers
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -18,7 +18,7 @@
 
 #include "static_asserts.h"
 
-/* used for converting pointer to an unsigned long long integer and back:
+/* this mask is used while converting pointer to an unsigned long long integer and back:
   if pointer type is signed, it may be sign-extended during conversion to unsigned long long integer
   - these extra bits should be masked out before converting unsigned long long integer back to a pointer */
 #define PTR_VALUE_MASK \
