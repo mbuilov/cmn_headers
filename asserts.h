@@ -27,6 +27,8 @@
   if condition is false or pointer is NULL, then:
   in DEBUG   - abnormal program exit
   in RELEASE - _unreachable_ code
+
+  NOTE: condition must have no side-effects!
 */
 
 #ifndef ASSERT
@@ -142,6 +144,8 @@ static void asserts_h_assert_ptr(
   if condition is false or pointer is NULL, then:
   in DEBUG   - abnormal program exit
   in RELEASE - _reachable_ code, error must be processed appropriately
+
+  NOTE: condition must have no side-effects!
 */
 #ifndef DEBUG_CHECK
 #ifndef NDEBUG
