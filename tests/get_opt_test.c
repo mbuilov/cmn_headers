@@ -1,6 +1,6 @@
 /**********************************************************************************
 * Program options and parameters parsing test
-* Copyright (C) 2012-2018 Michael M. Builov, https://github.com/mbuilov/cmn_headers
+* Copyright (C) 2012-2020 Michael M. Builov, https://github.com/mbuilov/cmn_headers
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "../sal_defs.h"
+#include "../asserts.h"
 #include "../get_opt.inl"
 
 int main(int argc, char *argv[])
@@ -42,22 +43,22 @@ int main(int argc, char *argv[])
 
 	static const GET_OPT_CHAR short_opts[] = SHORT_OPTION_a;
 
-#define LONG_OPTION_file    LONG_OPT_MODIFIER("=file",   LONG_OPTION_level)  /* --file=value  */
-#define LONG_OPTION_level   LONG_OPT_MODIFIER("=level",  LONG_OPTION_debug)  /* --level=value */
-#define LONG_OPTION_debug   LONG_OPT_MODIFIER("=debug",  LONG_OPTION_quiet)  /* --debug=value */
+#define LONG_OPTION_file    LONG_OPT_MODIFIER("file",   1, LONG_OPTION_level)  /* --file=value  */
+#define LONG_OPTION_level   LONG_OPT_MODIFIER("level",  1, LONG_OPTION_debug)  /* --level=value */
+#define LONG_OPTION_debug   LONG_OPT_MODIFIER("debug",  1, LONG_OPTION_quiet)  /* --debug=value */
 #if 0
 #define LONG_OPTION_quiet   LONG_OPT_MODIFIER("quiet",   LONG_OPTION_output)
 #else
 #define LONG_OPTION_quiet   LONG_OPTION_output
 #endif
-#define LONG_OPTION_output  LONG_OPT_MODIFIER("=output", LONG_OPTION_verbose) /* --output=value */
-#define LONG_OPTION_verbose LONG_OPT_MODIFIER("verbose", LONG_OPTION_trace)   /* --verbose      */
-#define LONG_OPTION_trace   LONG_OPT_MODIFIER("trace",   LONG_OPT_NULL)       /* --trace        */
+#define LONG_OPTION_output  LONG_OPT_MODIFIER("output",  1, LONG_OPTION_verbose) /* --output=value */
+#define LONG_OPTION_verbose LONG_OPT_MODIFIER("verbose", 0, LONG_OPTION_trace)   /* --verbose      */
+#define LONG_OPTION_trace   LONG_OPT_MODIFIER("trace",   0, LONG_OPT_NULL)       /* --trace        */
 
-#define LONG_OPT_NULL       NULL
+#define LONG_OPT_NULL       {0,NULL}
 #define LONG_OPT_MODIFIER   LONG_OPT_DEFINER
 
-	static const GET_OPT_CHAR *const long_opts[] = {LONG_OPTION_file};
+	static const struct long_opt_info long_opts[] = {LONG_OPTION_file};
 
 #undef  SHORT_OPT_NULL
 #undef  SHORT_OPT_MODIFIER
@@ -93,13 +94,13 @@ int main(int argc, char *argv[])
 				printf("d:%s\n", i.value ? i.value : "<null>");
 				break;
 			case SHORT_OPTION_o:
-				printf("o:%s\n", i.value ? i.value : "<null>");
+				printf("o\n");
 				break;
 			case SHORT_OPTION_v:
-				printf("v:%s\n", i.value ? i.value : "<null>");
+				printf("v\n");
 				break;
 			case SHORT_OPTION_g:
-				printf("g:%s\n", i.value ? i.value : "<null>");
+				printf("g\n");
 				break;
 			case LONG_OPTION_file:
 				printf("file:%s\n", i.value ? i.value : "<null>");
