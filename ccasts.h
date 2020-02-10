@@ -104,7 +104,14 @@ static struct c_casts_void_ *c_const_cast_void_(const void *p)
   c_casts_const_type<const A> -> const A
 */
 #ifdef __cplusplus
+#if defined __GNUC__ && __GNUC__ >= 6
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wtemplates"
+#endif
 extern "C++" template <class T> struct c_casts_const_type {typedef const T XT;};
+#if defined __GNUC__ && __GNUC__ >= 6
+#pragma GCC diagnostic pop
+#endif
 #endif
 
 /* CAST macro
