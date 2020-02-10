@@ -3,7 +3,7 @@
 
 /**********************************************************************************
 * Obtain number of elements in array
-* Copyright (C) 2019 Michael M. Builov, https://github.com/mbuilov/cmn_headers
+* Copyright (C) 2019-2020 Michael M. Builov, https://github.com/mbuilov/cmn_headers
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -34,7 +34,7 @@ or
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wtemplates"
 #endif
-template <typename T, size_t N> char (&COUNT_OF_(T (&arr)[N]))[N];
+template <typename T, unsigned long long N> char (&COUNT_OF_(T (&arr)[N]))[N];
 #if defined __GNUC__ && __GNUC__ >= 6
 #pragma GCC diagnostic pop
 #endif
