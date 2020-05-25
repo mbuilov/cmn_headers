@@ -214,6 +214,7 @@
 #define A_Field_size_bytes_full_opt(s)   _Field_size_bytes_full_opt_(s)   /* <-> null? w_b=s r_b=c (validity?)                     */
 #define A_Field_z                        _Field_z_                        /* <-> 0-term            (null-ness?, validity?)         */
 #define A_Field_range(l,h)               _Field_range_(l,h)               /* <-> l <= field <= h                                   */
+#define A_Size_t(n)                      ((unsigned int)(n))              /* cast 'n' to size_t in annotations                     */
 #define A_Ret_restrict                   __declspec(restrict) /* auto-mark pointer that accepts return value as A_Restrict         */
 #define A_Ret_malloc                     A_Ret_restrict
 #define A_Ret_never_null                 _Success_(1) _Always_(_Ret_notnull_) /* for a custom A_Success() use A_Ret_never_null_but */
@@ -499,6 +500,7 @@
 #define A_Field_size_bytes_full_opt(s)   /* pre/post NULL? array of s read/writable bytes            (validity?)           */
 #define A_Field_z                    /* pre/post 0-term array of chars     (NULL-ness?, validity?)                         */
 #define A_Field_range(l,h)           /* pre/post field value is in given range (inclusive)                                 */
+#define A_Size_t(n)                  /* use in annotations like A_Success(return != A_Size_t(-1))                          */
 #define A_Acquires_lock(expr)                /* increments lock counter of (rw-)semaphore, mutex or spin-lock              */
 #define A_Acquires_shared_lock(expr)         /* increments lock counter of (rw-)semaphore                                  */
 #define A_Acquires_exclusive_lock(expr)      /* increments lock counter of (re-entrant) mutex                              */
