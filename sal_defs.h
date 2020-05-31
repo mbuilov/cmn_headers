@@ -303,8 +303,8 @@
 #define A_Ret_never_null                         __attribute__ ((returns_nonnull))
 #define A_Ret_never_null_but                     __attribute__ ((returns_nonnull))
 #else /* no GCC extensions */
-#define A_Ret_never_null                         /* never returns NULL (if there is no A_Success() annotation)                     */
-#define A_Ret_never_null_but                     /* never returns NULL, even if expr of A_Success(expr) is 0                       */
+#define A_Ret_never_null                         /* never returns NULL, there must be no A_Success() annotation                    */
+#define A_Ret_never_null_but                     /* never returns NULL, even on failure (when expr of A_Success(expr) is 0)        */
 #endif /* no GCC extensions */
 
 #if (defined(__GNUC__) && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 3))) || \
