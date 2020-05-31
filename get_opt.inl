@@ -216,7 +216,7 @@ const struct long_opt_info long_opts[] = {LONG_OPTION_alpha};
  'next'      - next option, e.g.: LONG_OPTION_beta */
 #define LONG_OPT_DEFINER(name, has_value, next) {                 \
     sizeof("" name) - 1 + 0*sizeof(int[1-2*(sizeof(name) <= 1)]), \
-    (has_value) ? GET_OPT_TEXT("=" name) : GET_OPT_TEXT(name)  \
+    (has_value) ? GET_OPT_TEXT("=" name) : GET_OPT_TEXT(name)     \
   }, next
 
 /* then, to be able to re-use options macros as (encoded) long option indexes (in the long options names array):
