@@ -119,7 +119,7 @@
 #define A_Unchanged(p)                    _Unchanged_(p)                    /* <- read -> p == old(p) */
 #define A_Pre_satisfies(cond)             _Pre_satisfies_(cond)             /* <- cond != 0 */
 #define A_Post_satisfies(cond)            _Post_satisfies_(cond)            /* -> cond != 0 */
-#define A_Success(expr)                   _Success_(expr)                   /* -> expr != 0 */
+#define A_Success(expr)                   _Success_(!!(expr))               /* -> expr != 0 */
 #define A_Return_type_success(expr)       _Return_type_success_(expr)       /* -> expr != 0 */
 #define A_Result_zeroonfailure            _Result_zeroonfailure_            /* (failed -> deref == 0) (null-ness?) */
 #define A_Result_nullonfailure            _Result_nullonfailure_            /* (failed -> deref null) (null-ness?) */
