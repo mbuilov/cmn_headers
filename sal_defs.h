@@ -174,7 +174,7 @@
 #define A_Nonnull_arg(i)
 #define A_Printf_format_at(f,v)
 #else /* !_MSC_VER */
-#if defined(__GNUC__) && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 2))
+#if defined __GNUC__ && __GNUC__ > 4 - (__GNUC_MINOR__ >= 2)
 #if defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
 #define A_Restrict                               restrict
 #else
@@ -200,16 +200,21 @@
 #define A_Check_return                           /* caller must check function's return value                                      */
 #endif /* no GCC extensions */
 #define A_Ret_restrict                           /* returned pointer is the only alias to allocated memory - result of malloc()    */
-#if (defined(__GNUC__) && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 9))) || \
-  (defined(__clang__) && (__clang_major__ > 3 || (3 == __clang_major__  && __clang_minor__ >= 7)))
+#if (defined __GNUC__ && __GNUC__ > 4 - (__GNUC_MINOR__ >= 9)) || \
+  (defined __clang__ && __clang_major__ > 3 - (__clang_minor__ >= 7))
 #define A_Ret_never_null                         __attribute__ ((returns_nonnull))
 #define A_Nonnull_all_args                       __attribute__ ((nonnull))
 #define A_Nonnull_arg(i)                         __attribute__ ((nonnull(i,i)))
-#define A_Printf_format_at(f,v)                  __attribute__ ((format(printf, f, v)))
 #else /* no GCC extensions */
 #define A_Ret_never_null                         /* never returns NULL, even if A_Success() is false                               */
 #define A_Nonnull_all_args                       /* all function arguments pointers are != NULL                                    */
 #define A_Nonnull_arg(i)                         /* function argument number i is != NULL                                          */
+#endif /* no GCC extensions */
+#if defined __GNUC__ && __GNUC__ > 4 - (__GNUC_MINOR__ >= 9)
+#define A_Printf_format_at(f,v)                  __attribute__ ((format(printf, f, v)))
+#elif defined __clang__ && __clang_major__ > 3 - (__clang_minor__ >= 7)
+#define A_Printf_format_at(f,v)                  __attribute__ ((__format__(__printf__, f, v)))
+#else /* no GCC extensions */
 #define A_Printf_format_at(f,v)                  /* f arg - printf format string, v - va_arg                                       */
 #endif /* no GCC extensions */
 #define A_Curr                                   /* references current function parameter, like A_At(*A_Curr, A_Post_notnull)      */
@@ -424,7 +429,7 @@
 #define ASSUME(cond) ((void)(!(cond) ? __builtin_unreachable(), 0 : 1))
 #elif defined __clang__
 #define ASSUME(cond) __builtin_assume(!!(cond))
-#elif defined __GNUC__ && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5))
+#elif defined __GNUC__ && __GNUC__ > 4 - (__GNUC_MINOR__ >= 5)
 #define ASSUME(cond) ((void)(!(cond) ? __builtin_unreachable(), 0 : 1))
 #else
 #define ASSUME(cond) ((void)0) /* assume condition is always true */
