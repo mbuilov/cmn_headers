@@ -568,7 +568,7 @@
    C_destroy(A_Mark_valid(&a->c));
  }
 */
-#ifdef _MSC_VER
+#if defined _MSC_VER && !defined __clang__
 
 #pragma warning(push)
 #pragma warning(disable:6101) /* Returning uninitialized memory '*p' */
