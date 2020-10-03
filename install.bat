@@ -39,7 +39,7 @@ if not exist "%~1\*" (
 	exit /b 2
 )
 
-set incdir=%~1
+set "incdir=%~1"
 set headers=asserts.h bswaps.h ccasts.h dprint.h get_opts.inl get_opt.inl sal_defs.h
 
 if %uninstall%==1 (
