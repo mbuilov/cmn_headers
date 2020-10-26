@@ -28,7 +28,7 @@
 #if defined __cplusplus && __cplusplus >= 201402L
 constexpr
 #elif (defined(__GNUC__) && (__GNUC__ >= 4)) || \
-  (defined(__clang__) && (__clang_major__ > 3 || (3 == __clang_major__  && __clang_minor__ >= 7)))
+  (defined(__clang__) && __clang_major__ > 3 - (__clang_minor__ >= 7))
 __attribute__ ((const))
 #endif
 static inline void *ptr_add_tag_(void *const ptr/*NULL?*/, const unsigned tag/*>=0*/)
@@ -37,7 +37,7 @@ static inline void *ptr_add_tag_(void *const ptr/*NULL?*/, const unsigned tag/*>
 #pragma warning(push)
 #pragma warning(disable:4826) /* Conversion from 'const char *' to 'unsigned __int64' is sign-extended */
 #pragma warning(disable:4305) /* 'type cast': truncation from 'unsigned __int64' to 'void *' */
-#elif !defined __cplusplus && defined __GNUC__ && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 6))
+#elif !defined __cplusplus && defined __GNUC__ && __GNUC__ > 4 - (__GNUC_MINOR__ >= 6)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpointer-to-int-cast" /* warning: cast from pointer to integer of different size */
 #pragma GCC diagnostic ignored "-Wint-to-pointer-cast" /* warning: cast from pointer to integer of different size */
@@ -45,7 +45,7 @@ static inline void *ptr_add_tag_(void *const ptr/*NULL?*/, const unsigned tag/*>
 	return (void*)(PTR_VALUE_MASK & ((unsigned long long)ptr | tag));
 #ifdef _MSC_VER
 #pragma warning(pop)
-#elif !defined __cplusplus && defined __GNUC__ && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 6))
+#elif !defined __cplusplus && defined __GNUC__ && __GNUC__ > 4 - (__GNUC_MINOR__ >= 6)
 #pragma GCC diagnostic pop
 #endif
 }
@@ -53,7 +53,7 @@ static inline void *ptr_add_tag_(void *const ptr/*NULL?*/, const unsigned tag/*>
 #if defined __cplusplus && __cplusplus >= 201402L
 constexpr
 #elif (defined(__GNUC__) && (__GNUC__ >= 4)) || \
-  (defined(__clang__) && (__clang_major__ > 3 || (3 == __clang_major__  && __clang_minor__ >= 7)))
+  (defined(__clang__) && __clang_major__ > 3 - (__clang_minor__ >= 7))
 __attribute__ ((const))
 #endif
 static inline void *ptr_clear_tags_(void *const ptr/*NULL?*/, const unsigned align/*>0*/)
@@ -62,7 +62,7 @@ static inline void *ptr_clear_tags_(void *const ptr/*NULL?*/, const unsigned ali
 #pragma warning(push)
 #pragma warning(disable:4826) /* Conversion from 'const char *' to 'unsigned __int64' is sign-extended */
 #pragma warning(disable:4305) /* 'type cast': truncation from 'unsigned __int64' to 'void *' */
-#elif !defined __cplusplus && defined __GNUC__ && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 6))
+#elif !defined __cplusplus && defined __GNUC__ && __GNUC__ > 4 - (__GNUC_MINOR__ >= 6)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpointer-to-int-cast" /* warning: cast from pointer to integer of different size */
 #pragma GCC diagnostic ignored "-Wint-to-pointer-cast" /* warning: cast from pointer to integer of different size */
@@ -70,7 +70,7 @@ static inline void *ptr_clear_tags_(void *const ptr/*NULL?*/, const unsigned ali
 	return (void*)(PTR_VALUE_MASK & ((unsigned long long)ptr & ~(align - 1llu)));
 #ifdef _MSC_VER
 #pragma warning(pop)
-#elif !defined __cplusplus && defined __GNUC__ && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 6))
+#elif !defined __cplusplus && defined __GNUC__ && __GNUC__ > 4 - (__GNUC_MINOR__ >= 6)
 #pragma GCC diagnostic pop
 #endif
 }
@@ -78,7 +78,7 @@ static inline void *ptr_clear_tags_(void *const ptr/*NULL?*/, const unsigned ali
 #if defined __cplusplus && __cplusplus >= 201402L
 constexpr
 #elif (defined(__GNUC__) && (__GNUC__ >= 4)) || \
-  (defined(__clang__) && (__clang_major__ > 3 || (3 == __clang_major__  && __clang_minor__ >= 7)))
+  (defined(__clang__) && __clang_major__ > 3 - (__clang_minor__ >= 7))
 __attribute__ ((const))
 #endif
 static inline unsigned ptr_get_tags_(const void *const ptr/*NULL?*/, const unsigned align/*>0*/)
@@ -86,14 +86,14 @@ static inline unsigned ptr_get_tags_(const void *const ptr/*NULL?*/, const unsig
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable:4826) /* Conversion from 'const char *' to 'unsigned __int64' is sign-extended */
-#elif !defined __cplusplus && defined __GNUC__ && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 6))
+#elif !defined __cplusplus && defined __GNUC__ && __GNUC__ > 4 - (__GNUC_MINOR__ >= 6)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpointer-to-int-cast" /* warning: cast from pointer to integer of different size */
 #endif
 	return (unsigned)((unsigned long long)ptr & (align - 1llu));
 #ifdef _MSC_VER
 #pragma warning(pop)
-#elif !defined __cplusplus && defined __GNUC__ && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 6))
+#elif !defined __cplusplus && defined __GNUC__ && __GNUC__ > 4 - (__GNUC_MINOR__ >= 6)
 #pragma GCC diagnostic pop
 #endif
 }
@@ -101,7 +101,7 @@ static inline unsigned ptr_get_tags_(const void *const ptr/*NULL?*/, const unsig
 #if defined __cplusplus && __cplusplus >= 201402L
 constexpr
 #elif (defined(__GNUC__) && (__GNUC__ >= 4)) || \
-  (defined(__clang__) && (__clang_major__ > 3 || (3 == __clang_major__  && __clang_minor__ >= 7)))
+  (defined(__clang__) && __clang_major__ > 3 - (__clang_minor__ >= 7))
 __attribute__ ((const))
 #endif
 static inline void *ptr_make_tagged_(const unsigned value, const unsigned tag/*>=0*/)
