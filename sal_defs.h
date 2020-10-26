@@ -149,7 +149,7 @@
 #define A_Outptr_result_bytebuffer_all_maybenull(s)      _Outptr_result_bytebuffer_all_maybenull_(s)      /* <- !null w_e=1 -> valid (deref null? v_b=s)       */
 #define A_Outptr_opt_result_bytebuffer_all(s)            _Outptr_opt_result_bytebuffer_all_(s)            /* <- null? w_e=1 -> valid (deref !null v_b=s)       */
 #define A_Outptr_opt_result_bytebuffer_all_maybenull(s)  _Outptr_opt_result_bytebuffer_all_maybenull_(s)  /* <- null? w_e=1 -> valid (deref null? v_b=s)       */
-#define A_Printf_format_string           _Printf_format_string_           /* <->                 (null-ness?, validity?)  */
+#define A_Printf_format_string           _Printf_format_string_           /* <->                 (null-ness?, validity?) (use A_Printf_format_at() instead) */
 #define e_A_Group(anns,empty)            _Group_(anns##empty)
 #define A_Group(anns)                    e_A_Group(anns,A_Empty)
 #define e_A_On_failure(anns,empty)       _On_failure_(anns##empty)
@@ -244,8 +244,8 @@
 #define A_Restrict restrict                      /* standard keyword for c99 */
 #elif defined _MSC_VER
 #define A_Restrict                               __restrict
-#elif (defined(__GNUC__) && (__GNUC__ >= 3)) || \
-  (defined(__clang__) && (__clang_major__ > 3 || (3 == __clang_major__  && __clang_minor__ >= 7)))
+#elif (defined __GNUC__ && __GNUC__ >= 3) || \
+  (defined __clang__ && __clang_major__ > 3 - (__clang_minor__ >= 7))
 #define A_Restrict                               __restrict__
 #else /* no GCC extensions */
 #define A_Restrict
@@ -255,8 +255,8 @@
 #define A_Noreturn_function                      __declspec(noreturn)
 #define A_Force_inline_function                  __forceinline
 #define A_Non_inline_function                    __declspec(noinline)
-#elif (defined(__GNUC__) && (__GNUC__ >= 4)) || \
-  (defined(__clang__) && (__clang_major__ > 3 || (3 == __clang_major__  && __clang_minor__ >= 7)))
+#elif (defined __GNUC__ && __GNUC__ >= 4) || \
+  (defined __clang__ && __clang_major__ > 3 - (__clang_minor__ >= 7))
 #define A_Noreturn_function                      __attribute__ ((noreturn))
 #define A_Force_inline_function                  __attribute__ ((always_inline)) inline
 #define A_Non_inline_function                    __attribute__ ((noinline))
@@ -266,8 +266,8 @@
 #define A_Non_inline_function                    /* forbid inlining a function                                                     */
 #endif /* no GCC extensions */
 
-#if (defined(__GNUC__) && (__GNUC__ >= 4)) || \
-  (defined(__clang__) && (__clang_major__ > 3 || (3 == __clang_major__  && __clang_minor__ >= 7)))
+#if (defined __GNUC__ && __GNUC__ >= 4) || \
+  (defined __clang__ && __clang_major__ > 3 - (__clang_minor__ >= 7))
 #define A_Const_function                         __attribute__ ((const))
 #define A_Pure_function                          __attribute__ ((pure))
 #define A_Check_return                           __attribute__ ((warn_unused_result))
@@ -291,15 +291,15 @@
 
 #ifdef _MSC_VER
 #define A_Ret_malloc                             A_Ret_restrict
-#elif (defined(__GNUC__) && (__GNUC__ >= 4)) || \
-  (defined(__clang__) && (__clang_major__ > 3 || (3 == __clang_major__  && __clang_minor__ >= 7)))
+#elif (defined __GNUC__ && __GNUC__ >= 4) || \
+  (defined __clang__ && __clang_major__ > 3 - (__clang_minor__ >= 7))
 #define A_Ret_malloc                             __attribute__ ((malloc))
 #else /* no GCC extensions */
 #define A_Ret_malloc                             /* like A_Ret_restrict, but also returned memory do not contains valid pointers   */
 #endif /* no GCC extensions */
 
-#if (defined(__GNUC__) && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 9))) || \
-  (defined(__clang__) && (__clang_major__ > 3 || (3 == __clang_major__  && __clang_minor__ >= 7)))
+#if (defined __GNUC__ && __GNUC__ > 4 - (__GNUC_MINOR__ >= 9)) || \
+  (defined __clang__ && __clang_major__ > 3 - (__clang_minor__ >= 7))
 #define A_Ret_never_null                         __attribute__ ((returns_nonnull))
 #define A_Ret_never_null_but                     __attribute__ ((returns_nonnull))
 #else /* no GCC extensions */
@@ -307,8 +307,8 @@
 #define A_Ret_never_null_but                     /* never returns NULL, even on failure (when expr of A_Success(expr) is 0)        */
 #endif /* no GCC extensions */
 
-#if (defined(__GNUC__) && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 3))) || \
-  (defined(__clang__) && (__clang_major__ >= 4))
+#if (defined __GNUC__ && __GNUC__ > 4 - (__GNUC_MINOR__ >= 3)) || \
+  (defined __clang__ && __clang_major__ >= 4)
 #define A_Alloc_size(i)                          __attribute__ ((alloc_size(i)))
 #else /* no GCC extensions */
 #define A_Alloc_size(i)                          /* function argument number i is the size of allocated memory                     */
@@ -526,7 +526,7 @@
 #define ASSUME(cond) __builtin_assume(!!(cond))
 #elif defined __INTEL_COMPILER
 #define ASSUME(cond) ((void)0) /* ICC compiles calls to __builtin_unreachable() as jumps somewhere... */
-#elif defined __GNUC__ && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5))
+#elif defined __GNUC__ && __GNUC__ > 4 - (__GNUC_MINOR__ >= 5)
 #define ASSUME(cond) ((void)(!(cond) ? __builtin_unreachable(), 0 : 1))
 #else
 #define ASSUME(cond) ((void)0) /* assume condition is always true */
@@ -642,10 +642,9 @@ static inline void *A_Mark_opt_valid_(void *const p/*NULL?*/)
 #ifndef FALLTHROUGH
 #if defined __cplusplus && __cplusplus >= 201703L
 #define FALLTHROUGH [[fallthrough]]
-#elif defined(__GNUC__) && (__GNUC__ >= 7)
+#elif defined __GNUC__ && __GNUC__ >= 7
 #define FALLTHROUGH __attribute__ ((fallthrough))
-#elif defined __cplusplus && defined(__clang__) && (__clang_major__ > 3 || \
-  (3 == __clang_major__  && __clang_minor__ >= 6))
+#elif defined __cplusplus && defined __clang__ && __clang_major__ > 3 - (__clang_minor__ >= 6)
 #define FALLTHROUGH [[clang::fallthrough]]
 #else
 #define FALLTHROUGH ((void)0)
