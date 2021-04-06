@@ -55,7 +55,7 @@ extern "C" {
 #ifndef DPRINT_GET_THREAD_ID
 
 /* NOTE: #include <windows.h> or <pthread.h> before this file */
-#ifdef WIN32
+#ifdef _WIN32
 #define DPRINT_GET_THREAD_ID ((long long)0 + GetCurrentThreadId())
 #elif defined _POSIX_THREADS
 #define DPRINT_GET_THREAD_ID ((long long)0 + pthread_self())
