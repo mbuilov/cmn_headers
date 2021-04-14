@@ -3,7 +3,7 @@
 
 /**********************************************************************************
 * C-casts
-* Copyright (C) 2012-2020 Michael M. Builov, https://github.com/mbuilov/cmn_headers
+* Copyright (C) 2012-2021 Michael M. Builov, https://github.com/mbuilov/cmn_headers
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -89,12 +89,12 @@ A_Check_return
 A_Ret_range(==,p)
 static struct c_casts_void_ *c_const_cast_void_(const void *p)
 {
-#if defined __clang__ || (defined(__GNUC__) && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 6)))
+#if defined __clang__ || (defined __GNUC__ && __GNUC__ > 4 - (__GNUC_MINOR__ >= 6))
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual" /* cast from type 'const void*' to type 'void*' casts away qualifiers */
 #endif
 	return (struct c_casts_void_*)p;
-#if defined __clang__ || (defined(__GNUC__) && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 6)))
+#if defined __clang__ || (defined __GNUC__ && __GNUC__ > 4 - (__GNUC_MINOR__ >= 6))
 #pragma GCC diagnostic pop
 #endif
 }
@@ -126,13 +126,13 @@ extern "C++" template <class T> struct c_casts_const_type {typedef const T XT;};
   CAST(?, p);        - error: 'p' points to CONST
 */
 #if defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
-#if defined(__GNUC__) && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 6))
+#if defined __GNUC__ && __GNUC__ > 4 - (__GNUC_MINOR__ >= 6)
 #define CAST(type_, ptr_) __extension__({                    \
   _Pragma("GCC diagnostic push")                             \
   _Pragma("GCC diagnostic error \"-Wdiscarded-qualifiers\"") \
-  type_ *p__ = (type_*)c_cast_void_(ptr_);                   \
+  type_ *p_ = (type_*)c_cast_void_(ptr_);                    \
   _Pragma("GCC diagnostic pop")                              \
-  p__;                                                       \
+  p_;                                                        \
 })
 #endif
 #endif
@@ -143,16 +143,16 @@ extern "C++" template <class T> struct c_casts_const_type {typedef const T XT;};
 #define CAST(type_, ptr_) __extension__({                            \
   _Pragma("clang diagnostic push")                                   \
   _Pragma("clang diagnostic error \"-Wincompatible-pointer-types\"") \
-  type_ *p__ = (type_*)c_cast_void_(ptr_);                           \
+  type_ *p_ = (type_*)c_cast_void_(ptr_);                            \
   _Pragma("clang diagnostic pop")                                    \
-  p__;                                                               \
+  p_;                                                                \
 })
 #endif
 #endif
 #endif
 
 #ifndef CAST
-#if !defined(__cplusplus) && defined(_MSC_VER)
+#if !defined __cplusplus && defined _MSC_VER
 #define CAST(type_, ptr_) (                                                 \
   __pragma(warning(push))                                                   \
   __pragma(warning(error:4090))/*'function': different 'const' qualifiers*/ \
@@ -178,13 +178,13 @@ extern "C++" template <class T> struct c_casts_const_type {typedef const T XT;};
   CAST_CONSTANT(struct B, p);  - error: 'struct B' is NON-CONST
 */
 #if defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
-#if defined __clang__ || (defined(__GNUC__) && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 6)))
+#if defined __clang__ || (defined __GNUC__ && __GNUC__ > 4 - (__GNUC_MINOR__ >= 6))
 #define CAST_CONSTANT(type_, ptr_) __extension__({  \
   _Pragma("GCC diagnostic push")                    \
   _Pragma("GCC diagnostic error \"-Wcast-qual\"")   \
-  type_ *p__ = (type_*)c_cast_constant_void_(ptr_); \
+  type_ *p_ = (type_*)c_cast_constant_void_(ptr_);  \
   _Pragma("GCC diagnostic pop")                     \
-  p__;                                              \
+  p_;                                               \
 })
 #endif
 #endif
@@ -233,16 +233,16 @@ extern "C++" template <class T> struct c_casts_const_type {typedef const T XT;};
   CONST_CAST(const struct A, p);  - error: 'const struct A' is CONST
 */
 #if defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
-#if defined(__GNUC__) && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 6))
+#if defined __GNUC__ && __GNUC__ > 4 - (__GNUC_MINOR__ >= 6)
 #define CONST_CAST(type_, ptr_) __extension__({                    \
   _Pragma("GCC diagnostic push")                                   \
   _Pragma("GCC diagnostic error \"-Wincompatible-pointer-types\"") \
   _Pragma("GCC diagnostic error \"-Wdiscarded-qualifiers\"")       \
-  type_ *p__ = (type_*)c_const_cast_void_(ptr_);                   \
+  type_ *p_ = (type_*)c_const_cast_void_(ptr_);                    \
   (void)sizeof(*(const type_**)0 = (ptr_));                        \
   (void)sizeof(c_cast_void_((type_*)0));                           \
   _Pragma("GCC diagnostic pop")                                    \
-  p__;                                                             \
+  p_;                                                              \
 })
 #endif
 #endif
@@ -254,18 +254,18 @@ extern "C++" template <class T> struct c_casts_const_type {typedef const T XT;};
   _Pragma("clang diagnostic push")                                   \
   _Pragma("clang diagnostic ignored \"-Wduplicate-decl-specifier\"") \
   _Pragma("clang diagnostic error \"-Wincompatible-pointer-types\"") \
-  type_ *p__ = (type_*)c_const_cast_void_(ptr_);                     \
+  type_ *p_ = (type_*)c_const_cast_void_(ptr_);                      \
   (void)sizeof(*(const type_**)0 = (ptr_));                          \
   (void)sizeof(c_cast_void_((type_*)0));                             \
   _Pragma("clang diagnostic pop")                                    \
-  p__;                                                               \
+  p_;                                                                \
 })
 #endif
 #endif
 #endif
 
 #ifndef CONST_CAST
-#if !defined(__cplusplus) && defined(_MSC_VER)
+#if !defined __cplusplus && defined _MSC_VER
 #define CONST_CAST(type_, ptr_) (                                                  \
   __pragma(warning(push))                                                          \
   __pragma(warning(disable:4114))/*same type qualifier used more than once*/       \
@@ -320,15 +320,15 @@ extern "C++" template <class T> struct c_casts_const_type {typedef const T XT;};
   CAST_PPC(struct B, pp);  - error: 'struct B' is NON-CONST
 */
 #if defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
-#if defined(__GNUC__) && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 6))
+#if defined __GNUC__ && __GNUC__ > 4 - (__GNUC_MINOR__ >= 6)
 #define CAST_PPC(type_, pp_) __extension__({                 \
   _Pragma("GCC diagnostic push")                             \
   _Pragma("GCC diagnostic error \"-Wcast-qual\"")            \
   _Pragma("GCC diagnostic error \"-Wdiscarded-qualifiers\"") \
-  type_ **pp__ = (type_**)c_cast_void_(pp_);                 \
+  type_ **ppc_ = (type_**)c_cast_void_(pp_);                 \
   (void)sizeof((type_*)c_cast_constant_void_(*(pp_)));       \
   _Pragma("GCC diagnostic pop")                              \
-  pp__;                                                      \
+  ppc_;                                                      \
 })
 #endif
 #endif
@@ -340,10 +340,10 @@ extern "C++" template <class T> struct c_casts_const_type {typedef const T XT;};
   _Pragma("clang diagnostic push")                                         \
   _Pragma("clang diagnostic ignored \"-Wduplicate-decl-specifier\"")       \
   _Pragma("clang diagnostic error \"-Wincompatible-pointer-types\"")       \
-  type_ **pp__ = (type_**)c_cast_void_(pp_);                               \
+  type_ **ppc_ = (type_**)c_cast_void_(pp_);                               \
   (void)sizeof(*(type_**)0 = (const type_*)c_cast_constant_void_(*(pp_))); \
   _Pragma("clang diagnostic pop")                                          \
-  pp__;                                                                    \
+  ppc_;                                                                    \
 })
 #endif
 #endif
@@ -447,12 +447,12 @@ static struct c_casts_void_ *c_opt_container_of_(
 	A_In_opt A_When(!!p, A_At((char*)p - offset, A_Writable_bytes(offset))) const void *p/*NULL?*/,
 	size_t offset/*0?*/)
 {
-	return (struct c_casts_void_*)(p ? (char*)c_const_cast_void_(p) - offset : NULL);
+	return (struct c_casts_void_*)(p ? (char*)c_const_cast_void_(p) - offset : (char*)0);
 }
 
 /* check that CONTAINER_OF() doesn't discard const qualifier */
 #if defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
-#if defined(__GNUC__) && (__GNUC__ > 4 || (4 == __GNUC__ && __GNUC_MINOR__ >= 6))
+#if defined __GNUC__ && __GNUC__ > 4 - (__GNUC_MINOR__ >= 6)
 #define c_check_constness_(ptr_, member_, x_) __extension__({ \
   _Pragma("GCC diagnostic push")                              \
   _Pragma("GCC diagnostic error \"-Wdiscarded-qualifiers\"")  \
@@ -506,7 +506,7 @@ static struct c_casts_void_ *c_opt_container_of_(
 #endif
 
 /* CONTAINER_OF macro
-  get container by the non-NULL pointer to member:
+  get container by a non-NULL pointer to member:
 
   struct Container {
     struct Member memb;
