@@ -3,7 +3,7 @@
 
 /**********************************************************************************
 * Compile-time assertions
-* Copyright (C) 2012-2019 Michael M. Builov, https://github.com/mbuilov/cmn_headers
+* Copyright (C) 2012-2019,2021 Michael M. Builov, https://github.com/mbuilov/cmn_headers
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -27,29 +27,37 @@
 #endif /* !_MSC_VER */
 #endif
 
+/* note: use bit-field of negative size instead of array of negative size
+  - to make sure that expression is compile-time defined; c99 allows to
+  specify arrays with run-time defined bounds */
 #ifndef EMBED_ASSERT
-#define EMBED_ASSERT(const_expr) (0*sizeof(int[1-2*!STATIC_EXPR(const_expr)]))
+#define EMBED_ASSERT3(e,l,n) \
+	(0*sizeof(struct embed_assert_##n##_at_line_##l { \
+		unsigned int f_##n##_at_line_##l: 1-2*!STATIC_EXPR(e); \
+	}*))
+#define EMBED_ASSERT2(e,l,n) EMBED_ASSERT3(e,l,n)
+#define EMBED_ASSERT1(e,n)   EMBED_ASSERT2(e,__LINE__,n)
+#define EMBED_ASSERT(cexpr)  EMBED_ASSERT1(cexpr,0)
 #endif
 
-/* note: use ##line for the unique name */
+/* note: use bit-field of negative size instead of array of negative size
+  - to make sure that expression is compile-time defined; c99 allows to
+  specify arrays with run-time defined bounds */
 #ifndef STATIC_ASSERT
-#ifdef __COUNTER__
 #ifdef __GNUC__
-#define STATIC_ASSERT2(e,l,n) typedef __attribute__ ((unused)) int static_assert_##n##_at_line_##l[1-2*!STATIC_EXPR(e)]
+#define STATIC_ASSERT3(e,l,n) \
+	typedef __attribute__ ((unused)) struct static_assert_##n##_at_line_##l { \
+		unsigned int f_##n##_at_line_##l: 1-2*!STATIC_EXPR(e); \
+	} static_assert_##n##_at_line_##l##_t
 #else /* !__GNUC__ */
-#define STATIC_ASSERT2(e,l,n) typedef int static_assert_##n##_at_line_##l[1-2*!STATIC_EXPR(e)]
+#define STATIC_ASSERT3(e,l,n) \
+	typedef struct static_assert_##n##_at_line_##l { \
+		unsigned int f_##n##_at_line_##l: 1-2*!STATIC_EXPR(e); \
+	} static_assert_##n##_at_line_##l##_t
 #endif /* !__GNUC__ */
-#define STATIC_ASSERT1(e,l,n) STATIC_ASSERT2(e,l,n)
-#define STATIC_ASSERT(cexpr)  STATIC_ASSERT1(cexpr,__LINE__,__COUNTER__)
-#else /* !__COUNTER__ */
-#ifdef __GNUC__
-#define STATIC_ASSERT2(e,l) typedef __attribute__ ((unused)) int static_assert_at_line_##l[1-2*!STATIC_EXPR(e)]
-#else /* !__GNUC__ */
-#define STATIC_ASSERT2(e,l) typedef int static_assert_at_line_##l[1-2*!STATIC_EXPR(e)]
-#endif /* !__GNUC__ */
-#define STATIC_ASSERT1(e,l)  STATIC_ASSERT2(e,l)
-#define STATIC_ASSERT(cexpr) STATIC_ASSERT1(cexpr,__LINE__)
-#endif /* !__COUNTER__ */
+#define STATIC_ASSERT2(e,l,n) STATIC_ASSERT3(e,l,n)
+#define STATIC_ASSERT1(e,n)   STATIC_ASSERT2(e,__LINE__,n)
+#define STATIC_ASSERT(cexpr)  STATIC_ASSERT1(cexpr,0)
 #endif
 
 #endif /* STATIC_ASSERTS_H_INCLUDED */
