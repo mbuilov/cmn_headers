@@ -31,10 +31,14 @@
   - to make sure that expression is compile-time defined; c99 allows to
   specify arrays with run-time defined bounds */
 #ifndef EMBED_ASSERT
+#ifndef __cplusplus
 #define EMBED_ASSERT3(e,l,n) \
 	(0*sizeof(struct embed_assert_##n##_at_line_##l { \
 		unsigned int f_##n##_at_line_##l: 1-2*!STATIC_EXPR(e); \
-	}*))
+	}))
+#else /* __cplusplus */
+#define EMBED_ASSERT3(e,l,n) (0*sizeof(int[1-2*!STATIC_EXPR(e)]))
+#endif /* __cplusplus */
 #define EMBED_ASSERT2(e,l,n) EMBED_ASSERT3(e,l,n)
 #define EMBED_ASSERT1(e,n)   EMBED_ASSERT2(e,__LINE__,n)
 #define EMBED_ASSERT(cexpr)  EMBED_ASSERT1(cexpr,0)
