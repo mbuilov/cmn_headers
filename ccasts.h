@@ -64,7 +64,7 @@ A_Check_return
 A_Ret_range(==,p)
 static struct c_casts_void_ *c_cast_ppc_void_(const void **const p)
 {
-	void *const v = p;
+	void *const v = (void*)p;
 	return (struct c_casts_void_*)v;
 }
 
@@ -77,7 +77,7 @@ A_Check_return
 A_Ret_range(==,p)
 static const struct c_casts_void_ *c_cast_constant_void_(const void *const p)
 {
-	const void *const v = p;
+	const void *const v = (void*)p;
 	return (const struct c_casts_void_*)v;
 }
 
