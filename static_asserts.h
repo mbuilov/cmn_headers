@@ -32,10 +32,20 @@
   specify arrays with run-time defined bounds */
 #ifndef EMBED_ASSERT
 #ifndef __cplusplus
+#ifndef _MSC_VER
 #define EMBED_ASSERT3(e,l,n) \
 	(0*sizeof(struct embed_assert_##n##_at_line_##l { \
 		unsigned int f_##n##_at_line_##l: 1-2*!STATIC_EXPR(e); \
 	}))
+#else /* _MSC_VER */
+#define EMBED_ASSERT3(e,l,n) (                                              \
+	__pragma(warning(push))                                                 \
+	__pragma(warning(disable:4115))/*named type definition in parentheses*/ \
+	0*sizeof(struct embed_assert_##n##_at_line_##l {                        \
+		unsigned int f_##n##_at_line_##l: 1-2*!STATIC_EXPR(e);              \
+	})                                                                      \
+	__pragma(warning(pop)))
+#endif /* _MSC_VER */
 #else /* __cplusplus */
 #define EMBED_ASSERT3(e,l,n) (0*sizeof(int[1-2*!STATIC_EXPR(e)]))
 #endif /* __cplusplus */
