@@ -128,6 +128,16 @@ static inline UINT64_TYPE hswap8(UINT64_TYPE x)
 	);
 }
 
+/* check if processor architecture is BIG-endian */
+static inline int arch_is_be(void)
+{
+	const UINT32_TYPE x = 1;
+	return !(const unsigned char*)&x;
+}
+
+/* check if processor architecture is LITTLE-endian */
+#define arch_is_le() (!arch_is_be())
+
 #ifdef __cplusplus
 }
 #endif
