@@ -671,6 +671,12 @@ static inline void *A_Mark_opt_valid_(void *const p/*NULL?*/)
 #endif /* !ASSERT */
 #endif /* !NO_DEFAULT_CASE */
 
+#ifdef __cplusplus
+#define A_Noexcept noexcept
+#else
+#define A_Noexcept
+#endif
+
 #ifdef __NETBEANS_PREPROCESSING
 #undef A_Force_inline_function
 #define A_Force_inline_function
