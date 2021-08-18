@@ -281,7 +281,7 @@
 #define A_Ret_malloc                             A_Ret_restrict
 #elif (defined __GNUC__ && __GNUC__ >= 4) || \
   (defined __clang__ && __clang_major__ > 3 - (__clang_minor__ >= 7))
-#define A_Ret_malloc                             __attribute__ ((malloc)) /* returned memory do not contains valid pointers */
+#define A_Ret_malloc                             __attribute__ ((malloc))
 #else /* no GCC extensions */
 #define A_Ret_malloc                             /* like A_Ret_restrict, but also returned memory do not contains valid pointers   */
 #endif /* no GCC extensions */
@@ -291,6 +291,12 @@
 #define A_Alloc_size(i)                          __attribute__ ((alloc_size(i)))
 #else /* no GCC extensions */
 #define A_Alloc_size(i)                          /* function argument number i is the size of allocated memory                     */
+#endif /* no GCC extensions */
+
+#if defined __GNUC__ && __GNUC__ >= 11
+#define A_Allocator(deallocator, dealloc_idx)    __attribute__ ((malloc(deallocator, dealloc_idx))) /* do not implies A_Ret_malloc */
+#else /* no GCC extensions */
+#define A_Allocator(deallocator, dealloc_idx)    /* function allocates an object which must be deallocated via deallocator */
 #endif /* no GCC extensions */
 
 /* sal.h replacements/comments */
