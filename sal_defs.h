@@ -668,6 +668,18 @@ static inline void *A_Mark_opt_valid_(void *const p/*NULL?*/)
 #endif /* !__GNUC__ */
 
 #ifndef FALLTHROUGH
+#if defined __cplusplus && defined __has_cpp_attribute
+#if __has_cpp_attribute(fallthrough)
+#define FALLTHROUGH [[fallthrough]]
+#endif
+#elif defined __has_c_attribute
+#if __has_c_attribute(fallthrough)
+#define FALLTHROUGH [[fallthrough]]
+#endif
+#endif
+#endif
+
+#ifndef FALLTHROUGH
 #if defined __cplusplus && __cplusplus >= 201703L
 #define FALLTHROUGH [[fallthrough]]
 #elif defined __GNUC__ && __GNUC__ >= 7
