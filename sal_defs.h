@@ -8,7 +8,7 @@
 
 /* sal_defs.h */
 
-#if defined _MSC_VER && _MSC_VER >= 1600 && !defined NO_SAL_ANNOTATIONS
+#if defined _MSC_VER && _MSC_VER >= 1600 && !defined NO_SAL_ANNOTATIONS && defined _PREFAST_
 
 /* SAL annotations, see http://www.codeproject.com/Reference/879527/SAL-Function-Parameters-Annotations */
 #include <sal.h>
@@ -207,7 +207,6 @@
 #define A_Size_t(n)                      ((unsigned int)(n))              /* cast 'n' to size_t in annotations                     */
 #define A_Ret_never_null                 _Success_(1) _Always_(_Ret_notnull_) /* for a custom A_Success() use A_Ret_never_null_but */
 #define A_Ret_never_null_but             _Always_(_Ret_notnull_)          /* never NULL, but may fail - for custom A_Success(expr) */
-#define A_Nonnull_all_args               /* gcc-specific */
 #define A_Nonnull_arg(i)                 _At_(_Param_(i), _Notnull_)
 #define A_Printf_format_at(f,v)          _At_(_Param_(f), _Printf_format_string_)
 /* note: use "/analyze:plugin EspXEngine.dll" for this annotations */
@@ -225,105 +224,7 @@
 #define A_Requires_lock_not_held(expr)       _Requires_lock_not_held_(expr)
 #define A_Requires_no_locks_held             _Requires_no_locks_held_
 
-#endif /* _MSC_VER >= 1600 && !NO_SAL_ANNOTATIONS */
-
-/* non-sal.h annotations */
-
-#if defined __cplusplus && __cplusplus >= 201402L
-#define A_Const_function                         constexpr
-#elif (defined __GNUC__ && __GNUC__ >= 4) || \
-  (defined __clang__ && __clang_major__ > 3 - (__clang_minor__ >= 7))
-#define A_Const_function                         __attribute__ ((const))
-#else /* no GCC extensions */
-#define A_Const_function                         /* declare function without side effects, cannot access any memory by pointer     */
-#endif /* no GCC extensions */
-
-#if (defined __GNUC__ && __GNUC__ >= 4) || \
-  (defined __clang__ && __clang_major__ > 3 - (__clang_minor__ >= 7))
-#define A_Pure_function                          __attribute__ ((pure))
-#else /* no GCC extensions */
-#define A_Pure_function                          /* declare function without side effects, may read but cannot write memory        */
-#endif /* no GCC extensions */
-
-#ifdef _MSC_VER
-#define A_Noreturn_function                      __declspec(noreturn)
-#define A_Force_inline_function                  __forceinline
-#define A_Non_inline_function                    __declspec(noinline)
-#elif (defined __GNUC__ && __GNUC__ >= 4) || \
-  (defined __clang__ && __clang_major__ > 3 - (__clang_minor__ >= 7))
-#define A_Noreturn_function                      __attribute__ ((noreturn))
-#define A_Force_inline_function                  __attribute__ ((always_inline)) inline
-#define A_Non_inline_function                    __attribute__ ((noinline))
-#else /* no GCC extensions */
-#define A_Noreturn_function                      /* function which never returns - calls exit()                                    */
-#define A_Force_inline_function inline           /* forcibly inlined function                                                      */
-#define A_Non_inline_function                    /* forbid inlining a function                                                     */
-#endif /* no GCC extensions */
-
-#if defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
-#define A_Restrict                               restrict /* standard keyword for c99 */
-#elif defined _MSC_VER
-#define A_Restrict                               __restrict
-#elif (defined __GNUC__ && __GNUC__ >= 3) || \
-  (defined __clang__ && __clang_major__ > 3 - (__clang_minor__ >= 7))
-#define A_Restrict                               __restrict__
-#else /* no GCC extensions */
-#define A_Restrict
-#endif /* no GCC extensions */
-
-#ifdef _MSC_VER
-#define A_Ret_restrict                           __declspec(restrict) /* auto-mark pointer that accepts return value as A_Restrict */
-#else /* !_MSC_VER */
-#define A_Ret_restrict                           /* function returns restricted pointer - assign it to A_Restrict variable         */
-#endif /* !_MSC_VER */
-
-#ifdef _MSC_VER
-#define A_Ret_malloc                             A_Ret_restrict
-#elif (defined __GNUC__ && __GNUC__ >= 4) || \
-  (defined __clang__ && __clang_major__ > 3 - (__clang_minor__ >= 7))
-#define A_Ret_malloc                             __attribute__ ((malloc))
-#else /* no GCC extensions */
-#define A_Ret_malloc                             /* like A_Ret_restrict, but also returned memory do not contains valid pointers   */
-#endif /* no GCC extensions */
-
-#if (defined __GNUC__ && __GNUC__ > 4 - (__GNUC_MINOR__ >= 3)) || \
-  (defined __clang__ && __clang_major__ >= 4)
-#define A_Alloc_size(i)                          __attribute__ ((alloc_size(i)))
-#else /* no GCC extensions */
-#define A_Alloc_size(i)                          /* function argument number i is the size of allocated memory                     */
-#endif /* no GCC extensions */
-
-#if defined __GNUC__ && __GNUC__ >= 11
-#define A_Allocator(deallocator, dealloc_idx)    __attribute__ ((malloc(deallocator, dealloc_idx))) /* do not implies A_Ret_malloc */
-#else /* no GCC extensions */
-#define A_Allocator(deallocator, dealloc_idx)    /* function allocates an object which must be deallocated via deallocator */
-#endif /* no GCC extensions */
-
-/* sal.h replacements/comments */
-
-#if !defined _MSC_VER || _MSC_VER < 1600 || defined NO_SAL_ANNOTATIONS
-
-#if (defined __GNUC__ && __GNUC__ >= 4) || \
-  (defined __clang__ && __clang_major__ > 3 - (__clang_minor__ >= 7))
-#define A_Check_return                           __attribute__ ((warn_unused_result))
-#define A_Nonnull_all_args                       __attribute__ ((nonnull))
-#define A_Nonnull_arg(i)                         __attribute__ ((nonnull(i,i)))
-#define A_Printf_format_at(f,v)                  __attribute__ ((format(printf, f, v)))
-#else /* no GCC extensions */
-#define A_Check_return                           /* caller must check function's return value                                      */
-#define A_Nonnull_all_args                       /* all function arguments pointers are != NULL                                    */
-#define A_Nonnull_arg(i)                         /* function argument number i is != NULL                                          */
-#define A_Printf_format_at(f,v)                  /* f - 1-based index of printf format argument, v - index of va_arg argument      */
-#endif /* no GCC extensions */
-
-#if (defined __GNUC__ && __GNUC__ > 4 - (__GNUC_MINOR__ >= 9)) || \
-  (defined __clang__ && __clang_major__ > 3 - (__clang_minor__ >= 7))
-#define A_Ret_never_null                         __attribute__ ((returns_nonnull))
-#define A_Ret_never_null_but                     __attribute__ ((returns_nonnull))
-#else /* no GCC extensions */
-#define A_Ret_never_null                         /* never returns NULL, there must be no A_Success() annotation                    */
-#define A_Ret_never_null_but                     /* never returns NULL, even on failure (when expr of A_Success(expr) is 0)        */
-#endif /* no GCC extensions */
+#else /* !_MSC_VER || NO_SAL_ANNOTATIONS || !_PREFAST_ */
 
 #define A_Curr                                   /* references current function parameter, like A_At(*A_Curr, A_Post_notnull)      */
 #define A_Param(i)                               /* references function parameter number i, like A_At(A_Param(1), A_Notnull)       */
@@ -404,6 +305,26 @@
 #define A_Ret_writes_to_maybenull(s,c)           /* returns NULL? ptr to array of s writable elems, c elems are valid              */
 #define A_Ret_writes_bytes_to(s,c)               /* returns !NULL ptr to array of s writable bytes, c bytes are valid              */
 #define A_Ret_writes_bytes_to_maybenull(s,c)     /* returns NULL? ptr to array of s writable bytes, c bytes are valid              */
+
+#if defined __cplusplus && defined __has_cpp_attribute
+#if __has_cpp_attribute(nodiscard)
+#define A_Check_return [[nodiscard]]
+#endif
+#elif defined __has_c_attribute
+#if __has_c_attribute(nodiscard)
+#define A_Check_return [[nodiscard]]
+#endif
+#endif
+
+#ifndef A_Check_return
+#if (defined __GNUC__ && __GNUC__ >= 4) || \
+  (defined __clang__ && __clang_major__ > 3 - (__clang_minor__ >= 7))
+#define A_Check_return                           __attribute__ ((warn_unused_result))
+#else /* no GCC extensions */
+#define A_Check_return                           /* caller must check function's return value                                      */
+#endif /* no GCC extensions */
+#endif
+
 #define A_Must_inspect_result                    /* caller must check value of out-parameter (*ptr) (NULL-ness?, validity?)        */
 #define A_String_length(p)                       /* length of C-string passed in parameter p, i.e. strlen(p)/wsclen(p)             */
 #define A_Pre_ptrdiff_count(e)                   /* before the call: number of elements in array until ptr e                       */
@@ -512,6 +433,25 @@
 #define A_Field_z                    /* pre/post 0-term array of chars     (NULL-ness?, validity?)                         */
 #define A_Field_range(l,h)           /* pre/post field value is in given range (inclusive)                                 */
 #define A_Size_t(n)                  /* use in annotations like A_Success(return != A_Size_t(-1))                          */
+
+#if (defined __GNUC__ && __GNUC__ > 4 - (__GNUC_MINOR__ >= 9)) || \
+  (defined __clang__ && __clang_major__ > 3 - (__clang_minor__ >= 7))
+#define A_Ret_never_null                     __attribute__ ((returns_nonnull))
+#define A_Ret_never_null_but                 __attribute__ ((returns_nonnull))
+#else /* no GCC extensions */
+#define A_Ret_never_null                     /* never returns NULL, there must be no A_Success() annotation                    */
+#define A_Ret_never_null_but                 /* never returns NULL, even on failure (when expr of A_Success(expr) is 0)        */
+#endif /* no GCC extensions */
+
+#if (defined __GNUC__ && __GNUC__ >= 4) || \
+  (defined __clang__ && __clang_major__ > 3 - (__clang_minor__ >= 7))
+#define A_Nonnull_arg(i)                     __attribute__ ((nonnull(i,i)))
+#define A_Printf_format_at(f,v)              __attribute__ ((format(printf, f, v)))
+#else /* no GCC extensions */
+#define A_Nonnull_arg(i)                     /* function argument number i is != NULL                                          */
+#define A_Printf_format_at(f,v)              /* f - 1-based index of printf format argument, v - index of va_arg argument      */
+#endif /* no GCC extensions */
+
 #define A_Acquires_lock(expr)                /* increments lock counter of (rw-)semaphore, mutex or spin-lock              */
 #define A_Acquires_shared_lock(expr)         /* increments lock counter of (rw-)semaphore                                  */
 #define A_Acquires_exclusive_lock(expr)      /* increments lock counter of (re-entrant) mutex                              */
@@ -526,7 +466,84 @@
 #define A_Requires_lock_not_held(expr)       /* checks for zero lock counter of (rw-)semaphore, mutex or spin-lock         */
 #define A_Requires_no_locks_held             /* no known locks must be held */
 
-#endif /* !_MSC_VER || NO_SAL_ANNOTATIONS */
+#endif /* !_MSC_VER || NO_SAL_ANNOTATIONS || !_PREFAST_ */
+
+#if (defined __GNUC__ && __GNUC__ >= 4) || \
+  (defined __clang__ && __clang_major__ > 3 - (__clang_minor__ >= 7))
+#define A_Nonnull_all_args                       __attribute__ ((nonnull))
+#else /* no GCC extensions */
+#define A_Nonnull_all_args                       /* all function arguments pointers are != NULL                                    */
+#endif /* no GCC extensions */
+
+#if defined __cplusplus && __cplusplus >= 201402L
+#define A_Const_function                         constexpr
+#elif (defined __GNUC__ && __GNUC__ >= 4) || \
+  (defined __clang__ && __clang_major__ > 3 - (__clang_minor__ >= 7))
+#define A_Const_function                         __attribute__ ((const))
+#else /* no GCC extensions */
+#define A_Const_function                         /* declare function without side effects, cannot access any memory by pointer     */
+#endif /* no GCC extensions */
+
+#if (defined __GNUC__ && __GNUC__ >= 4) || \
+  (defined __clang__ && __clang_major__ > 3 - (__clang_minor__ >= 7))
+#define A_Pure_function                          __attribute__ ((pure))
+#else /* no GCC extensions */
+#define A_Pure_function                          /* declare function without side effects, may read but cannot write memory        */
+#endif /* no GCC extensions */
+
+#ifdef _MSC_VER
+#define A_Noreturn_function                      __declspec(noreturn)
+#define A_Force_inline_function                  __forceinline
+#define A_Non_inline_function                    __declspec(noinline)
+#elif (defined __GNUC__ && __GNUC__ >= 4) || \
+  (defined __clang__ && __clang_major__ > 3 - (__clang_minor__ >= 7))
+#define A_Noreturn_function                      __attribute__ ((noreturn))
+#define A_Force_inline_function                  __attribute__ ((always_inline)) inline
+#define A_Non_inline_function                    __attribute__ ((noinline))
+#else /* no GCC extensions */
+#define A_Noreturn_function                      /* function which never returns - calls exit()                                    */
+#define A_Force_inline_function inline           /* forcibly inlined function                                                      */
+#define A_Non_inline_function                    /* forbid inlining a function                                                     */
+#endif /* no GCC extensions */
+
+#if defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
+#define A_Restrict                               restrict /* standard keyword for c99 */
+#elif defined _MSC_VER
+#define A_Restrict                               __restrict
+#elif (defined __GNUC__ && __GNUC__ >= 3) || \
+  (defined __clang__ && __clang_major__ > 3 - (__clang_minor__ >= 7))
+#define A_Restrict                               __restrict__
+#else /* no GCC extensions */
+#define A_Restrict
+#endif /* no GCC extensions */
+
+#ifdef _MSC_VER
+#define A_Ret_restrict                           __declspec(restrict) /* auto-mark pointer that accepts return value as A_Restrict */
+#else /* !_MSC_VER */
+#define A_Ret_restrict                           /* function returns restricted pointer - assign it to A_Restrict variable         */
+#endif /* !_MSC_VER */
+
+#ifdef _MSC_VER
+#define A_Ret_malloc                             A_Ret_restrict
+#elif (defined __GNUC__ && __GNUC__ >= 4) || \
+  (defined __clang__ && __clang_major__ > 3 - (__clang_minor__ >= 7))
+#define A_Ret_malloc                             __attribute__ ((malloc))
+#else /* no GCC extensions */
+#define A_Ret_malloc                             /* like A_Ret_restrict, but also returned memory do not contains valid pointers   */
+#endif /* no GCC extensions */
+
+#if (defined __GNUC__ && __GNUC__ > 4 - (__GNUC_MINOR__ >= 3)) || \
+  (defined __clang__ && __clang_major__ >= 4)
+#define A_Alloc_size(i)                          __attribute__ ((alloc_size(i)))
+#else /* no GCC extensions */
+#define A_Alloc_size(i)                          /* function argument number i is the size of allocated memory                     */
+#endif /* no GCC extensions */
+
+#if defined __GNUC__ && __GNUC__ >= 11
+#define A_Allocator(deallocator, dealloc_idx)    __attribute__ ((malloc(deallocator, dealloc_idx))) /* do not implies A_Ret_malloc */
+#else /* no GCC extensions */
+#define A_Allocator(deallocator, dealloc_idx)    /* function allocates an object which must be deallocated via deallocator */
+#endif /* no GCC extensions */
 
 #ifndef ASSUME
 #if defined _MSC_VER
