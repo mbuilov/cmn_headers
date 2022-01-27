@@ -1,6 +1,6 @@
 /**********************************************************************************
 * Program options and parameters parsing test
-* Copyright (C) 2012-2020 Michael M. Builov, https://github.com/mbuilov/cmn_headers
+* Copyright (C) 2012-2022 Michael M. Builov, https://github.com/mbuilov/cmn_headers
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -18,7 +18,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "../sal_defs.h"
 #include "../asserts.h"
 #include "../get_opt.inl"
 
