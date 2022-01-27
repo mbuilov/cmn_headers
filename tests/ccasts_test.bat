@@ -43,7 +43,7 @@ rem should not be compiled
 (call :StepFail "cl /nologo /TP /c %WARN% ccasts_test.c /DBAD13") || exit /b 1
 (call :StepFail "cl /nologo /TP /c %WARN% ccasts_test.c /DBAD14") || exit /b 1
 
-echo OK
+echo =============== all tests OK ===============
 exit /b 0
 
 :StepOk
