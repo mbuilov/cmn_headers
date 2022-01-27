@@ -3,7 +3,7 @@
 
 /**********************************************************************************
 * Add a tag to a pointer value
-* Copyright (C) 2019-2020 Michael M. Builov, https://github.com/mbuilov/cmn_headers
+* Copyright (C) 2019-2022 Michael M. Builov, https://github.com/mbuilov/cmn_headers
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -17,20 +17,17 @@
 */
 
 #include "static_asserts.h"
+#include "annotations.h"
 
 /* this mask is used while converting pointer to an unsigned long long integer and back:
   if pointer type is signed, it may be sign-extended during conversion to unsigned long long integer
   - these extra bits should be masked out before converting unsigned long long integer back to a pointer */
 #define PTR_VALUE_MASK \
-	(/* byte has 8 bits */0*sizeof(int[1-2*(255 != (unsigned char)-1)]) + \
+	(/* byte has 8 bits */EMBED_ASSERT(255 == (unsigned char)-1) + \
+	/*ull is large enough*/EMBED_ASSERT(sizeof(unsigned long long) >= sizeof(void*)) + \
 	((1llu << (8*sizeof(void*) - 1)) | ~(~0llu << (8*sizeof(void*) - 1))))
 
-#if defined __cplusplus && __cplusplus >= 201402L
-constexpr
-#elif (defined(__GNUC__) && (__GNUC__ >= 4)) || \
-  (defined(__clang__) && __clang_major__ > 3 - (__clang_minor__ >= 7))
-__attribute__ ((const))
-#endif
+A_Const_function
 static inline void *ptr_add_tag_(void *const ptr/*NULL?*/, const unsigned tag/*>=0*/)
 {
 #ifdef _MSC_VER
@@ -50,12 +47,7 @@ static inline void *ptr_add_tag_(void *const ptr/*NULL?*/, const unsigned tag/*>
 #endif
 }
 
-#if defined __cplusplus && __cplusplus >= 201402L
-constexpr
-#elif (defined(__GNUC__) && (__GNUC__ >= 4)) || \
-  (defined(__clang__) && __clang_major__ > 3 - (__clang_minor__ >= 7))
-__attribute__ ((const))
-#endif
+A_Const_function
 static inline void *ptr_clear_tags_(void *const ptr/*NULL?*/, const unsigned align/*>0*/)
 {
 #ifdef _MSC_VER
@@ -75,12 +67,7 @@ static inline void *ptr_clear_tags_(void *const ptr/*NULL?*/, const unsigned ali
 #endif
 }
 
-#if defined __cplusplus && __cplusplus >= 201402L
-constexpr
-#elif (defined(__GNUC__) && (__GNUC__ >= 4)) || \
-  (defined(__clang__) && __clang_major__ > 3 - (__clang_minor__ >= 7))
-__attribute__ ((const))
-#endif
+A_Const_function
 static inline unsigned ptr_get_tags_(const void *const ptr/*NULL?*/, const unsigned align/*>0*/)
 {
 #ifdef _MSC_VER
@@ -98,12 +85,7 @@ static inline unsigned ptr_get_tags_(const void *const ptr/*NULL?*/, const unsig
 #endif
 }
 
-#if defined __cplusplus && __cplusplus >= 201402L
-constexpr
-#elif (defined(__GNUC__) && (__GNUC__ >= 4)) || \
-  (defined(__clang__) && __clang_major__ > 3 - (__clang_minor__ >= 7))
-__attribute__ ((const))
-#endif
+A_Const_function
 static inline void *ptr_make_tagged_(const unsigned value, const unsigned tag/*>=0*/)
 {
 	return (void*)(value + tag);
