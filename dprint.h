@@ -3,7 +3,7 @@
 
 /**********************************************************************************
 * Debug printing/tracing helpers
-* Copyright (C) 2012-2021 Michael M. Builov, https://github.com/mbuilov/cmn_headers
+* Copyright (C) 2012-2022 Michael M. Builov, https://github.com/mbuilov/cmn_headers
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -33,7 +33,7 @@
 #include <stdio.h> /* for fprintf() */
 #endif
 
-#include "sal_defs.h" /* for A_Printf_format_at()/A_Printf_format_string */
+#include "annotations.h" /* for A_Printf_format() */
 
 #ifdef __cplusplus
 extern "C" {
@@ -116,8 +116,8 @@ extern "C" {
 #ifdef DPRINT_TO_LOG
 
 /* prototype of custom logging function - it must be defined elsewhere */
-A_Printf_format_at(1,2)
-void DPRINT_TO_LOG(A_In_z A_Printf_format_string const char *format, ...);
+A_Printf_format(1,2)
+void DPRINT_TO_LOG(const char *format/*!=NULL,'\0'-terminated*/, ...);
 
 #define DBGPRINT3_1(f) \
 	DPRINT_TO_LOG(DPRINT_LOCATION_FORMAT f, DPRINT_GET_THREAD_ID, __FILE__, __LINE__, DPRINT_FUNC)
