@@ -55,4 +55,4 @@ Step && $CXX -c ccasts_test.c -DBAD12 && Exit
 Step && $CXX -c ccasts_test.c -DBAD13 && Exit
 Step && $CXX -c ccasts_test.c -DBAD14 && Exit
 
-echo "OK"
+echo "=============== all tests OK ==============="
