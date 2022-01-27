@@ -37,4 +37,4 @@ Step && $CXX -c countof_test.c -DBAD3 && Exit
 Step && $CXX -c countof_test.c -DBAD4 && Exit
 Step && $CXX -c countof_test.c -DBAD5 && Exit
 
-echo "OK"
+echo "=============== all tests OK ==============="
