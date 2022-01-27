@@ -3,7 +3,7 @@
 
 /**********************************************************************************
 * Program options and parameters parsing
-* Copyright (C) 2012-2020 Michael M. Builov, https://github.com/mbuilov/cmn_headers
+* Copyright (C) 2012-2022 Michael M. Builov, https://github.com/mbuilov/cmn_headers
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -34,8 +34,14 @@
 #endif
 
 /* note: may #include "asserts.h" for the ASSERT macro */
-#ifndef ASSERT
-#define ASSERT(x) ((void)0)
+#ifndef GET_OPT_ASSERT
+#ifdef ASSERT
+#define GET_OPT_ASSERT(expr) ASSERT(expr)
+#elif defined ASSUME
+#define GET_OPT_ASSERT(expr) ASSUME(expr)
+#else
+#define GET_OPT_ASSERT(expr) ((void)0)
+#endif
 #endif
 
 #ifdef _MSC_VER
@@ -185,8 +191,8 @@ const GET_OPT_CHAR short_opts[] = SHORT_OPTION_a;
 
 /* long option description */
 struct long_opt_info {
-	unsigned len;
-	const GET_OPT_CHAR *name;
+	unsigned len;             /* >0 */
+	const GET_OPT_CHAR *name; /* !=NULL, '\0'-terminated */
 };
 
 /*--------------------------------------------------------------------------------------------------------
@@ -344,25 +350,15 @@ int main(int argc, char *argv[])
 }
 #endif
 
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Nonnull_all_args
-A_At(i, A_Out)
-#ifdef GET_OPT_ARGV_NZ
-A_At(argc, A_In_range(>,0))
-A_At(argv, A_In_reads(argc))
-#else
-A_At(argv, A_In)
-#endif
-#endif
 #ifdef GET_OPT_ARGV_NZ
 static void opt_info_init(
-	struct opt_info *const i/*out*/,
-	const int argc,
-	GET_OPT_CHAR *const argv[/*argc*/]/*may be not NULL-terminated*/)
+	struct opt_info *const i/*!=NULL,out*/,
+	const int argc/*>0*/,
+	GET_OPT_CHAR *const argv[/*argc*/]/*!=NULL,read-only,may be not NULL-terminated*/)
 #else
 static void opt_info_init(
-	struct opt_info *i/*out*/,
-	GET_OPT_CHAR *const argv[]/*NULL-terminated*/)
+	struct opt_info *i/*!=NULL,out*/,
+	GET_OPT_CHAR *const argv[]/*!=NULL,read-only,non-empty,NULL-terminated*/)
 #endif
 {
 	i->arg = &argv[1];   /* skip program name at argv[0] */
@@ -373,15 +369,7 @@ static void opt_info_init(
 #endif
 }
 
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Pure_function
-A_Nonnull_all_args
-A_At(i, A_In)
-A_Ret_range(0,1)
-A_Check_return
-#endif
-static int opt_info_is_end(
-	const struct opt_info *const i/*in*/)
+static int opt_info_is_end(const struct opt_info *const i/*!=NULL*/)
 {
 #ifdef GET_OPT_ARGV_NZ
 	return i->arg == i->args_end;
@@ -390,44 +378,27 @@ static int opt_info_is_end(
 #endif
 }
 
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Pure_function
-A_Nonnull_all_args
-A_At(arg, A_In_z)
-A_Ret_range(0,1)
-A_Check_return
-#endif
-static int opt_arg_is_option(
-	const GET_OPT_CHAR *const arg/*!=NULL*/)
+static int opt_arg_is_option(const GET_OPT_CHAR *const arg/*!=NULL*/)
 {
 	/* an argument looks like an option:
 	  - if it begins with a dash, except the dash alone */
 	return GET_OPT_TEXT('-') == *arg && arg[1];
 }
 
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Check_return
-A_Nonnull_arg(1)
-A_Ret_range(>=,OPT_REST_PARAMS)
-#ifdef GET_OPT_ARGV_NZ
-A_Pre_satisfies(i->arg < i->args_end)
-#else
-A_Pre_satisfies(!!i->arg[0])
-#endif
-A_At(i, A_Inout)
-A_At(short_opts, A_In_opt_z)
-A_At(long_opts, A_In_opt)
-#endif
 static int get_opt(
-	struct opt_info *const i/*in,out*/,
+#ifdef GET_OPT_ARGV_NZ
+	struct opt_info *const i/*!=NULL,i->arg < i->args_end*/,
+#else
+	struct opt_info *const i/*!=NULL,i->arg[0] != NULL*/,
+#endif
 	const GET_OPT_CHAR short_opts[]/*NULL?*/,
-	const struct long_opt_info long_opts[]/*NULL?*/
-) {
+	const struct long_opt_info long_opts[]/*NULL?*/)
+{
 	GET_OPT_CHAR *a = i->sopt;
 #ifdef GET_OPT_ARGV_NZ
-	ASSERT(i->arg < i->args_end);
+	GET_OPT_ASSERT(i->arg < i->args_end);
 #else
-	ASSERT(i->arg[0]);
+	GET_OPT_ASSERT(i->arg[0]);
 #endif
 	if (a) {
 		/* next short option in the bundle, like "yz" in "-xyz" */
@@ -435,7 +406,7 @@ static int get_opt(
 			const GET_OPT_CHAR *const o = GET_OPT_STRCHR(short_opts, *a);
 			if (o) {
 				/* short_opts format string must not contain "-" */
-				ASSERT(GET_OPT_TEXT('-') != o[0] && GET_OPT_TEXT('-') != o[1]);
+				GET_OPT_ASSERT(GET_OPT_TEXT('-') != o[0] && GET_OPT_TEXT('-') != o[1]);
 				if (GET_OPT_TEXT(' ') == o[1]) {
 					/* option is the first letter of a long option started with one dash:
 					   "-xfile=abc" as equivalent of "-x -file=abc" or "-x --file=abc" */
@@ -503,7 +474,7 @@ parse_long_option:
 					const GET_OPT_CHAR *n = lo->name;
 					if (GET_OPT_TEXT('=') == *n)
 						n++; /* option expects a value */
-					ASSERT(*n); /* bad long_opts array: long option name must be non-empty */
+					GET_OPT_ASSERT(*n); /* bad long_opts array: long option name must be non-empty */
 					if (!GET_OPT_MEMCMP(a, n, len*sizeof(GET_OPT_CHAR))) {
 						if (v) {
 							/* "--file=abc": set (can be empty) option value, even if not expecting one */
@@ -535,7 +506,7 @@ parse_long_option:
 		const GET_OPT_CHAR *const o = GET_OPT_STRCHR(short_opts, a[1]);
 		if (o) {
 			/* short_opts format string must not contain "-" */
-			ASSERT(GET_OPT_TEXT('-') != o[1]);
+			GET_OPT_ASSERT(GET_OPT_TEXT('-') != o[1]);
 			if (GET_OPT_TEXT(' ') == o[1]) {
 				/* long option started with one dash: "-file" or "-file=abc" */
 				a++; /* skip "-" */
@@ -579,12 +550,7 @@ parse_long_option:
 	return OPT_UNKNOWN; /* i->arg points to unknown option (or bundle, if i->sopt != NULL) */
 }
 
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Nonnull_all_args
-A_At(i, A_Inout)
-#endif
-static void opt_skip_unknown(
-	struct opt_info *const i/*in,out*/)
+static void opt_skip_unknown(struct opt_info *const i/*!=NULL*/)
 {
 	/* skip unknown option, assume it do not expects a value */
 	if (i->sopt) {
@@ -606,32 +572,19 @@ static void opt_skip_unknown(
     ...
   }
 */
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Pure_function
-A_Nonnull_all_args
-A_Ret_range(0,1)
-A_Check_return
-A_At(i, A_In)
-A_At(old_arg, A_Notnull)
-#endif
 static int opt_is_separate_value(
-	const struct opt_info *const i,
-	GET_OPT_CHAR *const *const old_arg)
+	const struct opt_info *const i/*!=NULL*/,
+	GET_OPT_CHAR *const *const old_arg/*!=NULL*/)
 {
-	ASSERT(i->value);
+	GET_OPT_ASSERT(i->value);
 	return (i->arg - 1) != old_arg;
 }
 
 /* unread option value specified in a separate argument, like: "-o value" or "--option value" */
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Nonnull_all_args
-A_At(i, A_Inout)
-#endif
-static void opt_unread_separate_value(
-	struct opt_info *const i/*in,out*/)
+static void opt_unread_separate_value(struct opt_info *const i/*!=NULL*/)
 {
 	i->arg--;
-	ASSERT(*i->arg == i->value);
+	GET_OPT_ASSERT(*i->arg == i->value);
 }
 
 /* suppress warnings about unreferenced static functions */
