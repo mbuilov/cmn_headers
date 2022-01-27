@@ -3,7 +3,7 @@
 
 /**********************************************************************************
 * C-casts
-* Copyright (C) 2012-2021 Michael M. Builov, https://github.com/mbuilov/cmn_headers
+* Copyright (C) 2012-2022 Michael M. Builov, https://github.com/mbuilov/cmn_headers
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -47,8 +47,6 @@ struct c_casts_void_;
 */
 A_Const_function
 A_Force_inline_function
-A_Check_return
-A_Ret_range(==,p)
 static struct c_casts_void_ *c_cast_void_(void *const p)
 {
 	return (struct c_casts_void_*)p;
@@ -60,8 +58,6 @@ static struct c_casts_void_ *c_cast_void_(void *const p)
 /* note: this function is needed for MSVC */
 A_Const_function
 A_Force_inline_function
-A_Check_return
-A_Ret_range(==,p)
 static struct c_casts_void_ *c_cast_ppc_void_(const void **const p)
 {
 	void *const v = (void*)p;
@@ -73,8 +69,6 @@ static struct c_casts_void_ *c_cast_ppc_void_(const void **const p)
 */
 A_Const_function
 A_Force_inline_function
-A_Check_return
-A_Ret_range(==,p)
 static const struct c_casts_void_ *c_cast_constant_void_(const void *const p)
 {
 	const void *const v = (void*)p;
@@ -87,8 +81,6 @@ static const struct c_casts_void_ *c_cast_constant_void_(const void *const p)
 /* note: remove 'constness' of the pointed type */
 A_Const_function
 A_Force_inline_function
-A_Check_return
-A_Ret_range(==,p)
 static struct c_casts_void_ *c_const_cast_void_(const void *const p)
 {
 #if defined __clang__ || (defined __GNUC__ && __GNUC__ > 4 - (__GNUC_MINOR__ >= 6))
@@ -240,7 +232,8 @@ extern "C++" template <class T> struct c_casts_const_type {typedef const T XT;};
   _Pragma("GCC diagnostic push")                                   \
   _Pragma("GCC diagnostic error \"-Wincompatible-pointer-types\"") \
   _Pragma("GCC diagnostic error \"-Wdiscarded-qualifiers\"")       \
-  type_ *const p_ = (type_*)c_const_cast_void_(ptr_);              \
+  void *const x_ = c_const_cast_void_(ptr_);                       \
+  type_ *const p_ = (type_*)x_;                                    \
   (void)sizeof(*(const type_**)0 = (ptr_));                        \
   (void)sizeof(c_cast_void_((type_*)0));                           \
   _Pragma("GCC diagnostic pop")                                    \
@@ -256,7 +249,8 @@ extern "C++" template <class T> struct c_casts_const_type {typedef const T XT;};
   _Pragma("clang diagnostic push")                                   \
   _Pragma("clang diagnostic ignored \"-Wduplicate-decl-specifier\"") \
   _Pragma("clang diagnostic error \"-Wincompatible-pointer-types\"") \
-  type_ *const p_ = (type_*)c_const_cast_void_(ptr_);                \
+  void *const x_ = c_const_cast_void_(ptr_);                         \
+  type_ *const p_ = (type_*)x_;                                      \
   (void)sizeof(*(const type_**)0 = (ptr_));                          \
   (void)sizeof(c_cast_void_((type_*)0));                             \
   _Pragma("clang diagnostic pop")                                    \
@@ -425,37 +419,27 @@ extern "C++" template <class T> struct c_casts_const_type {typedef const T XT;};
 )
 #endif
 
-A_Nonnull_all_args
 A_Const_function
 A_Force_inline_function
-A_Check_return
-A_At(p, A_In)
-A_At((char*)p - offset, A_Readable_bytes(offset) A_Writable_bytes(offset))
-A_Ret_never_null
-A_Ret_range(==,(char*)p - offset)
-A_Ret_valid
 static struct c_casts_void_ *c_container_of_(
 	const void *const p/*!=NULL*/, const size_t offset/*0?*/)
 {
 	DEBUG_CHECK_PTR(p); /* p must be != NULL */
 	{
-		void *const v = (char*)c_const_cast_void_(p) - offset;
+		void *const x = c_const_cast_void_(p);
+		void *const v = (char*)x - offset;
 		return (struct c_casts_void_*)v;
 	}
 }
 
 A_Const_function
 A_Force_inline_function
-A_Check_return
-A_At(p, A_In_opt)
-A_When(!p, A_Ret_null)
-A_When(!!p, A_At((char*)p - offset, A_Readable_bytes(offset) A_Writable_bytes(offset)))
-A_When(!!p, A_Ret_range(==,(char*)p - offset) A_Ret_valid)
 static struct c_casts_void_ *c_opt_container_of_(
 	const void *const p/*NULL?*/, const size_t offset/*0?*/)
 {
 	if (p) {
-		void *const v = (char*)c_const_cast_void_(p) - offset;
+		void *const x = c_const_cast_void_(p);
+		void *const v = (char*)x - offset;
 		return (struct c_casts_void_*)v;
 	}
 	return (struct c_casts_void_*)0;
