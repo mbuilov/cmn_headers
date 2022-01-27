@@ -17,10 +17,10 @@
 */
 
 #ifndef NDEBUG
-#include <stdlib.h> /* for assert() */
-#include <assert.h> /* for exit() */
+#include <stdlib.h> /* for exit() */
+#include <assert.h> /* for assert() */
 #endif
-#include "dprint.h" /* for DBGPRINTX() */
+#include "dprint.h" /* for ASSUME(), DBGPRINTX(), annotations */
 
 /* ASSERT(condition), ASSERT_PTR(pointer)
 
@@ -54,7 +54,8 @@
 extern "C" {
 #endif
 
-A_Noreturn_function A_Force_inline_function
+A_Noreturn_function
+A_Force_inline_function
 static void asserts_h_assertion_failed(
 	const char *const cond,
 	const char *const file,
@@ -79,8 +80,9 @@ static void asserts_h_assertion_failed(
 	exit(-1);
 }
 
+A_Const_function /* for calling this function from const-expressions */
 A_Force_inline_function
-static void asserts_h_assert(
+static int asserts_h_assert(
 	const int x,
 	const char *const cond,
 	const char *const file,
@@ -89,13 +91,14 @@ static void asserts_h_assert(
 {
 	if (x)
 		asserts_h_assertion_failed(cond, file, line, function);
+	return 0;
 }
 
 #ifdef __cplusplus
 }
 #endif
 
-#define ASSERT(cond) asserts_h_assert(!(cond), #cond, __FILE__, __LINE__, DPRINT_FUNC)
+#define ASSERT(cond) ((void)asserts_h_assert(!(cond), #cond, __FILE__, __LINE__, DPRINT_FUNC))
 
 #ifndef ASSERT_PTR
 
@@ -104,8 +107,9 @@ extern "C" {
 #endif
 
 /* to avoid "-Wnonnull-compare", don't mark ptr as non-null */
+A_Const_function /* for calling this function from const-expressions */
 A_Force_inline_function
-static void asserts_h_assert_ptr(
+static int asserts_h_assert_ptr(
 	const void *const ptr,
 	const char *const cond,
 	const char *const file,
@@ -114,13 +118,14 @@ static void asserts_h_assert_ptr(
 {
 	if (!ptr)
 		asserts_h_assertion_failed(cond, file, line, function);
+	return 0;
 }
 
 #ifdef __cplusplus
 }
 #endif
 
-#define ASSERT_PTR(ptr) asserts_h_assert_ptr(ptr, #ptr, __FILE__, __LINE__, DPRINT_FUNC)
+#define ASSERT_PTR(ptr) ((void)asserts_h_assert_ptr(ptr, #ptr, __FILE__, __LINE__, DPRINT_FUNC))
 
 #endif /* !ASSERT_PTR */
 
