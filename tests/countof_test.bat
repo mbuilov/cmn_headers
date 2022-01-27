@@ -26,7 +26,7 @@ rem should not be compiled
 (call :StepFail "cl /nologo /TP /c %WARN% countof_test.c /DBAD4") || exit /b 1
 (call :StepFail "cl /nologo /TP /c %WARN% countof_test.c /DBAD5") || exit /b 1
 
-echo OK
+echo =============== all tests OK ===============
 exit /b 0
 
 :StepOk
