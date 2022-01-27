@@ -3,7 +3,7 @@
 
 /**********************************************************************************
 * Runtime assertions
-* Copyright (C) 2012-2019 Michael M. Builov, https://github.com/mbuilov/cmn_headers
+* Copyright (C) 2012-2022 Michael M. Builov, https://github.com/mbuilov/cmn_headers
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -54,12 +54,12 @@
 extern "C" {
 #endif
 
-A_Noreturn_function A_Force_inline_function A_Nonnull_all_args
+A_Noreturn_function A_Force_inline_function
 static void asserts_h_assertion_failed(
-	A_In_z const char *const cond,
-	A_In_z const char *const file,
+	const char *const cond,
+	const char *const file,
 	const int line,
-	A_In_z const char *const function)
+	const char *const function)
 {
 	volatile int *arr[1] = {NULL};
 	DBGPRINTX(file, line, function, "assertion failed: %s", cond);
@@ -80,13 +80,12 @@ static void asserts_h_assertion_failed(
 }
 
 A_Force_inline_function
-A_Nonnull_all_args
 static void asserts_h_assert(
 	const int x,
-	A_In_z const char *const cond,
-	A_In_z const char *const file,
+	const char *const cond,
+	const char *const file,
 	const int line,
-	A_In_z const char *const function)
+	const char *const function)
 {
 	if (x)
 		asserts_h_assertion_failed(cond, file, line, function);
@@ -106,15 +105,12 @@ extern "C" {
 
 /* to avoid "-Wnonnull-compare", don't mark ptr as non-null */
 A_Force_inline_function
-A_Nonnull_arg(2)
-A_Nonnull_arg(3)
-A_Nonnull_arg(5)
 static void asserts_h_assert_ptr(
 	const void *const ptr,
-	A_In_z const char *const cond,
-	A_In_z const char *const file,
+	const char *const cond,
+	const char *const file,
 	const int line,
-	A_In_z const char *const function)
+	const char *const function)
 {
 	if (!ptr)
 		asserts_h_assertion_failed(cond, file, line, function);
