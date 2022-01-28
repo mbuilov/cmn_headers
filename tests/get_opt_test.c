@@ -76,6 +76,7 @@ int main(int argc, char *argv[])
 	opt_info_init(&i, argc, argv);
 #else
 	opt_info_init(&i, argv);
+	(void)argc;
 #endif
 
 	while (!opt_info_is_end(&i)) {
