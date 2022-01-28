@@ -1,14 +1,24 @@
 /**********************************************************************************
 * Program options and parameters parsing test
-* Copyright (C) 2012-2017 Michael M. Builov, https://github.com/mbuilov/cmn_headers
+* Copyright (C) 2012-2022 Michael M. Builov, https://github.com/mbuilov/cmn_headers
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
 /* get_opt_test.c */
 
+/* compile with
+  gcc get_opt_test.c -o get_opt_test
+ or
+  gcc -DGET_OPT_ARGV_NZ get_opt_test.c -o get_opt_test
+
+ and run the test:
+  ./get_opt_test --help 3 --file 2 -b3 --level=4 -l 5 -d6 --debug 7 -o 8 -vr --output=9 -fg -f g\
+    --verbose 1 --verbose=4 -g 3 -g1 -9 - --trace --trace q --trace=v -t -tra -trace -h 6 -ogv- -- 4 -b --y 9
+*/
+
 #include <stdio.h>
 #include <string.h>
-#include "../sal_defs.h"
+#include "../asserts.h"
 #include "../get_opt.inl"
 
 int main(int argc, char *argv[])
@@ -25,29 +35,29 @@ int main(int argc, char *argv[])
 #define SHORT_OPTION_o      SHORT_OPT_MODIFIER("o",  SHORT_OPTION_v)      /* -o */
 #define SHORT_OPTION_v      SHORT_OPT_MODIFIER("v",  SHORT_OPTION_g)      /* -v */
 #define SHORT_OPTION_g      SHORT_OPT_MODIFIER("g",  DASH_SHORT_OPTION_t) /* -g */
-#define DASH_SHORT_OPTION_t SHORT_OPT_MODIFIER("t-", SHORT_OPT_NULL)      /* -trace (equivalent to --trace) */
+#define DASH_SHORT_OPTION_t SHORT_OPT_MODIFIER("t ", SHORT_OPT_NULL)      /* -trace (equivalent to --trace) */
 
-#define SHORT_OPT_NULL      ""
+#define SHORT_OPT_NULL      GET_OPT_TEXT("")
 #define SHORT_OPT_MODIFIER  SHORT_OPT_DEFINER
 
-	static const char short_opts[] = SHORT_OPTION_a;
+	static const GET_OPT_CHAR short_opts[] = SHORT_OPTION_a;
 
-#define LONG_OPTION_file    LONG_OPT_MODIFIER("=file",   LONG_OPTION_level)  /* --file=value  */
-#define LONG_OPTION_level   LONG_OPT_MODIFIER("=level",  LONG_OPTION_debug)  /* --level=value */
-#define LONG_OPTION_debug   LONG_OPT_MODIFIER("=debug",  LONG_OPTION_quiet)  /* --debug=value */
+#define LONG_OPTION_file    LONG_OPT_MODIFIER("file",   1, LONG_OPTION_level)  /* --file=value  */
+#define LONG_OPTION_level   LONG_OPT_MODIFIER("level",  1, LONG_OPTION_debug)  /* --level=value */
+#define LONG_OPTION_debug   LONG_OPT_MODIFIER("debug",  1, LONG_OPTION_quiet)  /* --debug=value */
 #if 0
 #define LONG_OPTION_quiet   LONG_OPT_MODIFIER("quiet",   LONG_OPTION_output)
 #else
 #define LONG_OPTION_quiet   LONG_OPTION_output
 #endif
-#define LONG_OPTION_output  LONG_OPT_MODIFIER("=output", LONG_OPTION_verbose) /* --output=value */
-#define LONG_OPTION_verbose LONG_OPT_MODIFIER("verbose", LONG_OPTION_trace)   /* --verbose      */
-#define LONG_OPTION_trace   LONG_OPT_MODIFIER("trace",   LONG_OPT_NULL)       /* --trace        */
+#define LONG_OPTION_output  LONG_OPT_MODIFIER("output",  1, LONG_OPTION_verbose) /* --output=value */
+#define LONG_OPTION_verbose LONG_OPT_MODIFIER("verbose", 0, LONG_OPTION_trace)   /* --verbose      */
+#define LONG_OPTION_trace   LONG_OPT_MODIFIER("trace",   0, LONG_OPT_NULL)       /* --trace        */
 
-#define LONG_OPT_NULL       NULL
+#define LONG_OPT_NULL       {0,NULL}
 #define LONG_OPT_MODIFIER   LONG_OPT_DEFINER
 
-	static const char *const long_opts[] = {LONG_OPTION_file};
+	static const struct long_opt_info long_opts[] = {LONG_OPTION_file};
 
 #undef  SHORT_OPT_NULL
 #undef  SHORT_OPT_MODIFIER
@@ -62,9 +72,16 @@ int main(int argc, char *argv[])
 #define LONG_OPT_MODIFIER   LONG_OPT_ENCODER
 
 	struct opt_info i;
+#ifdef GET_OPT_ARGV_NZ
+	fputs("nz\n", stderr);
 	opt_info_init(&i, argc, argv);
+#else
+	fputs("not-nz\n", stderr);
+	opt_info_init(&i, argv);
+	(void)argc;
+#endif
 
-	while (i.arg < i.args_end) {
+	while (!opt_info_is_end(&i)) {
 		switch (get_opt(&i, short_opts, long_opts)) {
 			case SHORT_OPTION_a:
 				printf("a:%s\n", i.value ? i.value : "<null>");
@@ -79,13 +96,13 @@ int main(int argc, char *argv[])
 				printf("d:%s\n", i.value ? i.value : "<null>");
 				break;
 			case SHORT_OPTION_o:
-				printf("o:%s\n", i.value ? i.value : "<null>");
+				printf("o\n");
 				break;
 			case SHORT_OPTION_v:
-				printf("v:%s\n", i.value ? i.value : "<null>");
+				printf("v\n");
 				break;
 			case SHORT_OPTION_g:
-				printf("g:%s\n", i.value ? i.value : "<null>");
+				printf("g\n");
 				break;
 			case LONG_OPTION_file:
 				printf("file:%s\n", i.value ? i.value : "<null>");
@@ -110,24 +127,14 @@ int main(int argc, char *argv[])
 					printf("unknown short option '%c' in the bundle: '%s'\n", *i.sopt, *i.arg);
 				else
 					printf("unknown option: '%s'\n", *i.arg);
-				i.arg++; /* skip unknown option */
-				i.sopt = NULL;
-				break;
-			case OPT_BAD_BUNDLE:
-				printf("short option '%c' cannot be bundled: '%s'\n", *i.sopt, *i.arg);
-				i.arg++; /* skip bad option */
-				i.sopt = NULL;
+				opt_skip_unknown(&i);
 				break;
 			case OPT_PARAMETER:
 				printf("parameter: %s\n", i.value);
 				break;
-			case OPT_DASH:
-				printf("dash option: '-'\n");
-				break;
 			case OPT_REST_PARAMS:
-				do {
-					printf("parameter: %s\n", *i.arg++);
-				} while (i.arg != i.args_end);
+				for (; !opt_info_is_end(&i); i.arg++)
+					printf("parameter: %s\n", *i.arg);
 				break;
 			default:
 				fprintf(stderr, "assert!\n");

@@ -2,111 +2,165 @@
 #define ASSERTS_H_INCLUDED
 
 /**********************************************************************************
-* Assertions
-* Copyright (C) 2012-2017 Michael M. Builov, https://github.com/mbuilov/cmn_headers
+* Runtime assertions
+* Copyright (C) 2012-2022 Michael M. Builov, https://github.com/mbuilov/cmn_headers
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
 /* asserts.h */
 
-/* defines: ASSERT, DEBUG_CHECK, EMBED_ASSERT, STATIC_ASSERT, COUNT_OF */
-
-#include <assert.h>
-#include "dprint.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* ASSERT(condition)
-
-  if condition is false, then:
-  in DEBUG   - abnormal program exit
-  in RELEASE - unreachable code
+/* defines:
+  ASSERT(cond)
+  ASSERT_PTR(ptr)
+  DEBUG_CHECK(cond)
+  DEBUG_CHECK_PTR(ptr)
 */
 
+#ifndef NDEBUG
+#include <stdlib.h> /* for exit() */
+#include <assert.h> /* for assert() */
+#endif
+#include "dprint.h" /* for ASSUME(), DBGPRINTX(), annotations */
+
+/* ASSERT(condition), ASSERT_PTR(pointer)
+
+  if condition is false or pointer is NULL, then:
+  in DEBUG   - abnormal program exit
+  in RELEASE - _unreachable_ code
+
+  NOTE: condition must have no side-effects!
+*/
+
+#ifndef ASSERT
+#ifndef NDEBUG
 #ifdef _MSC_VER
 #ifdef _DEBUG
 #define ASSERT(cond) assert(cond)
 #endif
 #endif
-
-#ifdef __clang_analyzer__
-#define ASSERT(cond) ASSUME(cond)
+#endif
 #endif
 
 #ifndef ASSERT
+#ifdef __clang_analyzer__
+#define ASSERT(cond) ASSUME(cond)
+#endif
+#endif
 
-#ifdef _DEBUG
+#ifndef ASSERT
+#ifndef NDEBUG
 
-A_Noreturn_function A_Force_inline_function
-static void _x__assertion_failed(A_In_z const char *cond, A_In_z const char *file, int line, A_In_z const char *function)
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+A_Noreturn_function
+A_Force_inline_function
+static void asserts_h_assertion_failed(
+	const char *const cond,
+	const char *const file,
+	const int line,
+	const char *const function)
 {
+	volatile int *arr[1] = {NULL};
 	DBGPRINTX(file, line, function, "assertion failed: %s", cond);
-	*(volatile int*)((char*)0 + fflush(stderr)) = 0; /* generate SIGSEGV */
+#if defined _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:6011) /* Dereferencing NULL pointer 'arr[0]' */
+#elif defined __GNUC__ && __GNUC__ >= 6
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnull-dereference"
+#endif
+	*arr[0] = fflush(stderr); /* generate SIGSEGV */
+#if defined _MSC_VER
+#pragma warning(pop)
+#elif defined __GNUC__ && __GNUC__ >= 6
+#pragma GCC diagnostic pop
+#endif
 	exit(-1);
 }
 
-static inline void _x__assert_(int x, A_In_z const char *cond, A_In_z const char *file, int line, A_In_z const char *function)
+A_Const_function /* for calling this function from const-expressions */
+A_Force_inline_function
+static int asserts_h_assert(
+	const int x,
+	const char *const cond,
+	const char *const file,
+	const int line,
+	const char *const function)
 {
 	if (x)
-		_x__assertion_failed(cond, file, line, function);
+		asserts_h_assertion_failed(cond, file, line, function);
+	return 0;
 }
-
-#define ASSERT(cond) _x__assert_(!(cond), #cond, __FILE__, __LINE__, __func__)
-
-#else /* !_DEBUG */
-#define ASSERT(cond) ASSUME(cond)
-#endif /* !_DEBUG */
-
-#endif /* !ASSERT */
-
-/* DEBUG_CHECK(condition)
-
-  if condition is false, then:
-  in DEBUG   - abnormal program exit
-  in RELEASE - _reachable_ code, error must be processed appropriately
-*/
-#ifdef _DEBUG
-#define DEBUG_CHECK(cond) ASSERT(cond)
-#else
-#define DEBUG_CHECK(cond) ((void)0) /* _must_ process an error on runtime if cond is false */
-#endif
-
-/* compile-time asserts:
-
-  EMBED_ASSERT(condition)  - evaluates to 0 at compile-time, may be placed inside expression,
-  STATIC_ASSERT(condition) - defines struct, cannot be placed inside expression.
-*/
-
-#define EMBED_ASSERT(expr) (0*sizeof(int[1-2*!(expr)]))
-
-#ifdef STATIC_ASSERT
-#undef STATIC_ASSERT
-#endif
-
-#define ___STATIC_ASSERT(expr,line) struct _static_assert_at_line_##line{int _a[1-2*!(expr)];}
-#define __STATIC_ASSERT(expr,line) ___STATIC_ASSERT(expr,line)
-#define STATIC_ASSERT(expr) __STATIC_ASSERT(expr,__LINE__)
-
-/* number of elements in static array:
-
-  int arr[10];
-  size_t count = COUNT_OF(arr); // 10
-*/
-
-#ifdef __GNUC__
-#define _COUNT_OF(arr) (sizeof(arr)/sizeof((arr)[0]))
-#define COUNT_OF(arr) (_COUNT_OF(arr) + 0*sizeof(&(arr) - (__typeof__((arr)[0])(*)[_COUNT_OF(arr)])0))
-#elif defined __cplusplus
-template <typename T, size_t N> char (&_COUNT_OF(T (&array)[N]))[N];
-#define COUNT_OF(arr) (sizeof(_COUNT_OF(arr)))
-#else
-#define COUNT_OF(arr) (sizeof(arr)/sizeof((arr)[0]))
-#endif
 
 #ifdef __cplusplus
 }
+#endif
+
+#define ASSERT(cond) ((void)asserts_h_assert(!(cond), #cond, __FILE__, __LINE__, DPRINT_FUNC))
+
+#ifndef ASSERT_PTR
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* to avoid "-Wnonnull-compare", don't mark ptr as non-null */
+A_Const_function /* for calling this function from const-expressions */
+A_Force_inline_function
+static int asserts_h_assert_ptr(
+	const void *const ptr,
+	const char *const cond,
+	const char *const file,
+	const int line,
+	const char *const function)
+{
+	if (!ptr)
+		asserts_h_assertion_failed(cond, file, line, function);
+	return 0;
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+#define ASSERT_PTR(ptr) ((void)asserts_h_assert_ptr(ptr, #ptr, __FILE__, __LINE__, DPRINT_FUNC))
+
+#endif /* !ASSERT_PTR */
+
+#else /* NDEBUG */
+
+#define ASSERT(cond) ASSUME(cond)
+
+#endif /* NDEBUG */
+#endif /* !ASSERT */
+
+#ifndef ASSERT_PTR
+#define ASSERT_PTR(ptr) ASSERT(ptr)
+#endif
+
+/* DEBUG_CHECK(condition), DEBUG_CHECK_PTR(pointer)
+
+  if condition is false or pointer is NULL, then:
+  in DEBUG   - abnormal program exit
+  in RELEASE - _reachable_ code, error must be processed appropriately
+
+  NOTE: condition must have no side-effects!
+*/
+#ifndef DEBUG_CHECK
+#ifndef NDEBUG
+#define DEBUG_CHECK(cond) ASSERT(cond)
+#ifndef DEBUG_CHECK_PTR
+#define DEBUG_CHECK_PTR(ptr) ASSERT_PTR(ptr)
+#endif
+#else /* NDEBUG */
+#define DEBUG_CHECK(cond) ((void)0) /* _must_ process an error on runtime if cond is false */
+#endif /* NDEBUG */
+#endif /* !DEBUG_CHECK */
+
+#ifndef DEBUG_CHECK_PTR
+#define DEBUG_CHECK_PTR(ptr) DEBUG_CHECK(ptr)
 #endif
 
 #endif /* ASSERTS_H_INCLUDED */

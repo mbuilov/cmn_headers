@@ -3,7 +3,7 @@
 
 /**********************************************************************************
 * Byte-order swap routines
-* Copyright (C) 2012-2017 Michael M. Builov, https://github.com/mbuilov/cmn_headers
+* Copyright (C) 2012-2018 Michael M. Builov, https://github.com/mbuilov/cmn_headers
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -15,7 +15,7 @@
 #define BYTESWAP_UINT16(x) _byteswap_ushort(x)
 #define BYTESWAP_UINT32(x) _byteswap_ulong(x)
 #define BYTESWAP_UINT64(x) _byteswap_uint64(x)
-typedef int _ULONG_TYPE_is_not_4_bytes_[1-2*(sizeof(unsigned long) != 4)];
+typedef int ULONG_TYPE_is_not_4_bytes_[1-2*(sizeof(unsigned long) != 4)];
 #endif
 #endif /* _MSC_VER */
 
@@ -50,10 +50,10 @@ extern "C" {
 #endif
 
 /* check that UINT16_TYPE is 16 bits long, UINT32_TYPE - 32 bits and  UINT64_TYPE - 64 bits */
-typedef int _CHAR_TYPE_is_not_8_bits_[1-2*(255 != (unsigned char)~(unsigned char)0)];
-typedef int _UINT16_TYPE_is_not_2_bytes_[1-2*(sizeof(UINT16_TYPE) != 2)];
-typedef int _UINT32_TYPE_is_not_4_bytes_[1-2*(sizeof(UINT32_TYPE) != 4)];
-typedef int _UINT64_TYPE_is_not_8_bytes_[1-2*(sizeof(UINT64_TYPE) != 8)];
+typedef int CHAR_TYPE_is_not_8_bits_[1-2*(255 != (unsigned char)-1)];
+typedef int UINT16_TYPE_is_not_2_bytes_[1-2*(sizeof(UINT16_TYPE) != 2)];
+typedef int UINT32_TYPE_is_not_4_bytes_[1-2*(sizeof(UINT32_TYPE) != 4)];
+typedef int UINT64_TYPE_is_not_8_bytes_[1-2*(sizeof(UINT64_TYPE) != 8)];
 
 /* endian conversion procedures - swap bytes in a integer */
 
@@ -64,8 +64,8 @@ static inline UINT16_TYPE bswap2(UINT16_TYPE x)
 #else
 	/* gcc, clang, icc optimizes this to simple ror, cl - can't */
 	return (UINT16_TYPE)(
-		((UINT16_TYPE)(x & 0xFF00) >> 8) |
-		((UINT16_TYPE)(x & 0x00FF) << 8)
+		((UINT16_TYPE)(x & 0xFF00u) >> 8) |
+		((UINT16_TYPE)(x & 0x00FFu) << 8)
 	);
 #endif
 }
@@ -76,7 +76,7 @@ static inline UINT32_TYPE bswap4(UINT32_TYPE x)
 	return BYTESWAP_UINT32(x);
 #else
 	/* gcc, clang, icc optimizes this to simple bswap, cl - can't */
-	return (UINT32_TYPE)(
+	return (
 		((x & 0xFF000000u) >> 24) |
 		((x & 0x00FF0000u) >>  8) |
 		((x & 0x0000FF00u) <<  8) |
@@ -91,7 +91,7 @@ static inline UINT64_TYPE bswap8(UINT64_TYPE x)
 	return BYTESWAP_UINT64(x);
 #else
 	/* gcc, clang, icc optimizes this to simple bswap, cl - can't */
-	return (UINT64_TYPE)(
+	return (
 		((x & 0xFF00000000000000ull) >> 56) |
 		((x & 0x00FF000000000000ull) >> 40) |
 		((x & 0x0000FF0000000000ull) >> 24) |
@@ -113,7 +113,7 @@ static inline UINT16_TYPE hswap2(UINT16_TYPE x)
 /* half-swap 32-bit integer */
 static inline UINT32_TYPE hswap4(UINT32_TYPE x)
 {
-	return (UINT32_TYPE)(
+	return (
 		((x & 0xFFFF0000u) >> 16) |
 		((x & 0x0000FFFFu) << 16)
 	);
@@ -122,11 +122,21 @@ static inline UINT32_TYPE hswap4(UINT32_TYPE x)
 /* half-swap 64-bit integer */
 static inline UINT64_TYPE hswap8(UINT64_TYPE x)
 {
-	return (UINT64_TYPE)(
+	return (
 		((x & 0xFFFFFFFF00000000ull) >> 32) |
 		((x & 0x00000000FFFFFFFFull) << 32)
 	);
 }
+
+/* check if processor architecture is BIG-endian */
+static inline int arch_is_be(void)
+{
+	const UINT32_TYPE x = 1;
+	return !(const unsigned char*)&x;
+}
+
+/* check if processor architecture is LITTLE-endian */
+#define arch_is_le() (!arch_is_be())
 
 #ifdef __cplusplus
 }
