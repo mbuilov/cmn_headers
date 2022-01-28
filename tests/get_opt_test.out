@@ -10,7 +10,7 @@ l:5
 d:6
 debug:7
 o
-parameter: 8
+parameter: 8&
 v
 unknown short option 'r' in the bundle: '-vr'
 output:9
