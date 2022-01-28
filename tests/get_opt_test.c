@@ -73,8 +73,10 @@ int main(int argc, char *argv[])
 
 	struct opt_info i;
 #ifdef GET_OPT_ARGV_NZ
+	fputs("nz\n", stderr);
 	opt_info_init(&i, argc, argv);
 #else
+	fputs("not-nz\n", stderr);
 	opt_info_init(&i, argv);
 	(void)argc;
 #endif
