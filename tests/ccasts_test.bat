@@ -1,4 +1,5 @@
 @echo off
+setlocal
 set step=0
 
 rem 4464: relative include path contains '..'
