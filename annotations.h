@@ -33,7 +33,7 @@
 #define A_Printf_format(f,v)
 #endif
 
-/* A_Restrict - annotates pointer pointing to memory that is not writable via other pointers */
+/* A_Restrict - annotates pointer to exclusive memory: reads may be prefetched, writes may be delayed */
 
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
 #define A_Restrict restrict
@@ -79,7 +79,7 @@
 #define A_Read_function
 #endif
 
-/* A_Noreturn_function - note: for gcc, must be specified before other attributes */
+/* A_Noreturn_function - function does not return; note: for gcc, must be specified before other attributes */
 
 #if defined __STDC_VERSION__ && __STDC_VERSION__ >= 201112L
 #define A_Noreturn_function                      _Noreturn /* standard keyword for c11 */
@@ -136,7 +136,7 @@
 #define A_Non_inline_function                    /* forbid inlining a function */
 #endif
 
-/* A_Hot_function */
+/* A_Hot_function - optimize function for speed */
 
 #if (defined __GNUC__ && __GNUC__ > 4 - (__GNUC_MINOR__ >= 3)) || \
   (defined __clang__ && __clang_major__ > 3 - (__clang_minor__ >= 7))
@@ -151,7 +151,7 @@
 #define A_Hot_function                           /* declare 'hot' function, which is called frequently and is optimized for speed */
 #endif
 
-/* A_Cold_function */
+/* A_Cold_function - optimize function for size */
 
 #if (defined __GNUC__ && __GNUC__ > 4 - (__GNUC_MINOR__ >= 3)) || \
   (defined __clang__ && __clang_major__ > 3 - (__clang_minor__ >= 7))
@@ -166,7 +166,7 @@
 #define A_Cold_function                          /* declare 'cold' function, which is called infrequently and is optimized for size */
 #endif
 
-/* ASSUME */
+/* ASSUME - assume condition is always true, so condition is never checked on run-time */
 #ifndef ASSUME
 #if defined _MSC_VER
 #define ASSUME(cond) __assume(!!(cond))
