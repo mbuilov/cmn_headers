@@ -387,7 +387,7 @@ extern "C++" template <class T> struct c_casts_const_type {typedef const T XT;};
   CAST_PP(?, p);  - error: 'p' is not a pointer-to-pointer
 
   struct A *const *pp;
-  CAST_PC(?, pp);  - error: 'pp' is not a pointer-to-non-const-pointer
+  CAST_PP(?, pp);  - error: 'pp' is not a pointer-to-non-const-pointer
 */
 #ifdef __cplusplus
 #define CAST_PP(type_, pp_) (                                                             \
@@ -514,17 +514,38 @@ static struct c_casts_void_ *c_opt_container_of_(
   const struct Member *m;
   CONTAINER_OF(m, struct Container, memb);  - error: 'struct Container' is non-const while 'm' points to a const
 */
-#define CONTAINER_OF(ptr_/*!=NULL*/, type_, member_) \
+#define CONTAINER_OF1(ptr_/*!=NULL*/, type_, member_) \
 	c_check_constness_(ptr_, member_, \
 		((type_*)c_container_of_(ptr_, c_casts_offsetof_(type_, member_) + \
 			0*sizeof((&((type_*)c_const_cast_void_(ptr_))->member_ - (ptr_))))))
 
 /* OPT_CONTAINER_OF macro
   like CONTAINER_OF, but returns NULL if pointer is NULL */
-#define OPT_CONTAINER_OF(ptr_/*NULL?*/, type_, member_) \
+#define OPT_CONTAINER_OF1(ptr_/*NULL?*/, type_, member_) \
 	c_check_constness_(ptr_, member_, \
 		((type_*)c_opt_container_of_(ptr_, c_casts_offsetof_(type_, member_) + \
 			0*sizeof((&((type_*)c_const_cast_void_(ptr_))->member_ - (ptr_))))))
+
+#if defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
+#if defined __clang__ || (defined __GNUC__ && __GNUC__ > 4 - (__GNUC_MINOR__ >= 6))
+#define CONTAINER_OF(ptr_/*!=NULL*/, type_, member_) __extension__({      \
+	__typeof__(ptr_) p_ = (ptr_);                                         \
+	CONTAINER_OF1(p_, type_, member_);                                    \
+})
+#define OPT_CONTAINER_OF(ptr_/*NULL?*/, type_, member_) __extension__({   \
+	__typeof__(ptr_) p_ = (ptr_);                                         \
+	OPT_CONTAINER_OF1(p_, type_, member_);                                \
+})
+#endif
+#endif
+
+#ifndef CONTAINER_OF
+#define CONTAINER_OF(ptr_/*!=NULL*/, type_, member_) CONTAINER_OF1(ptr_, type_, member_)
+#endif
+
+#ifndef OPT_CONTAINER_OF
+#define OPT_CONTAINER_OF(ptr_/*NULL?*/, type_, member_) OPT_CONTAINER_OF1(ptr_, type_, member_)
+#endif
 
 #ifdef __cplusplus
 }
