@@ -1,6 +1,6 @@
 /**********************************************************************************
 * Check compilation of ccasts.h
-* Copyright (C) 2020 Michael M. Builov, https://github.com/mbuilov/cmn_headers
+* Copyright (C) 2020,2022 Michael M. Builov, https://github.com/mbuilov/cmn_headers
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -31,6 +31,11 @@ struct B;
 struct B *T(struct A *const a)
 {
 	return CAST(struct B, a);
+}
+
+const struct B *T(struct A *const a)
+{
+	return CAST(const struct B, a);
 }
 
 #ifdef BAD1
@@ -239,3 +244,58 @@ struct C *T(const int *p)
 	return OPT_CONTAINER_OF(p, struct C, m);
 }
 #endif
+
+const struct C *T(const struct A *const p)
+{
+	return CONTAINER_OF(CAST_CONSTANT(const int, p), const struct C, m);
+}
+
+struct C *T(struct A *const p)
+{
+	return CONTAINER_OF(CAST(int, p), struct C, m);
+}
+
+const struct C *T(const struct A *const p)
+{
+	return OPT_CONTAINER_OF(CAST_CONSTANT(const int, p), const struct C, m);
+}
+
+struct C *T(struct A *const p)
+{
+	return OPT_CONTAINER_OF(CAST(int, p), struct C, m);
+}
+
+struct C *T(const int *const p)
+{
+	return CONTAINER_OF(CONST_CAST(int, p), struct C, m);
+}
+
+struct C *T(const int *const p)
+{
+	return OPT_CONTAINER_OF(CONST_CAST(int, p), struct C, m);
+}
+
+struct C *T(struct A **const p)
+{
+	return CONTAINER_OF(CAST_PP(int, p), struct C, m);
+}
+
+struct C *T(struct A **const p)
+{
+	return OPT_CONTAINER_OF(CAST_PP(int, p), struct C, m);
+}
+
+struct X {
+	double k;
+	const int *m;
+};
+
+const struct X *T(struct A **const p)
+{
+	return CONTAINER_OF(CAST_PPC(const int, p), const struct X, m);
+}
+
+const struct X *T(struct A **const p)
+{
+	return OPT_CONTAINER_OF(CAST_PPC(const int, p), const struct X, m);
+}
