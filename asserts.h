@@ -50,10 +50,6 @@
 #ifndef ASSERT
 #ifndef NDEBUG
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 A_Noreturn_function
 A_Force_inline_function
 static void asserts_h_assertion_failed(
@@ -94,23 +90,22 @@ static int asserts_h_assert(
 	return 0;
 }
 
-#ifdef __cplusplus
-}
-#endif
-
 #define ASSERT(cond) ((void)asserts_h_assert(!(cond), #cond, __FILE__, __LINE__, DPRINT_FUNC))
 
 #ifndef ASSERT_PTR
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /* to avoid "-Wnonnull-compare", don't mark ptr as non-null */
+#ifdef __cplusplus
+template <typename T>
+#endif
 A_Const_function /* for calling this function from const-expressions */
 A_Force_inline_function
 static int asserts_h_assert_ptr(
+#ifdef __cplusplus
+	T const ptr,
+#else
 	const void *const ptr,
+#endif
 	const char *const cond,
 	const char *const file,
 	const int line,
@@ -121,11 +116,21 @@ static int asserts_h_assert_ptr(
 	return 0;
 }
 
-#ifdef __cplusplus
-}
+#if defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
+#if defined __GNUC__ && __GNUC__ > 4 - (__GNUC_MINOR__ >= 6)
+/* suppress warning if converting pointer to a function to void* */
+#define ASSERT_PTR(ptr) do {                                                \
+  _Pragma("GCC diagnostic push")                                            \
+  _Pragma("GCC diagnostic ignored \"-Wpedantic\"")                          \
+  ((void)asserts_h_assert_ptr(ptr, #ptr, __FILE__, __LINE__, DPRINT_FUNC)); \
+  _Pragma("GCC diagnostic pop")                                             \
+} while (0)
+#endif
 #endif
 
+#ifndef ASSERT_PTR
 #define ASSERT_PTR(ptr) ((void)asserts_h_assert_ptr(ptr, #ptr, __FILE__, __LINE__, DPRINT_FUNC))
+#endif
 
 #endif /* !ASSERT_PTR */
 
