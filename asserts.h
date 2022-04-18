@@ -128,6 +128,15 @@ static int asserts_h_assert_ptr(
 #endif
 #endif
 
+#if !defined __cplusplus && defined _MSC_VER
+#define ASSERT_PTR(ptr) (                                                           \
+  __pragma(warning(push))                                                           \
+  __pragma(warning(disable:4152))/*function/data pointer conversion in expression*/ \
+  ((void)asserts_h_assert_ptr(ptr, #ptr, __FILE__, __LINE__, DPRINT_FUNC))          \
+  __pragma(warning(pop))                                                            \
+)
+#endif
+
 #ifndef ASSERT_PTR
 #define ASSERT_PTR(ptr) ((void)asserts_h_assert_ptr(ptr, #ptr, __FILE__, __LINE__, DPRINT_FUNC))
 #endif
