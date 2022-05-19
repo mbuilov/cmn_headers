@@ -22,6 +22,15 @@
 	__pragma(warning(disable:4296)) /* expression is always true */ \
 	(const_expr)                                                    \
 	__pragma(warning(pop)))
+# ifndef __cplusplus
+#  ifdef offsetof
+/* MSVC defines offsetof(type, memb) as (size_t)&((type*)0)->memb, which seems ok,
+  but !offsetof(my_type, my_memb) do not results in a contant expression needed for static assert...
+  Redefine offsetof. */
+#   undef offsetof
+#   define offsetof(type, memb) ((size_t)((const char*)&((type*)0)->memb - (const char*)0))
+#  endif
+# endif
 #else /* !_MSC_VER */
 #define STATIC_EXPR(const_expr) (const_expr)
 #endif /* !_MSC_VER */
@@ -56,7 +65,7 @@
 
 /* note: use bit-field of negative size instead of array of negative size
   - to make sure that expression is compile-time defined; c99 allows to
-  specify arrays with run-time defined bounds */
+  specify arrays with run-time defined bounds (VLAs) */
 #ifndef STATIC_ASSERT
 #ifdef __GNUC__
 #define STATIC_ASSERT3(e,l,n) \
