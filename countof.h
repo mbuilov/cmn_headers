@@ -80,7 +80,7 @@ or
 */
 
 #ifndef CONST_STR_LEN
-#define CONST_STR_LEN(str) (sizeof(str "") - sizeof(str[0]))
+#define CONST_STR_LEN(str) ((sizeof(str "") - sizeof(str[0]))/sizeof(str[0]))
 #endif
 
 #endif /* COUNTOF_H_INCLUDED */

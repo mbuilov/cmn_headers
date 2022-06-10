@@ -1,6 +1,6 @@
 /**********************************************************************************
 * Check compilation of countof.h
-* Copyright (C) 2020 Michael M. Builov, https://github.com/mbuilov/cmn_headers
+* Copyright (C) 2020-2022 Michael M. Builov, https://github.com/mbuilov/cmn_headers
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -127,3 +127,48 @@ unsigned T(const char *c)
 	return CONST_STR_LEN(c);
 }
 #endif
+
+/* check that COUNT_OF/MEMBER_SIZE/COUNT_OF_MEMBER/CONST_STR_LEN give correct values */
+void T(void)
+{
+	int arr[11];
+	struct X {
+		unsigned x : 1-2*(COUNT_OF(arr) != 11);
+	};
+	(void)arr;
+}
+
+void T(const struct S *const s)
+{
+	struct X {
+		unsigned x : 1-2*(COUNT_OF(s->arr) != 10);
+	};
+}
+
+void T(void)
+{
+	struct X {
+		unsigned x : 1-2*(MEMBER_SIZE(struct S, arr) != 10*sizeof(int));
+	};
+}
+
+void T(void)
+{
+	struct X {
+		unsigned x : 1-2*(COUNT_OF_MEMBER(struct S, arr) != 10);
+	};
+}
+
+void T(void)
+{
+	struct X {
+		unsigned x : 1-2*(CONST_STR_LEN("abc") != 3);
+	};
+}
+
+void T(void)
+{
+	struct X {
+		unsigned x : 1-2*(CONST_STR_LEN(L"abc") != 3);
+	};
+}
